@@ -2,7 +2,7 @@ const Roles = require('../model/roles');
 const PaymentMethods = require('../model/payment_methods');
 const Users = require('../model/users');
 
-Roles.bulkCreate([
+const roles = [
 	{
 		name: 'branches_manager',
 		display_name: 'Gerente de Filial',
@@ -23,9 +23,9 @@ Roles.bulkCreate([
 		display_name: 'Cliente',
 		permissions: '["customer"]'
 	},
-]);
+]
 
-PaymentMethods.bulkCreate([
+const payment_methods = [
 	{
 		name: 'credit_debit',
 		display_name: 'Cartão de Crédito/Débito',
@@ -34,8 +34,7 @@ PaymentMethods.bulkCreate([
 		name: 'money',
 		display_name: 'Dinheiro',
 	},
-]);
-
+];
 
 //DEVELPOMENT
 if (process.env.NODE_ENV != 'production') {
@@ -48,4 +47,11 @@ if (process.env.NODE_ENV != 'production') {
 			role: 'master'
 		},
 	])
+}
+
+module.exports = function () {
+	return Roles.bulkCreate(roles)
+	.then(()=>{
+		return PaymentMethods.bulkCreate(payment_methods)
+	})
 }

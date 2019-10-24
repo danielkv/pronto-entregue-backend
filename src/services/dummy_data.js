@@ -234,90 +234,88 @@ const deliveryAreas = [
 	}
 ]
 
-Promise.all([
-	Companies.create(companies_create[0], {include:[CompaniesMeta]}),
-	Companies.create(companies_create[1], {include:[CompaniesMeta]}),
-])
-.then (async (companies)=>{
-	const users = await Promise.all([
-		Users.create(users_create[0], {include:[UsersMeta]}),
-		Users.create(users_create[1], {include:[UsersMeta]}),
-	]);
-
-	companies[0].addUser(users[0]);
-	companies[1].addUser(users[1]);
-
-	return {companies, users};
-})
-.then(async (result)=>{
-	const branches = await Promise.all([
-		result.companies[0].createBranch(branches_create[0], {include:[BranchesMeta]}),
-		result.companies[0].createBranch(branches_create[1], {include:[BranchesMeta]}),
-		result.companies[1].createBranch(branches_create[2], {include:[BranchesMeta]}),
-	]);
-
-	//payment methods
-	await branches[0].setPaymentMethods([1,2]);
-	await branches[1].setPaymentMethods([2]);
-	await branches[2].setPaymentMethods([1]);
-	
-	//delivery areas
-	await branches[0].createDeliveryArea(deliveryAreas[0]);
-	await branches[0].createDeliveryArea(deliveryAreas[1]);
-	await branches[0].createDeliveryArea(deliveryAreas[2]);
-	await branches[1].createDeliveryArea(deliveryAreas[1]);
-	await branches[2].createDeliveryArea(deliveryAreas[1]);
-	
-
-	await branches[0].addUser(result.users[0], {through:{role_id:1}});
-	await branches[1].addUser(result.users[0], {through:{role_id:3}});
-	await branches[2].addUser(result.users[1], {through:{role_id:2}});
-
-	return {...result, branches};
-})
-.then (async (result)=>{
-	const categories = await Promise.all([
-		result.branches[0].createCategory(categories_create[0]),
-		result.branches[0].createCategory(categories_create[1]),
-		result.branches[0].createCategory(categories_create[2]),
-		result.branches[1].createCategory(categories_create[0]),
-		result.branches[1].createCategory(categories_create[1]),
-		result.branches[1].createCategory(categories_create[2]),
-		result.branches[2].createCategory(categories_create[0]),
-		result.branches[2].createCategory(categories_create[1]),
-		result.branches[2].createCategory(categories_create[2]),
-	]);
-
-	const products = await Promise.all([
-		categories[0].createProduct(products_create[0]),
-		categories[1].createProduct(products_create[1]),
-		categories[2].createProduct(products_create[2]),
-		categories[3].createProduct(products_create[0]),
-		categories[4].createProduct(products_create[1]),
-		categories[5].createProduct(products_create[2]),
-		categories[6].createProduct(products_create[0]),
-		categories[7].createProduct(products_create[1]),
-		categories[8].createProduct(products_create[2]),
+module.exports = function () {
+	return Promise.all([
+		Companies.create(companies_create[0], {include:[CompaniesMeta]}),
+		Companies.create(companies_create[1], {include:[CompaniesMeta]}),
 	])
-	
-	return {...result, products, categories};
-})
-.then(async (result)=>{
-	const options_groups = await Promise.all([
-		result.products[0].createOptionsGroup(create_options_groups[0], {include:[Options]}),
-		result.products[1].createOptionsGroup(create_options_groups[1], {include:[Options]}),
-		result.products[2].createOptionsGroup(create_options_groups[2], {include:[Options]}),
-		result.products[3].createOptionsGroup(create_options_groups[0], {include:[Options]}),
-		result.products[4].createOptionsGroup(create_options_groups[1], {include:[Options]}),
-		result.products[5].createOptionsGroup(create_options_groups[2], {include:[Options]}),
-		result.products[6].createOptionsGroup(create_options_groups[0], {include:[Options]}),
-		result.products[7].createOptionsGroup(create_options_groups[1], {include:[Options]}),
-		result.products[8].createOptionsGroup(create_options_groups[2], {include:[Options]}),
-	]);
+	.then (async (companies)=>{
+		const users = await Promise.all([
+			Users.create(users_create[0], {include:[UsersMeta]}),
+			Users.create(users_create[1], {include:[UsersMeta]}),
+		]);
 
-	return {...result, options_groups};
-})
+		companies[0].addUser(users[0]);
+		companies[1].addUser(users[1]);
 
-.catch((err)=>{
-	console.error(err);
-})
+		return {companies, users};
+	})
+	.then(async (result)=>{
+		const branches = await Promise.all([
+			result.companies[0].createBranch(branches_create[0], {include:[BranchesMeta]}),
+			result.companies[0].createBranch(branches_create[1], {include:[BranchesMeta]}),
+			result.companies[1].createBranch(branches_create[2], {include:[BranchesMeta]}),
+		]);
+
+		//payment methods
+		await branches[0].setPaymentMethods([1,2]);
+		await branches[1].setPaymentMethods([2]);
+		await branches[2].setPaymentMethods([1]);
+		
+		//delivery areas
+		await branches[0].createDeliveryArea(deliveryAreas[0]);
+		await branches[0].createDeliveryArea(deliveryAreas[1]);
+		await branches[0].createDeliveryArea(deliveryAreas[2]);
+		await branches[1].createDeliveryArea(deliveryAreas[1]);
+		await branches[2].createDeliveryArea(deliveryAreas[1]);
+		
+
+		await branches[0].addUser(result.users[0], {through:{role_id:1}});
+		await branches[1].addUser(result.users[0], {through:{role_id:3}});
+		await branches[2].addUser(result.users[1], {through:{role_id:2}});
+
+		return {...result, branches};
+	})
+	.then (async (result)=>{
+		const categories = await Promise.all([
+			result.branches[0].createCategory(categories_create[0]),
+			result.branches[0].createCategory(categories_create[1]),
+			result.branches[0].createCategory(categories_create[2]),
+			result.branches[1].createCategory(categories_create[0]),
+			result.branches[1].createCategory(categories_create[1]),
+			result.branches[1].createCategory(categories_create[2]),
+			result.branches[2].createCategory(categories_create[0]),
+			result.branches[2].createCategory(categories_create[1]),
+			result.branches[2].createCategory(categories_create[2]),
+		]);
+
+		const products = await Promise.all([
+			categories[0].createProduct(products_create[0]),
+			categories[1].createProduct(products_create[1]),
+			categories[2].createProduct(products_create[2]),
+			categories[3].createProduct(products_create[0]),
+			categories[4].createProduct(products_create[1]),
+			categories[5].createProduct(products_create[2]),
+			categories[6].createProduct(products_create[0]),
+			categories[7].createProduct(products_create[1]),
+			categories[8].createProduct(products_create[2]),
+		])
+		
+		return {...result, products, categories};
+	})
+	.then(async (result)=>{
+		const options_groups = await Promise.all([
+			result.products[0].createOptionsGroup(create_options_groups[0], {include:[Options]}),
+			result.products[1].createOptionsGroup(create_options_groups[1], {include:[Options]}),
+			result.products[2].createOptionsGroup(create_options_groups[2], {include:[Options]}),
+			result.products[3].createOptionsGroup(create_options_groups[0], {include:[Options]}),
+			result.products[4].createOptionsGroup(create_options_groups[1], {include:[Options]}),
+			result.products[5].createOptionsGroup(create_options_groups[2], {include:[Options]}),
+			result.products[6].createOptionsGroup(create_options_groups[0], {include:[Options]}),
+			result.products[7].createOptionsGroup(create_options_groups[1], {include:[Options]}),
+			result.products[8].createOptionsGroup(create_options_groups[2], {include:[Options]}),
+		]);
+
+		return {...result, options_groups};
+	})
+}
