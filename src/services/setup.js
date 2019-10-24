@@ -1,7 +1,7 @@
 const conn = require('./connection.js');
 require('./relations.js');
 
-const forceSync = false;
+const forceSync = process.env.FORCE_SETUP === 'true';
 
 if (forceSync) {
 	conn.sync({force:true}).then(()=>{
