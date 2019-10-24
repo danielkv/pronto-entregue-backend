@@ -36,16 +36,17 @@ const server = new ApolloServer({
 app.use('/uploads', express.static(path.resolve(__dirname, '..', 'uploads')));
 
 //porta de instalação
-if (process.env.SETUP && process.env.SETUP === 'true')
-	app.get('/setup', (req, res)=>{
-		installDataBase(req.query.installDefaults, req.query.installDummyData)
-		.then(()=>{
-			res.send('Banco de dados criado');
-		})
-		.catch((err)=>{
-			res.status(404).send(err);
-		})
+app.get('/setup', (req, res)=>{
+	if (process.env.SETUP && process.env.SETUP === 'true') return res.status(404);
+
+	installDataBase(req.query.installDefaults, req.query.installDummyData)
+	.then(()=>{
+		return res.send('Banco de dados criado');
 	})
+	.catch((err)=>{
+		return res.status(404).send(err);
+	})
+})
 
 //configura apollo server
 server.applyMiddleware({app, path:'/graphql'});
