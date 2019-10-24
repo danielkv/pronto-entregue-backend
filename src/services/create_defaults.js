@@ -36,19 +36,6 @@ const payment_methods = [
 	},
 ];
 
-//DEVELPOMENT
-if (process.env.NODE_ENV != 'production') {
-	Users.bulkCreate([
-		{
-			first_name: 'Daniel',
-			last_name : 'Guolo',
-			email: 'daniel_kv@hotmail.com',
-			password: '123456',
-			role: 'master'
-		},
-	])
-}
-
 module.exports = function () {
 	return Roles.bulkCreate(roles)
 	.then(()=>{

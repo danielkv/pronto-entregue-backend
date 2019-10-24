@@ -1,5 +1,5 @@
 require('dotenv').config();
-const {installDataBase} = require('./services/setup'); //Configura banco de dados e relações das tabelas
+const installDataBase = require('./services/setup'); //Configura banco de dados e relações das tabelas
 const { ApolloServer } = require('apollo-server-express');
 const express = require('express');
 const path = require('path');
@@ -36,17 +36,7 @@ const server = new ApolloServer({
 app.use('/uploads', express.static(path.resolve(__dirname, '..', 'uploads')));
 
 //porta de instalação
-app.get('/setup', (req, res)=>{
-	if (process.env.SETUP && process.env.SETUP === 'true') return res.status(404);
-
-	installDataBase(req.query.installDefaults, req.query.installDummyData)
-	.then(()=>{
-		return res.send('Banco de dados criado');
-	})
-	.catch((err)=>{
-		return res.status(404).send(err);
-	})
-})
+app.get('/setup', installDataBase);
 
 //configura apollo server
 server.applyMiddleware({app, path:'/graphql'});

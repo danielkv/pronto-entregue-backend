@@ -318,4 +318,16 @@ module.exports = function () {
 
 		return {...result, options_groups};
 	})
+	.then(()=>{
+		//DEVELPOMENT
+		return Users.bulkCreate([
+			{
+				first_name: 'Daniel',
+				last_name : 'Guolo',
+				email: 'daniel_kv@hotmail.com',
+				password: '123456',
+				role: 'master'
+			},
+		])
+	})
 }
