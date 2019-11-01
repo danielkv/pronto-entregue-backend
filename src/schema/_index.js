@@ -41,7 +41,7 @@ const typeDefs = gql`
 	}
 
 	type Query {
-		companies:[Company]! @hasRole(permission:"master")
+		companies:[Company]!
 		roles:[Role]! @hasRole(permission:"roles_edit", scope:"adm")
 		users:[User]! @hasRole(permission:"master")
 	}

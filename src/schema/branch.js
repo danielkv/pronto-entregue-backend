@@ -57,6 +57,8 @@ module.exports.typeDefs = gql`
 		user_relation:BranchRelation!
 		last_month_revenue:Float!
 
+		address:Address!
+
 		paymentMethods:[PaymentMethod]!
 		deliveryAreas:[DeliveryArea]!
 		users(filter:Filter):[User]!
@@ -173,6 +175,14 @@ module.exports.resolvers = {
 			if (filter && filter.showInactive) delete where.active;
 
 			return parent.getUsers({where});
+		},
+		address: (parent, {filter}, ctx) => {
+			return parent.getMetas({where:{meta_type:'address'}})
+			.then (([address])=> {
+				if (!address) throw new Error('Não foi encontrado o endereço dessa filial');
+
+				return {id:address.id, ...JSON.parse(address.meta_value)};
+			})
 		},
 		metas: (parent, args, ctx) => {
 			return parent.getMetas();

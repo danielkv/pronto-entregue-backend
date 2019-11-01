@@ -24,7 +24,7 @@ module.exports.typeDefs = gql`
 		user_relation: CompanyRelation!
 
 		users(filter:Filter):[User]! @hasRole(permission:"users_read", scope:"adm")
-		branches(filter:Filter):[Branch]! @hasRole(permission:"branches_read", scope:"adm")
+		branches(filter:Filter):[Branch]!
 		assigned_branches: [Branch]! @hasRole(permission:"users_edit", scope:"adm")
 		items (filter:Filter):[Item]!
 	}

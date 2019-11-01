@@ -2,12 +2,16 @@ require('dotenv').config();
 const installDataBase = require('./services/setup'); //Configura banco de dados e relações das tabelas
 const { ApolloServer } = require('apollo-server-express');
 const express = require('express');
+const cors = require('cors');
 const path = require('path');
 const mid = require('./middlewares');
 
 //express config
 const app = express();
 const port = process.env.PORT || 4000;
+
+//open cors
+app.use(cors());
 
 //schema
 const schema = require('./schema/_index');
@@ -35,6 +39,7 @@ const server = new ApolloServer({
 //configura rota estática
 app.use('/uploads', express.static(path.resolve(__dirname, '..', 'uploads')));
 
+app.get('/networkTest', (req, res)=>{res.send('Connected')});
 //porta de instalação
 app.get('/setup', installDataBase);
 
