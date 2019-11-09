@@ -25,10 +25,10 @@ Products.init({
 	},
 	type: {
 		type: Sequelize.STRING(50),
-		comment: 'single | multiple',
+		comment: 'inline | panel',
 		validate: {
 			isIn : {
-				args : [['single', 'multiple']],
+				args : [['inline', 'panel']],
 				msg: 'Tipo de produto inválido'
 			}
 		}

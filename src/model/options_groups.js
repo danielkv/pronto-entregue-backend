@@ -44,10 +44,10 @@ OptionsGroups.init({
 	name: Sequelize.STRING,
 	type: {
 		type: Sequelize.STRING(50),
-		comment: 'single | multiple',
+		comment: 'single | multi',
 		validate: {
 			isIn : {
-				args : [['single', 'multiple']],
+				args : [['single', 'multi']],
 				msg: 'Tipo de grupo inválido'
 			}
 		}
@@ -62,7 +62,14 @@ OptionsGroups.init({
 		}
 	},
 	min_select: Sequelize.INTEGER,
-	max_select: Sequelize.INTEGER,
+	max_select: {
+		type: Sequelize.INTEGER,
+		set (val) {
+			const type = this.getDataValue('type');
+			if (type === 'single') return this.setDataValue('max_select', 1);
+			return this.setDataValue('max_select', val);
+		}
+	},
 	active: {
 		type: Sequelize.BOOLEAN,
 		defaultValue: 1,

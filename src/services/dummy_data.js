@@ -103,12 +103,11 @@ const users_create = [
 	}
 ]
 
-
 const products_create = [
 	{
 		name:'Hambúrguer com Calabresa',
 		description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. In tincidunt augue a lectus ultricies, eget euismod ex blandit. Phasellus sollicitudin tempus varius.',
-		type:'single',
+		type:'inline',
 		price: 16.98,
 		image : "http://localhost:4000/uploads/copeiro-hamburge1r/5ac6194c6c058d82eaa26886605c121f-hamburguer-de-siri-stunt-burger-1432825855665_1280x855.jpg",
 		company_id:1,
@@ -116,7 +115,7 @@ const products_create = [
 	{
 		name:'Suco de laranja',
 		description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. In tincidunt augue a lectus ultricies, eget euismod ex blandit. Phasellus sollicitudin tempus varius.',
-		type:'single',
+		type:'inline',
 		price: 4.8,
 		image : "http://localhost:4000/uploads/copeiro-hamburge1r/5ac6194c6c058d82eaa26886605c121f-hamburguer-de-siri-stunt-burger-1432825855665_1280x855.jpg",
 		company_id:1,
@@ -124,7 +123,7 @@ const products_create = [
 	{
 		name:'Pizza',
 		description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. In tincidunt augue a lectus ultricies, eget euismod ex blandit. Phasellus sollicitudin tempus varius.',
-		type:'multiple',
+		type:'panel',
 		price: 55.90,
 		image : "http://localhost:4000/uploads/copeiro-hamburge1r/0dfea2e56c3a2a1a331d5d56d4af528b-batata-frita-vagao-gourmet.jpg",
 		company_id:1,
@@ -194,7 +193,7 @@ const create_options_groups = [
 		name:'Sabores',
 		min_select:0,
 		max_select:3,
-		type:'single',
+		type:'multi',
 		options:[
 			{
 				name:'Calabres',
