@@ -23,10 +23,11 @@ const server = new ApolloServer({
 		const {authorization, company_id, branch_id} = req.headers;
 		let user = null, company = null, branch = null;
 
+		
 		if (authorization) user = await mid.authenticate(authorization);
 		if (company_id) company = await mid.selectCompany(company_id, user);
 		if (branch_id) branch = await mid.selectBranch(company, user, branch_id);
-
+		
 		return {
 			user,
 			company,

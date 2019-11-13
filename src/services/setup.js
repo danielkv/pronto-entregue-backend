@@ -18,6 +18,9 @@ module.exports = function (req, res) {
 	.then(async (t)=>{
 		result += '<li>Connected to Database</li>';
 
+		await conn.query('SET FOREIGN_KEY_CHECKS = 0', {raw: true}).then(()=>conn.drop());
+		result += '<li>Dropped all tables</li>';
+
 		await conn.sync({force:true});
 		result += '<li>Tables created</li>';
 		

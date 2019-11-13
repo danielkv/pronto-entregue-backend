@@ -52,7 +52,7 @@ Users.init({
 	},
 	role: {
 		type: Sequelize.STRING,
-		defaultValue: 'default',
+		defaultValue: 'customer',
 		allowNull: false,
 		comment: 'master | adm | customer | default'
 	}

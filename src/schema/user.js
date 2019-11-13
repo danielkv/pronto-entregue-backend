@@ -1,13 +1,13 @@
 const sequelize = require('../services/connection');
 const Op = require('sequelize').Op;
+const jwt = require('jsonwebtoken');
+const {gql} = require('apollo-server');
 const Users = require('../model/users');
 const UsersMeta = require('../model/users_meta');
 const Companies = require('../model/companies');
 const Branches = require('../model/branches');
 const Roles = require('../model/roles');
 const {salt} = require('../utilities');
-const jwt = require('jsonwebtoken');
-const {gql} = require('apollo-server');
 
 module.exports.typeDefs = gql`
 	type UserMeta {
@@ -53,6 +53,7 @@ module.exports.typeDefs = gql`
 		role:String
 		email:String
 		active:Boolean
+
 		assigned_branches:[AssignedBranchInput]
 		assigned_company:AssignedCompanyInput
 		metas:[UserMetaInput]
@@ -89,8 +90,8 @@ module.exports.typeDefs = gql`
 		login (email:String!, password:String!): Login!
 		authenticate (token:String!): User!
 		
-		createUser (data:UserInput!): User! @hasRole(permission:"users_edit", scope:"adm")
-		updateUser (id:ID!, data:UserInput!): User! @hasRole(permission:"users_edit", scope:"adm")
+		createUser (data:UserInput!): User!
+		updateUser (id:ID!, data:UserInput!): User!
 		
 		setUserRole (id:ID!, role_id:ID!):User! @hasRole(permission:"adm")
 		setUserScopeRole (id:ID!, role:String!):User! @hasRole(permission:"adm")
@@ -128,7 +129,19 @@ module.exports.resolvers = {
 	},
 	Mutation : {
 		createUser: (parent, {data}, ctx) => {
-			return sequelize.transaction(transaction => {
+			if (data.role === 'default' || data.role === 'adm') {
+				if (!ctx.user.can('adm')) throw new Error(`Você não tem premissões para cadastrar um usuário com permissão ${data.role}`);
+			}
+			
+			if (data.role === 'master') {
+				if (!ctx.user.can('master')) throw new Error(`Você não tem premissões para cadastrar um usuário com permissão ${data.role}`);
+			}
+
+			return sequelize.transaction(async transaction => {
+				await ctx.company.getUsers({where:{email:data.email}})
+					.then((users)=>{
+						if (users.length) throw new Error('Já existe um usuário com esse email')
+					})
 
 				return Users.create(data, {include:[UsersMeta], transaction})
 				.then(async (user_created)=> {
@@ -145,6 +158,14 @@ module.exports.resolvers = {
 			});
 		},
 		updateUser: (parent, {id, data}, ctx) => {
+			if (data.role === 'default' || data.role === 'adm') {
+				if (!ctx.user.can('adm')) throw new Error(`Você não tem premissões para cadastrar um usuário com permissão ${data.role}`);
+			}
+			
+			if (data.role === 'master') {
+				if (!ctx.user.can('master')) throw new Error(`Você não tem premissões para cadastrar um usuário com permissão ${data.role}`);
+			}
+
 			return sequelize.transaction(transaction => {
 				return Users.findByPk(id)
 				.then(user=>{

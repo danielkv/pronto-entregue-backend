@@ -1,7 +1,5 @@
 //const { SchemaDirectiveVisitor } = require('graphql-tools');
 const Users = require('../../model/users');
-const Companies = require('../../model/companies');
-const Branches = require('../../model/branches');
 
 module.exports = {
 	hasRole: (next, source, {permission, scope}, ctx) => {

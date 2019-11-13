@@ -2,11 +2,12 @@ const {gql} = require('apollo-server');
 
 module.exports.typeDefs = gql`
 	type OrderProduct {
-		id:ID!
-		name:String!
-		price:Float!
-		message:String!
-		product_related:Product!
+		id: ID!
+		name: String!
+		quantity: Int!
+		price: Float!
+		message: String!
+		product_related: Product!
 		options_groups: [OrderOptionsGroup]!
 	}
 `;

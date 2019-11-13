@@ -45,11 +45,12 @@ function selectCompany (company_id, user) {
 		return company_found;
 	})
 	.then (async (company_found) => {
-		
-		const [assigned_user] = await company_found.getUsers({where:{id:user.get('id')}});
-		
-		if (assigned_user && assigned_user.company_relation.active) {
-			company_found.user_relation = assigned_user.company_relation;
+		if (user) {
+			const [assigned_user] = await company_found.getUsers({where:{id:user.get('id')}});
+			
+			if (assigned_user && assigned_user.company_relation.active) {
+				company_found.user_relation = assigned_user.company_relation;
+			}
 		}
 
 		return company_found;
@@ -75,12 +76,14 @@ function selectBranch (company, user, branch_id) {
 		return branch_found;
 	})
 	.then (async (branch_found) => {
-		const [assigned_user] = await branch_found.getUsers({where:{id:user.get('id')}});
-		if (assigned_user && assigned_user.branch_relation.active) {
-			branch_found.user_relation = assigned_user.branch_relation;
+		if (user) {
+			const [assigned_user] = await branch_found.getUsers({where:{id:user.get('id')}});
+			if (assigned_user && assigned_user.branch_relation.active) {
+				branch_found.user_relation = assigned_user.branch_relation;
 
-			const role = await assigned_user.branch_relation.getRole();
-			user.permissions = [...user.permissions, role.permissions];
+				const role = await assigned_user.branch_relation.getRole();
+				user.permissions = [...user.permissions, role.permissions];
+			}
 		}
 
 		return branch_found;
