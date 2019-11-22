@@ -106,6 +106,8 @@ module.exports.typeDefs = gql`
 		user(id:ID!): User! @hasRole(permission:"users_read", scope:"adm")
 		searchCompanyUsers(search:String!):[User]!
 		me:User! @isAuthenticated
+
+		userAddress (id: ID!): Address! @isAuthenticated
 	}
 
 `;
@@ -129,7 +131,18 @@ module.exports.resolvers = {
 			return ctx.company.getUsers({where:{
 				[Op.or] : [{first_name:{[Op.like]:`%${search}%`}}, {last_name:{[Op.like]:`%${search}%`}}, {email:{[Op.like]:`%${search}%`}}]
 			}})
-		}
+		},
+		userAddress: (parent, { id }, ctx) => {
+			return ctx.user.getMetas({ where: { id }})
+				.then(([address]) => {
+					if (!address) throw new Error('Endereço não encontrado');
+
+					return {
+						id: address.id,
+						...JSON.parse(address.meta_value)
+					};
+				})
+		},
 	},
 	Mutation : {
 		createUser: (parent, {data}, ctx) => {
