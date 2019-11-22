@@ -103,7 +103,19 @@ const users_create = [
 			{
 				meta_value:"000.000.000-00",
 				meta_type:"document"
-			}
+			},
+			{
+				meta_type:"address",
+				meta_value:JSON.stringify({
+					"name": "Roodel",
+					"street": "Amoth",
+					"number": "59",
+					"city": "Cincinnati",
+					"state": "Ohio",
+					"district": "Summit",
+					"zipcode": "45271"
+				}),
+			},
 		]
 	},
 	{
@@ -118,8 +130,74 @@ const users_create = [
 				meta_type:"document"
 			},
 			{
+				meta_type:"address",
+				meta_value:JSON.stringify({
+					"name": "Roodel",
+					"street": "Amoth",
+					"number": "59",
+					"city": "Cincinnati",
+					"state": "Ohio",
+					"district": "Summit",
+					"zipcode": "45271"
+				}),
+			},
+			{
 				meta_value:"4898754686",
 				meta_type:"phone"
+			}
+		]
+	},
+	{
+		first_name:"Daniel",
+		last_name:"Guolo",
+		email:"daniel_kv@hotmail.com",
+		password:"123456",
+		active:true,
+		role:'master',
+		metas:[
+			{
+				meta_type:"document",
+				meta_value:"000.000.000-00",
+			},
+			{
+				meta_type:"address",
+				meta_value:JSON.stringify({
+					"name": "Roodel",
+					"street": "Amoth",
+					"number": "59",
+					"city": "Cincinnati",
+					"state": "Ohio",
+					"district": "Summit",
+					"zipcode": 88960000
+				}),
+			},
+			{
+				meta_type:"address",
+				meta_value:JSON.stringify({
+					"name": "Youspan",
+					"street": "Meadow Vale",
+					"number": "6455",
+					"city": "Houston",
+					"state": "Texas",
+					"district": "Waubesa",
+					"zipcode": 88955000
+				  }),
+			},
+			{
+				meta_type:"address",
+				meta_value:JSON.stringify({
+					"name": "Fivechat",
+					"street": "Northport",
+					"number": "7067",
+					"city": "Little Rock",
+					"state": "Arkansas",
+					"district": "Laurel",
+					"zipcode": 88960001
+				  }),
+			},
+			{
+				meta_type:"phone",
+				meta_value:"4898754686",
 			}
 		]
 	}
@@ -300,6 +378,7 @@ module.exports = function () {
 		const users = await Promise.all([
 			Users.create(users_create[0], {include:[UsersMeta]}),
 			Users.create(users_create[1], {include:[UsersMeta]}),
+			Users.create(users_create[2], {include:[UsersMeta]}),
 		]);
 
 		companies[0].addUser(users[0]);
@@ -375,7 +454,7 @@ module.exports = function () {
 
 		return {...result, options_groups};
 	})
-	.then(()=>{
+	/* .then(()=>{
 		//DEVELPOMENT
 		return Users.bulkCreate([
 			{
@@ -386,5 +465,5 @@ module.exports = function () {
 				role: 'master'
 			},
 		])
-	})
+	}) */
 }

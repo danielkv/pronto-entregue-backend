@@ -7,18 +7,18 @@ const OrderOptions = require('../model/orders_options');
 
 module.exports.typeDefs = gql`
 	type Order {
-		id:ID!
-		user:User!
-		payment_fee:Float!
-		delivery_price:Float!
-		price:Float!
-		type:String!
-		discount:Float!
-		status:String!
-		message:String!
-		updatedAt:String!
-		products:[OrderProduct]!
-		payment_method:PaymentMethod!
+		id: ID!
+		user: User!
+		payment_fee: Float!
+		delivery_price: Float!
+		price: Float!
+		type: String!
+		discount: Float!
+		status: String!
+		message: String!
+		updatedAt: String!
+		products: [OrderProduct]!
+		payment_method: PaymentMethod!
 		
 		street:String
 		number:Int
@@ -34,26 +34,26 @@ module.exports.typeDefs = gql`
 	}	
 
 	input OrderInput {
-		user_id:ID!
-		type:String!
-		status:String!
-		payment_method_id:ID
+		user_id: ID
+		type: String
+		status: String
+		payment_method_id: ID
 
-		payment_fee:Float!
-		delivery_price:Float!
-		discount:Float
-		price:Float!
-		message:String!
+		payment_fee: Float
+		delivery_price: Float
+		discount: Float
+		price: Float
+		message: String
 		
-		street:String
-		number:Int
-		complement:String
-		city:String
-		state:String
-		district:String
-		zipcode:String
+		street: String
+		number: String
+		complement: String
+		city: String
+		state: String
+		district: String
+		zipcode: Int
 
-		products:[OrderProductInput!]
+		products: [OrderProductInput]
 	}
 
 	input OrderProductInput {
@@ -158,7 +158,7 @@ module.exports.resolvers = {
 					if (!order) throw new Error('Pedido não encontrado');
 					const updated_order = await order.update(data, {transaction});
 
-					await OrderProducts.updateAll(data.products, updated_order, transaction);
+					if (data.products) await OrderProducts.updateAll(data.products, updated_order, transaction);
 
 					return updated_order;
 				})

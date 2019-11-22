@@ -3,14 +3,24 @@ const {gql} = require('apollo-server');
 module.exports.typeDefs = gql`
 
 	type Address {
-		id:ID!
-		name:String
-		street:String!
-		number:String!
-		zipcode:String!
-		district:String!
-		city:String!
-		state:String!
+		id: ID!
+		name: String
+		street: String!
+		number: String!
+		zipcode: Int!
+		district: String!
+		city: String!
+		state: String!
+	}
+
+	input UserAddressInput {
+		name: String!
+		street: String!
+		number: String!
+		zipcode: Int!
+		district: String!
+		city: String!
+		state: String!
 	}
 
 	

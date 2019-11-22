@@ -41,6 +41,7 @@ module.exports.typeDefs = gql`
 
 		addresses:[Address]!
 		
+		orders: [Order]!
 		branch_relation:BranchRelation!
 		company(company_id:ID!): Company!
 		companies(filter:Filter):[Company]! @hasRole(permission:"companies_read", scope:"adm")
@@ -96,6 +97,9 @@ module.exports.typeDefs = gql`
 		setUserRole (id:ID!, role_id:ID!):User! @hasRole(permission:"adm")
 		setUserScopeRole (id:ID!, role:String!):User! @hasRole(permission:"adm")
 
+		removeUserAddress (id: ID!): Address! @isAuthenticated
+		updateUserAddress (id: ID!, data: UserAddressInput!): Address! @isAuthenticated
+		createUserAddress (data: UserAddressInput!): Address! @isAuthenticated
 	}
 
 	extend type Query {
@@ -246,6 +250,36 @@ module.exports.resolvers = {
 				};
 			});
 		},
+		removeUserAddress: (parent, { id }) => {
+			return UsersMeta.findByPk(id)
+				.then(async (address_found)=>{
+					if (!address_found) throw new Error('Endereço não encontrado');
+
+					const removed = await address_found.destroy();
+
+					return {id, ...JSON.parse(removed.meta_value)};
+				})
+		},
+		updateUserAddress: (parent, { id, data }, ctx) => {
+			return ctx.user.getMetas({ where: { meta_type: 'address', id } })
+				.then(async ([address_found])=>{
+					if (!address_found) throw new Error('Endereço não encontrado');
+					
+					const updated = await address_found.update({ meta_value: JSON.stringify(data) })
+					
+					return {id, ...JSON.parse(updated.meta_value)};
+				});
+		},
+		createUserAddress: (parent, { data }, ctx) => {
+			return ctx.user.createMeta({ meta_type: 'address', meta_value: JSON.stringify(data) })
+				.then((meta_address) => {
+					console.log(meta_address.get());
+					return {
+						id: meta_address.get('id'),
+						...JSON.parse(meta_address.get('meta_value'))
+					}
+				})
+		},
 	},
 	User: {
 		addresses : (parent, args, ctx) => {
@@ -283,8 +317,8 @@ module.exports.resolvers = {
 			})
 		},
 		branch_relation: (parent, args, ctx) => {
-			
 			if (!parent.branches_users) throw new Error('Nenhum usuário selecionado');
+			
 			return parent.branches_users.getRole()
 			.then(role => {
 				return {
@@ -292,6 +326,9 @@ module.exports.resolvers = {
 					active:parent.branches_users.active
 				}
 			})
+		},
+		orders: (parent) => {
+			return parent.getOrders();
 		},
 	}
 }

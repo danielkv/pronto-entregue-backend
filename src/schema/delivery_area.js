@@ -9,23 +9,23 @@ module.exports.typeDefs = gql`
 		name:String!
 		type:String!
 		price:Float!
-		zipcode_a:Int!
-		zipcode_b:Int
+		zipcode_a: Int!
+		zipcode_b: Int
 		createdAt:String!
 		updatedAt:String!
 	}
 
 	input DeliveryAreaInput {
-		id:ID
-		name:String
-		type:String
-		price:Float
-		zipcode_a:Int
-		zipcode_b:Int
+		id: ID
+		name: String
+		type: String
+		price: Float
+		zipcode_a: Int
+		zipcode_b: Int
 	}
 
 	extend type Query {
-		calculateDeliveryPrice(zipcode:Int!): DeliveryArea!
+		calculateDeliveryPrice(zipcode: Int!): DeliveryArea!
 	}
 
 	extend type Mutation {

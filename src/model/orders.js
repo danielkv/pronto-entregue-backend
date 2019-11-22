@@ -54,7 +54,6 @@ Orders.init({
 		type: Sequelize.STRING,
 		comment: 'waiting | preparing | delivery | delivered | canceled',
 		defaultValue : 'waiting',
-		allowNull : false,
 		validate : {
 			isIn : [['waiting', 'preparing', 'delivery', 'delivered', 'canceled']],
 		}

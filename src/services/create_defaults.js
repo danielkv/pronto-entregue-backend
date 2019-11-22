@@ -27,11 +27,11 @@ const roles = [
 
 const payment_methods = [
 	{
-		name: 'credit_debit',
+		name: 'CreditDebit',
 		display_name: 'Cartão de Crédito/Débito',
 	},
 	{
-		name: 'money',
+		name: 'Money',
 		display_name: 'Dinheiro',
 	},
 ];
