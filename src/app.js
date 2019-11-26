@@ -40,7 +40,9 @@ const server = new ApolloServer({
 //configura rota estática
 app.use('/uploads', express.static(path.resolve(__dirname, '..', 'uploads')));
 
-app.get('/networkTest', (req, res)=>{res.send('Connected')});
+app.get('/networkTest', (req, res)=>{
+	res.send(`Connected at ${req.hostname}<br>Host: ${req.headers.host}`);
+});
 //porta de instalação
 app.get('/setup', installDataBase);
 
