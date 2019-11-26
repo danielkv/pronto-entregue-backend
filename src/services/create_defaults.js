@@ -36,7 +36,7 @@ const payment_methods = [
 	},
 ];
 
-module.exports = function () {
+module.exports = function ({ host }) {
 	return Roles.bulkCreate(roles)
 	.then(()=>{
 		return PaymentMethods.bulkCreate(payment_methods)

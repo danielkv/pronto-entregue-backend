@@ -13,6 +13,7 @@ module.exports = function (req, res) {
 	if (!process.env.SETUP || process.env.SETUP !== 'true') return res.status(404).send('Not Found');
 	
 	let result = '';
+	let host = req.headers.host;
 
 	conn.authenticate()
 	.then(async (t)=>{
@@ -25,13 +26,13 @@ module.exports = function (req, res) {
 		result += '<li>Tables created</li>';
 		
 		if (req.query.installDefaults) {
-			await createDefaults();
+			await createDefaults({ host });
 			result += '<li>Default data ok</li>';
 		}
 
 		//createDummyData
 		if (req.query.installDummyData) {
-			await createDummyData();
+			await createDummyData({ host });
 			result += '<li>Dummy data ok</li>';
 		}
 		
