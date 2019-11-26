@@ -37,8 +37,8 @@ module.exports.typeDefs = gql`
 		active:Boolean!
 		createdAt:String! @dateTime
 		updatedAt:String! @dateTime
-		metas:[UserMeta]!
 
+		metas (type: String): [UserMeta]!
 		addresses:[Address]!
 		
 		orders: [Order]!
@@ -161,17 +161,17 @@ module.exports.resolvers = {
 					})
 
 				return Users.create(data, {include:[UsersMeta], transaction})
-				.then(async (user_created)=> {
-					await ctx.company.addUser(user_created, {through:{...data.assigned_company}, transaction});
+					.then(async (user_created)=> {
+						await ctx.company.addUser(user_created, {through:{...data.assigned_company}, transaction});
 
-					return user_created;
-				})
-				.then(async (user_created)=> {
-					if (data.assigned_branches) {
-						await Branches.assignAll(data.assigned_branches, user_created, transaction);
-					}
-					return user_created;
-				})
+						return user_created;
+					})
+					.then(async (user_created)=> {
+						if (data.assigned_branches) {
+							await Branches.assignAll(data.assigned_branches, user_created, transaction);
+						}
+						return user_created;
+					})
 			});
 		},
 		updateUser: (parent, {id, data}, ctx) => {
@@ -185,51 +185,51 @@ module.exports.resolvers = {
 
 			return sequelize.transaction(transaction => {
 				return Users.findByPk(id)
-				.then(user=>{
-					if (!user) throw new Error('Usuário não encontrada');
+					.then(user=>{
+						if (!user) throw new Error('Usuário não encontrada');
 
-					return user.update(data, { fields: ['first_name', 'last_name', 'password', 'role', 'active'], transaction })
-				})
-				.then(async (user_updated) => {
-					if (data.metas) {
-						await UsersMeta.updateAll(data.metas, user_updated, transaction);
-					}
-					return user_updated;
-				})
-				.then(async (user_updated)=> {
-					await ctx.company.addUser(user_updated, {through:{...data.assigned_company}, transaction});
+						return user.update(data, { fields: ['first_name', 'last_name', 'password', 'role', 'active'], transaction })
+					})
+					.then(async (user_updated) => {
+						if (data.metas) {
+							await UsersMeta.updateAll(data.metas, user_updated, transaction);
+						}
+						return user_updated;
+					})
+					.then(async (user_updated)=> {
+						await ctx.company.addUser(user_updated, {through:{...data.assigned_company}, transaction});
 
-					return user_updated;
-				})
-				.then(async (user_updated)=> {
-					if (data.assigned_branches) {
-						await Branches.assignAll(data.assigned_branches, user_updated, transaction);
-					}
-					return user_updated;
-				})
+						return user_updated;
+					})
+					.then(async (user_updated)=> {
+						if (data.assigned_branches) {
+							await Branches.assignAll(data.assigned_branches, user_updated, transaction);
+						}
+						return user_updated;
+					})
 			})
 		},
 		setUserScopeRole : (parent, {id, role}, ctx) => {
 			return ctx.company.getUsers({where:{id}})
-			.then(async ([user])=>{
-				if (!user) throw new Error('Usuário não encontrada');
+				.then(async ([user])=>{
+					if (!user) throw new Error('Usuário não encontrada');
 
-				const user_updated = await user.update({role});
+					const user_updated = await user.update({role});
 
-				return user_updated;
-			});
+					return user_updated;
+				});
 		},
 		setUserRole : (parent, {id, role_id}, ctx) => {
 			return ctx.branch.getUsers({where:{id}})
-			.then(async ([user])=>{
-				if (!user || !user.branch_relation) throw new Error('Usuário não encontrada');
-				const role = await Roles.findByPk(role_id);
-				if (!role) throw new Error('Função não encontrada');
+				.then(async ([user])=>{
+					if (!user || !user.branch_relation) throw new Error('Usuário não encontrada');
+					const role = await Roles.findByPk(role_id);
+					if (!role) throw new Error('Função não encontrada');
 
-				await user.branch_relation.setRole(role);
-				
-				return user;
-			});
+					await user.branch_relation.setRole(role);
+					
+					return user;
+				});
 		},
 		/*
 		* Autoriza usuário retornando o token com dados,
@@ -240,28 +240,28 @@ module.exports.resolvers = {
 			return Users.findOne({
 				where : {email},
 			})
-			.then ((user_found)=>{
-				//Verifica se encontrou usuário
-				if (!user_found) throw new Error('Usuário não encotrado');
-		
-				//gera token com senha recebidos e salt encontrado e verifica se token salvo é igual
-				const salted = salt(password, user_found.salt);
-				if (user_found.password != salted.password) throw new Error('Senha incorreta');
-				
-				//Gera webtoken com id e email
-				const token = jwt.sign({
-					id: user_found.id,
-					email: user_found.email,
-				}, process.env.SECRET);
-				
-				//Retira campos para retornar usuário
-				const authorized = user_found.get();
-		
-				return {
-					token,
-					user:authorized,
-				};
-			});
+				.then ((user_found)=>{
+					//Verifica se encontrou usuário
+					if (!user_found) throw new Error('Usuário não encotrado');
+			
+					//gera token com senha recebidos e salt encontrado e verifica se token salvo é igual
+					const salted = salt(password, user_found.salt);
+					if (user_found.password != salted.password) throw new Error('Senha incorreta');
+					
+					//Gera webtoken com id e email
+					const token = jwt.sign({
+						id: user_found.id,
+						email: user_found.email,
+					}, process.env.SECRET);
+					
+					//Retira campos para retornar usuário
+					const authorized = user_found.get();
+			
+					return {
+						token,
+						user:authorized,
+					};
+				});
 		},
 		removeUserAddress: (parent, { id }) => {
 			return UsersMeta.findByPk(id)
@@ -309,8 +309,14 @@ module.exports.resolvers = {
 		full_name : (parent, args, ctx) => {
 			return `${parent.first_name} ${parent.last_name}`;
 		},
-		metas: (parent, args, ctx) => {
-			return parent.getMetas();
+		metas: (parent, { type }) => {
+			let where = {};
+
+			if (type) {
+				where = { where: { meta_type: type } }
+			}
+
+			return parent.getMetas(where);
 		},
 		companies: (parent, {filter}, ctx) => {
 			let where = {active: true};
@@ -323,22 +329,22 @@ module.exports.resolvers = {
 		},
 		company:(parent, {company_id}, ctx) => {
 			return parent.getCompanies({where:{id:company_id}})
-			.then (([company])=>{
-				if (!company) throw new Error('Empresa não encontrada');
+				.then (([company])=>{
+					if (!company) throw new Error('Empresa não encontrada');
 
-				return company;
-			})
+					return company;
+				})
 		},
 		branch_relation: (parent, args, ctx) => {
 			if (!parent.branches_users) throw new Error('Nenhum usuário selecionado');
 			
 			return parent.branches_users.getRole()
-			.then(role => {
-				return {
-					role,
-					active:parent.branches_users.active
-				}
-			})
+				.then(role => {
+					return {
+						role,
+						active:parent.branches_users.active
+					}
+				})
 		},
 		orders: (parent) => {
 			return parent.getOrders();

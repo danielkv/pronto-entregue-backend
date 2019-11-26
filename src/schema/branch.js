@@ -51,13 +51,14 @@ module.exports.typeDefs = gql`
 		createdAt:String! @dateTime
 		updatedAt:String! @dateTime
 		company:Company!
-		metas:[BranchMeta]!
-		business_hours:[BusinessHour]!
 		orders (limit:Int, filter:Filter):[Order]!
 		user_relation:BranchRelation!
 		last_month_revenue:Float!
 
+		metas: [BranchMeta]!
+		phones: [Phone]!
 		address:Address!
+		business_hours: [BusinessHour]!
 
 		paymentMethods:[PaymentMethod]!
 		deliveryAreas:[DeliveryArea]!
@@ -184,8 +185,23 @@ module.exports.resolvers = {
 				return {id:address.id, ...JSON.parse(address.meta_value)};
 			})
 		},
-		metas: (parent, args, ctx) => {
-			return parent.getMetas();
+		metas: (parent, { type }, ctx) => {
+			let where = {};
+
+			if (type) {
+				where = { where: { meta_type: type } }
+			}
+
+			return parent.getMetas(where);
+		},
+		phones: (parent) => {
+			return parent.getMetas({ where: { meta_type: 'phone' } })
+				.then((phones) => {
+					return phones.map((phone) => ({
+						id: phone.id,
+						number: phone.meta_value
+					}));
+				})
 		},
 		categories: (parent, {filter}, ctx) => {
 			let where = {active: true};
