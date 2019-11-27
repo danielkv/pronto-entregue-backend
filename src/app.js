@@ -40,7 +40,7 @@ const server = new ApolloServer({
 app.use('/uploads', express.static(path.resolve(__dirname, '..', 'uploads')));
 
 app.get('/networkTest', (req, res)=>{
-	res.send(`Connected at ${req.hostname}<br>Host: ${req.headers.host}<br>Secure connection: ${!!req.secure}`);
+	res.send(`Connected at ${req.hostname}<br>Host: ${req.headers.host}<br>Secure connection: ${!!req.secure}<br>Protocol: ${req.protocol}`);
 });
 //porta de instalação
 app.get('/setup', installDataBase);

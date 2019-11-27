@@ -13,7 +13,7 @@ module.exports = function (req, res) {
 	if (!process.env.SETUP || process.env.SETUP !== 'true') return res.status(404).send('Not Found');
 	
 	let result = '';
-	let host = (req.secure ? 'https://' : 'http://') + req.headers.host;
+	let host = `${req.protocol}://${req.headers.host}`;
 
 	conn.authenticate()
 	.then(async (t)=>{
