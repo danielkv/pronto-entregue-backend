@@ -22,7 +22,6 @@ const server = new ApolloServer({
 	context : async ({req}) => {
 		const {authorization, company_id, branch_id} = req.headers;
 		let user = null, company = null, branch = null;
-
 		
 		if (authorization) user = await mid.authenticate(authorization);
 		if (company_id) company = await mid.selectCompany(company_id, user);
@@ -41,7 +40,7 @@ const server = new ApolloServer({
 app.use('/uploads', express.static(path.resolve(__dirname, '..', 'uploads')));
 
 app.get('/networkTest', (req, res)=>{
-	res.send(`Connected at ${req.hostname}<br>Host: ${req.headers.host}`);
+	res.send(`Connected at ${req.hostname}<br>Host: ${req.headers.host}<br>Secure connection: ${!!req.secure}`);
 });
 //porta de instalação
 app.get('/setup', installDataBase);
