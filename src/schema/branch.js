@@ -222,6 +222,7 @@ module.exports.resolvers = {
 					featured: true,
 					['$category.branch_id$']: parent.get('id')
 				},
+				limit,
 				include: [{
 					model:ProductsCategories
 				}]
@@ -233,6 +234,7 @@ module.exports.resolvers = {
 						where: {
 							['$category.branch_id$']: parent.get('id')
 						},
+						limit,
 						include: [{
 							model:ProductsCategories
 						}]
