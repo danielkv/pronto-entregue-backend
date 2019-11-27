@@ -65,7 +65,6 @@ module.exports.typeDefs = gql`
 
 	extend type Query {
 		product(id:ID!): Product!
-		featuredProducts(limit:Int): [Product]!
 		searchBranchProducts(search:String!, filter:Filter):[Product]!
 	}
 
@@ -141,29 +140,6 @@ module.exports.resolvers = {
 				if (!product) throw new Error('Produto não encontrada');
 				return product;
 			})
-		},
-		featuredProducts: (parent, { limit = 5 }, ctx) => {
-			return Products.findAll({
-				where: {
-					featured: true,
-					['$category.branch_id$']: ctx.branch.get('id')
-				},
-				include: [{
-					model:ProductsCategories
-				}]
-			})
-				.then(products => {
-					if (products.length > 0) return products;
-
-					return Products.findAll({
-						where: {
-							['$category.branch_id$']: ctx.branch.get('id')
-						},
-						include: [{
-							model:ProductsCategories
-						}]
-					})
-				})
 		},
 		searchBranchProducts: (parent, {search, filter}, ctx) => {
 			let where = {active: true};

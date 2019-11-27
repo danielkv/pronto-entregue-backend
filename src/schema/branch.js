@@ -65,6 +65,7 @@ module.exports.typeDefs = gql`
 		users(filter:Filter):[User]!
 		categories(filter:Filter):[Category]!
 		products(filter:Filter):[Product]!
+		featuredProducts(limit:Int): [Product]!
 
 		orders_qty(filter:Filter):Int!
 		best_sellers (limit:Int!, createdAt:String): [ProductBestSeller]!
@@ -214,6 +215,29 @@ module.exports.resolvers = {
 			if (filter && filter.showInactive) delete where.active;
 
 			return Products.findAll({where, include:[{model:ProductsCategories, where:{branch_id:parent.get('id')}}]})
+		},
+		featuredProducts: (parent, { limit = 5 }) => {
+			return Products.findAll({
+				where: {
+					featured: true,
+					['$category.branch_id$']: parent.get('id')
+				},
+				include: [{
+					model:ProductsCategories
+				}]
+			})
+				.then(products => {
+					if (products.length > 0) return products;
+
+					return Products.findAll({
+						where: {
+							['$category.branch_id$']: parent.get('id')
+						},
+						include: [{
+							model:ProductsCategories
+						}]
+					})
+				})
 		},
 		paymentMethods: (parent, args, ctx) => {
 			return parent.getPaymentMethods();
