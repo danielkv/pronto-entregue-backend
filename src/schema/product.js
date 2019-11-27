@@ -65,7 +65,7 @@ module.exports.typeDefs = gql`
 
 	extend type Query {
 		product(id:ID!): Product!
-		featuredProducts(limit:Int): [Product]! @isAuthenticated
+		featuredProducts(limit:Int): [Product]!
 		searchBranchProducts(search:String!, filter:Filter):[Product]!
 	}
 
