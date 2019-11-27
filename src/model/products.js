@@ -14,6 +14,11 @@ Products.init({
 	name: Sequelize.STRING,
 	description: Sequelize.STRING,
 	image: Sequelize.TEXT,
+	featured: {
+		type: Sequelize.BOOLEAN,
+		defaultValue: false,
+		allowNull: false,
+	},
 	order: {
 		type: Sequelize.INTEGER,
 		defaultValue: 0,

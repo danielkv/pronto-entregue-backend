@@ -1,5 +1,4 @@
 const sequelize = require('../services/connection');
-const Sequelize = require('sequelize');
 const Op = require('sequelize').Op;
 const Products = require('../model/products');
 const ProductsCategories = require('../model/products_categories');
@@ -17,6 +16,8 @@ module.exports.typeDefs = gql`
 		order:Int!
 		type:String!
 		price:Float!
+		featured: Boolean!
+
 		active:Boolean!
 		createdAt:String! @dateTime
 		updatedAt:String! @dateTime
@@ -29,6 +30,7 @@ module.exports.typeDefs = gql`
 	input ProductInput {
 		name:String
 		description:String
+		featured: Boolean
 		file:Upload
 		type:String
 		price:Float
@@ -113,7 +115,7 @@ module.exports.resolvers = {
 				return Products.findByPk(id)
 				.then(async (product) => {
 					if (!product) throw new Error('Produto não encontrado');
-					const product_updated = await product.update(data, {fields:['price', 'order', 'active', 'image', 'type'], transaction});
+					const product_updated = await product.update(data, {fields:['price', 'order', 'featured', 'active', 'image', 'type'], transaction});
 					
 					if (data.category_id) {
 						const [category] = await ctx.branch.getCategories({where:{id:data.category_id}})
