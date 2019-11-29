@@ -1,6 +1,6 @@
 const sequelize = require('../services/connection');
 const ProductsCagetories = require('../model/products_categories')
-const uploads = require('../config/uploads');
+const { upload } = require('../config/uploads');
 const {gql} = require('apollo-server');
 
 module.exports.typeDefs = gql`
@@ -43,25 +43,14 @@ module.exports.resolvers = {
 	Mutation: {
 		createCategory : async (parent, {data}, ctx) => {
 			if (data.file) {
-				const { stream, filename} = await data.file;
-				//console.log(filename);
-				
-				const filepath = uploads.createFilePath(ctx.host, ctx.company.name, filename);
-				await uploads.startUpload(stream, filepath.path);
-
-				data.image = filepath.url;
+				data.image = await upload(ctx.company.name, await data.file);
 			}
 
 			return ctx.branch.createCategory(data);
 		},
 		updateCategory : async (parent, {id, data}, ctx) => {
 			if (data.file) {
-				const { stream, filename} = await data.file;
-				
-				const filepath = uploads.createFilePath(ctx.host, ctx.company.name, filename);
-				await uploads.startUpload(stream, filepath.path);
-
-				data.image = filepath.url;
+				data.image = await upload(ctx.company.name, await data.file);
 			}
 
 			return ctx.branch.getCategories({where:{id}})

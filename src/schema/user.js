@@ -87,7 +87,7 @@ module.exports.typeDefs = gql`
 		token:String!
 	}
 
-	type Mutation {
+	extend type Mutation {
 		login (email:String!, password:String!): Login!
 		authenticate (token:String!): User!
 		

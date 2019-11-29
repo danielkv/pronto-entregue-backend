@@ -1,6 +1,7 @@
 const {makeExecutableSchema, gql} = require('apollo-server');
 const {merge} = require('lodash');
 const directives = require('./directives');
+const { upload } = require('../config/uploads');
 
 //types
 const {typeDefs: Branch, resolvers: branchResolvers} = require('./branch');
@@ -46,10 +47,22 @@ const typeDefs = gql`
 		roles:[Role]! @hasRole(permission:"roles_edit", scope:"adm")
 		users:[User]! @hasRole(permission:"master")
 	}
+
+	type Mutation {
+		uploadFile(file: Upload!): String! @hasRole(permission:"master")
+	}
 `
+
+const resolvers = {
+	Mutation: {
+		uploadFile: async (_, { file }) => {
+			return await upload('testea', await file);
+		}
+	}
+}
 
 module.exports = makeExecutableSchema({
 	typeDefs : [typeDefs, Branch, Category, Company, Item, Option, OptionsGroup, OrderOption, OrderOptionsGroup, OrderProduct, Order, PaymentMethod, Product, Role, DeliveryArea, User, Address, Phone],
-	resolvers : merge(branchResolvers, categoryResolvers, companyResolvers, itemResolvers, optionResolvers, optionsGroupResolvers, orderOptionResolvers, orderOptionsGroupResolvers, orderProductResolvers, orderResolvers, paymentMethodResolvers, productResolvers, roleResolvers, deliveryAreaResolvers, userResolvers, addressResolvers, phoneResolvers),
+	resolvers : merge(resolvers, branchResolvers, categoryResolvers, companyResolvers, itemResolvers, optionResolvers, optionsGroupResolvers, orderOptionResolvers, orderOptionsGroupResolvers, orderProductResolvers, orderResolvers, paymentMethodResolvers, productResolvers, roleResolvers, deliveryAreaResolvers, userResolvers, addressResolvers, phoneResolvers),
 	directiveResolvers : directives,
 })

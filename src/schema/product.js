@@ -5,7 +5,7 @@ const ProductsCategories = require('../model/products_categories');
 const Options = require('../model/options');
 const OptionsGroups = require('../model/options_groups');
 const { gql} = require('apollo-server');
-const uploads = require('../config/uploads');
+const { upload } = require('../config/uploads');
 
 module.exports.typeDefs = gql`
 	type Product {
@@ -76,14 +76,9 @@ module.exports.typeDefs = gql`
 
 module.exports.resolvers = {
 	Mutation: {
-		createProduct: async (parent, {data}, ctx) => {
+		createProduct: async (_, { data }, ctx) => {
 			if (data.file) {
-				const { stream, filename } = await data.file;
-
-				const filepath = uploads.createFilePath(ctx.host, ctx.company.name, filename);
-				await uploads.startUpload(stream, filepath.path);
-
-				data.image = filepath.url;
+				data.image = await upload(ctx.company.name, await data.file);
 			}
 
 			return sequelize.transaction(transaction => {
@@ -101,14 +96,9 @@ module.exports.resolvers = {
 				
 			})
 		},
-		updateProduct : async (parent, {id, data}, ctx) => {
+		updateProduct : async (_, { id, data }, ctx) => {
 			if (data.file) {
-				const { stream, filename } = await data.file;
-
-				const filepath = uploads.createFilePath(ctx.host, ctx.company.name, filename);
-				await uploads.startUpload(stream, filepath.path);
-
-				data.image = filepath.url;
+				data.image = await upload(ctx.company.name, await data.file);
 			}
 
 			return sequelize.transaction(transaction => {

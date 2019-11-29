@@ -1,53 +1,61 @@
-const path = require('path');
-const fs = require('fs');
+const { extname, basename } = require('path');
 const crypto = require('crypto');
 const {slugify} = require('../utilities');
+const { storage } = require('../services/gcloud');
 
-const destination = (folder) => {
-	const company_folder = slugify(folder);
+const upload = async (bucketName, file) => {
+	const bucket = await getFileBucket(bucketName);
+	const { url } = await startUpload(bucket, file);
 
-	const uploads_path = path.join(__dirname, '..', '..', 'uploads');
-	if (!fs.existsSync(uploads_path)) fs.mkdirSync(uploads_path);
-
-	const company_path = path.resolve(__dirname, '..', '..', 'uploads', company_folder);
-	if (!fs.existsSync(company_path)) fs.mkdirSync(company_path);
-
-	return path.join('uploads', company_folder);
+	return url;
 }
 
-const newFileName = (filename) => {
-	const hash = crypto.randomBytes(16);
-	const new_name = `${hash.toString("hex")}-${slugify(filename)}`;
+const getFileBucket = async (bucketName) => {
+	const slugifiedName = `${slugify(bucketName)}_flakery`;
+	const bucket = storage.bucket(slugifiedName);
+
+	return bucket.exists()
+		.then(async ([exists])=>{
+			if (exists) return bucket;
+
+			const [createdBucket] = await storage.createBucket(slugifiedName);
+			return createdBucket;
+		})
+}
+
+const newFileName = (file_name, bytes=16) => {
+	const fileExtension = extname(file_name);
+	const fileName = basename(file_name, fileExtension)
+	const hash = crypto.randomBytes(bytes);
+	const new_name = `${slugify(fileName)}-${hash.toString("hex")}${fileExtension}`;
 
 	return new_name;
 }
 
-const createFilePath = (host, company_name, filename)=> {
-	const new_destination = destination(company_name);
-	const new_filename = newFileName(filename);
-
-	const final_path = path.join(__dirname, '..', '..', new_destination, new_filename);
-	const url = `${host}/${new_destination}/${new_filename}`.replace(/\\/g, '/');
-
-	return {path:final_path, url};
-}
-
-const startUpload = async (readStream, writeStreamPath) => {
+const startUpload = async (bucket, file) => {
 	return new Promise((resolve, reject)=>{
-		const writeStream = fs.createWriteStream(writeStreamPath);
+		const { filename, createReadStream, mimetype } = file;
 
-		readStream.pipe(writeStream)
-		.on('finish', (err)=>{
-			if (err) reject(err);
+		const newFile = bucket.file(newFileName(filename));
+		const writeStream = newFile.createWriteStream({
+			resumable: false,
+			public: true,
+			gzip: true, 
+			metadata: {
+				contentType: mimetype
+			}
+		})
 
-			resolve(writeStreamPath);
-		});
+		createReadStream().pipe(writeStream)
+			.on('error', reject)
+			.on('finish', ()=>{
+				const url = `https://${newFile.storage.apiEndpoint}/${newFile.bucket.name}/${newFile.name}`;
+				
+				resolve({ file: newFile, url });
+			});
 	});
 }
 
 module.exports = {
-	destination,
-	newFileName,
-	createFilePath,
-	startUpload,
+	upload
 }
