@@ -7,6 +7,7 @@ module.exports.typeDefs = gql`
 		name: String
 		street: String!
 		number: String!
+		complement: String
 		zipcode: Int!
 		district: String!
 		city: String!
@@ -17,6 +18,7 @@ module.exports.typeDefs = gql`
 		name: String!
 		street: String!
 		number: String!
+		complement: String
 		zipcode: Int!
 		district: String!
 		city: String!
