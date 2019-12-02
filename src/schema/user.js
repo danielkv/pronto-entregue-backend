@@ -103,7 +103,7 @@ module.exports.typeDefs = gql`
 	}
 
 	extend type Query {
-		user(id:ID!): User! @hasRole(permission:"users_read", scope:"adm")
+		user(id:ID!): User!
 		searchCompanyUsers(search:String!):[User]!
 		me:User! @isAuthenticated
 
@@ -120,7 +120,12 @@ module.exports.resolvers = {
 		users : (parent, args, ctx) => {
 			return Users.findAll();
 		},
-		user:(parent, {id}, ctx) => {
+		user:(parent, { id }, ctx) => {
+			if (
+				!ctx.user.can('users_read', { scope: 'adm' }) ||
+				!ctx.user.id === id
+			) throw new Error('Você não tem autorização')
+
 			return Users.findByPk(id)
 			.then(user => {
 				if (!user) throw new Error('Usuário não encontrada');
@@ -236,7 +241,7 @@ module.exports.resolvers = {
 		* caso autenticação falhe, 'arremessa' um erro
 		* 
 		*/
-		login : (parent, {email, password}, ctx) => {
+		login: (parent, {email, password}, ctx) => {
 			return Users.findOne({
 				where : {email},
 			})
@@ -262,6 +267,16 @@ module.exports.resolvers = {
 						user:authorized,
 					};
 				});
+		},
+		authenticate: (_, { token }) => {
+			const { id, email } = jwt.verify(token, process.env.SECRET);
+
+			return Users.findAll({ where: { id, email } })
+				.then(([user_found])=>{
+					if (!user_found) throw new Error('Usuário não encotrado');
+
+					return user_found;
+				})
 		},
 		removeUserAddress: (parent, { id }) => {
 			return UsersMeta.findByPk(id)
