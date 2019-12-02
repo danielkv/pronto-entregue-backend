@@ -105,7 +105,7 @@ module.exports.resolvers = {
 				return Products.findByPk(id)
 				.then(async (product) => {
 					if (!product) throw new Error('Produto não encontrado');
-					const product_updated = await product.update(data, {fields:['price', 'order', 'featured', 'active', 'image', 'type'], transaction});
+					const product_updated = await product.update(data, {fields:['name', 'description', 'price', 'order', 'featured', 'active', 'image', 'type'], transaction});
 					
 					if (data.category_id) {
 						const [category] = await ctx.branch.getCategories({where:{id:data.category_id}})
