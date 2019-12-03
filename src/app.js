@@ -1,10 +1,9 @@
 require('dotenv').config();
-const installDataBase = require('./services/setup'); //Configura banco de dados e relações das tabelas
 const { ApolloServer } = require('apollo-server-express');
 const express = require('express');
 const cors = require('cors');
-const path = require('path');
 const mid = require('./middlewares');
+const routes = require('./router');
 
 //express config
 const app = express();
@@ -36,14 +35,8 @@ const server = new ApolloServer({
 	},
 });
 
-//configura rota estática
-app.use('/uploads', express.static(path.resolve(__dirname, '..', 'uploads')));
-
-app.get('/networkTest', (req, res)=>{
-	res.send(`Connected at ${req.hostname}<br>Host: ${req.headers.host}<br>Secure connection: ${!!req.secure}<br>Protocol: ${req.protocol}`);
-});
-//porta de instalação
-app.get('/setup', installDataBase);
+// configure router
+app.use(routes);
 
 //configura apollo server
 server.applyMiddleware({app, path:'/graphql'});

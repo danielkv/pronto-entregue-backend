@@ -4,11 +4,6 @@ require('./relations.js');
 const createDefaults = require('./create_defaults');
 const createDummyData = require('./dummy_data');
 
-function installDataBase(installDefaults=true, installDummyData=false) {
-	
-	
-}
-
 module.exports = function (req, res) {
 	if (!process.env.SETUP || process.env.SETUP !== 'true') return res.status(404).send('Not Found');
 	
