@@ -121,8 +121,9 @@ module.exports.resolvers = {
 			return Users.findAll();
 		},
 		user:(parent, { id }, ctx) => {
+
 			if (
-				!ctx.user.can('users_read', { scope: 'adm' }) ||
+				!ctx.user.can('users_read', { scope: 'adm' }) &&
 				!ctx.user.id === id
 			) throw new Error('Você não tem autorização')
 
