@@ -44,7 +44,7 @@ module.exports.typeDefs = gql`
 		orders: [Order]!
 		branch_relation:BranchRelation!
 		company(company_id:ID!): Company!
-		companies(filter:Filter):[Company]! @hasRole(permission:"companies_read", scope:"adm")
+		companies(filter:Filter): [Company]! @hasRole(permission:"companies_read", scope:"adm")
 	}
 
 	input UserInput {
@@ -334,14 +334,14 @@ module.exports.resolvers = {
 
 			return parent.getMetas(where);
 		},
-		companies: (parent, {filter}, ctx) => {
-			let where = {active: true};
+		companies: (parent, { filter }) => {
+			let where = { active: true };
 			if (filter && filter.showInactive) delete where.active;
 
 			if (parent.role == 'master')
-				return Companies.findAll();
+				return Companies.findAll({ where });
 
-			return parent.getCompanies({where, through:{where:{active:true}}});
+			return parent.getCompanies({ where, through: { where: { active: true } } });
 		},
 		company:(parent, {company_id}, ctx) => {
 			return parent.getCompanies({where:{id:company_id}})

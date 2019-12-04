@@ -45,26 +45,26 @@ module.exports.typeDefs = gql`
 	}
 
 	type Branch {
-		id:ID!
-		name:String!
-		active:Boolean!
-		createdAt:String! @dateTime
-		updatedAt:String! @dateTime
-		company:Company!
+		id: ID!
+		name: String!
+		active: Boolean!
+		createdAt: String! @dateTime
+		updatedAt: String! @dateTime
+		company: Company!
 		orders (limit:Int, filter:Filter):[Order]!
-		user_relation:BranchRelation!
-		last_month_revenue:Float!
+		user_relation: BranchRelation!
+		last_month_revenue: Float!
 
 		metas: [BranchMeta]!
 		phones: [Phone]!
-		address:Address!
+		address: Address!
 		business_hours: [BusinessHour]!
 
-		paymentMethods:[PaymentMethod]!
-		deliveryAreas:[DeliveryArea]!
-		users(filter:Filter):[User]!
-		categories(filter:Filter):[Category]!
-		products(filter:Filter):[Product]!
+		paymentMethods: [PaymentMethod]!
+		deliveryAreas: [DeliveryArea]!
+		users(filter:Filter): [User]!
+		categories(filter:Filter): [Category]!
+		products(filter:Filter): [Product]!
 		featuredProducts(limit:Int): [Product]!
 
 		orders_qty(filter:Filter):Int!
@@ -172,13 +172,16 @@ module.exports.resolvers = {
 		
 	},
 	Branch: {
-		users: (parent, {filter}, ctx) => {
-			let where = {active: true};
+		users: (parent, { filter }, ctx) => {
+			let where = { active: true };
 			if (filter && filter.showInactive) delete where.active;
 
-			return parent.getUsers({where});
+			return parent.getUsers({
+				where,
+				order: [['name', 'ASC']]
+			});
 		},
-		address: (parent, {filter}, ctx) => {
+		address: (parent, { filter }, ctx) => {
 			return parent.getMetas({where:{meta_type:'address'}})
 			.then (([address])=> {
 				if (!address) throw new Error('Não foi encontrado o endereço dessa filial');
@@ -204,17 +207,24 @@ module.exports.resolvers = {
 					}));
 				})
 		},
-		categories: (parent, {filter}, ctx) => {
-			let where = {active: true};
+		categories: (parent, { filter }, ctx) => {
+			let where = { active: true };
 			if (filter && filter.showInactive) delete where.active;
 
-			return parent.getCategories({where});
+			return parent.getCategories({
+				where,
+				order: [['order', 'ASC']]
+			});
 		},
-		products : (parent, {filter}) => {
-			let where = {active: true};
+		products : (parent, { filter }) => {
+			let where = { active: true };
 			if (filter && filter.showInactive) delete where.active;
 
-			return Products.findAll({where, include:[{model:ProductsCategories, where:{branch_id:parent.get('id')}}]})
+			return Products.findAll({
+				where,
+				include: [{ model: ProductsCategories, where: { branch_id: parent.get('id') } }],
+				order: [['name', 'ASC']]
+			})
 		},
 		featuredProducts: (parent, { limit = 5 }) => {
 			return Products.findAll({
@@ -225,7 +235,8 @@ module.exports.resolvers = {
 				limit,
 				include: [{
 					model:ProductsCategories
-				}]
+				}],
+				order: [['updatedAt', 'DESC']]
 			})
 				.then(products => {
 					if (products.length > 0) return products;
@@ -304,7 +315,7 @@ module.exports.resolvers = {
 				return orders.length;
 			})
 		},
-		orders: (parent, {limit, filter}, ctx) => {
+		orders: (parent, { limit, filter }, ctx) => {
 			let where = filter;
 
 			if (filter && filter.createdAt) {
@@ -318,9 +329,13 @@ module.exports.resolvers = {
 				}
 			}
 
-			return parent.getOrders({where, limit, order:[['createdAt', 'DESC']]});
+			return parent.getOrders({
+				where,
+				limit,
+				order:[['createdAt', 'DESC']]
+			});
 		},
-		user_relation: (parent, args, ctx) => {
+		user_relation: (parent) => {
 			if (!parent.branch_relation) throw new Error('Nenhum usuário selecionado');
 			return parent.branch_relation.getRole()
 			.then(role => {

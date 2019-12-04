@@ -24,7 +24,7 @@ module.exports.typeDefs = gql`
 		user_relation: CompanyRelation!
 
 		users(filter:Filter):[User]! @hasRole(permission:"users_read", scope:"adm")
-		branches(filter:Filter):[Branch]!
+		branches(filter:Filter): [Branch]!
 		assigned_branches: [Branch]! @hasRole(permission:"users_edit", scope:"adm")
 		items (filter:Filter):[Item]!
 	}
@@ -118,28 +118,38 @@ module.exports.resolvers = {
 				return user.getBranches({where:{company_id:parent.get('id')}});
 			})
 		},
-		branches: (parent, {filter}, ctx) => {
-			let where = {active: true};
+		branches: (parent, { filter }) => {
+			let where = { active: true };
 			if (filter && filter.showInactive) delete where.active; 
 
-			if (!parent.company_relation) return parent.getBranches({where});
+			if (!parent.company_relation) return parent.getBranches({ where });
 			
 			return Users.findByPk(parent.company_relation.get('user_id'))
 			.then(user=>{
 				//se Usuário for master pode buscar todas as filiais mesmo desativadas
-				if (user.get('role') === 'master') return parent.getBranches({where:{...where, company_id:parent.get('id')}});
+				if (user.get('role') === 'master') return parent.getBranches({ where: { ...where, company_id: parent.get('id') } });
 				
 				//se Usuário for adm pode buscar todas as filiais ativas
-				if (user.get('role') === 'adm') return parent.getBranches({where:{...where, company_id:parent.get('id')}});
+				if (user.get('role') === 'adm') return parent.getBranches({ where: { ...where, company_id: parent.get('id') } });
 
 				//caso chegue aqui usuário verá a lista de filiais que estão ativas e estão vinculadas a ele
-				return user.getBranches({where:{active:true, company_id:parent.get('id')}, through:{where:{active:true}}})
+				return user.getBranches({
+					where: {
+						...where,
+						company_id: parent.get('id')
+					},
+
+					through: { where: { active: true } }
+				})
 			});
 		},
-		users: (parent, {filter}, ctx) => {
+		users: (parent, { filter }) => {
 			let where = {active: true};
 			if (filter && filter.showInactive) delete where.active; 
-			return parent.getUsers({where});
+			return parent.getUsers({
+				where,
+				order: [['first_name', 'ASC'], ['last_name', 'ASC']]
+			});
 		},
 		metas: (parent) => {
 			return parent.getMetas();
