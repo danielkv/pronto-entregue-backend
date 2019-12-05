@@ -30,6 +30,7 @@ module.exports.typeDefs = gql`
 
 		users(filter:Filter, pagination: Pagination): [User]! @hasRole(permission:"users_read", scope:"adm")
 		
+		countBranches(filter:Filter): Int!
 		branches(filter:Filter, pagination: Pagination): [Branch]!
 		countItems(filter: Filter): Int!
 		items(filter:Filter, pagination: Pagination): [Item]!
@@ -129,29 +130,38 @@ module.exports.resolvers = {
 			.then(([user])=>{
 				if (!user) throw new Error('Usuário não encontrado');
 
-				return user.getBranches({where:{company_id:parent.get('id')}});
+				return user.getBranches({ where: { company_id:parent.get('id') } });
 			})
 		},
-		branches: (parent, { filter }) => {
-			let where = { active: true };
-			if (filter && filter.showInactive) delete where.active; 
+		branches: (parent, { filter, pagination }) => {
+			const _filter = sanitizeFilter(filter, { search: ['name'] });
 
-			if (!parent.company_relation) return parent.getBranches({ where });
+			if (!parent.company_relation) return parent.getBranches({
+				where: _filter,
+				...getSQLPagination(pagination),
+			});
 			
 			return Users.findByPk(parent.company_relation.get('user_id'))
 			.then(user=>{
 				//se Usuário for master pode buscar todas as filiais mesmo desativadas
-				if (user.get('role') === 'master') return parent.getBranches({ where: { ...where, company_id: parent.get('id') } });
+				if (user.get('role') === 'master') return parent.getBranches({
+					where: { ..._filter, company_id: parent.get('id') },
+					...getSQLPagination(pagination),
+				});
 				
 				//se Usuário for adm pode buscar todas as filiais ativas
-				if (user.get('role') === 'adm') return parent.getBranches({ where: { ...where, company_id: parent.get('id') } });
+				if (user.get('role') === 'adm') return parent.getBranches({
+					where: { ..._filter, company_id: parent.get('id') },
+					...getSQLPagination(pagination),
+				});
 
 				//caso chegue aqui usuário verá a lista de filiais que estão ativas e estão vinculadas a ele
 				return user.getBranches({
 					where: {
-						...where,
+						..._filter,
 						company_id: parent.get('id')
 					},
+					...getSQLPagination(pagination),
 
 					through: { where: { active: true } }
 				})
