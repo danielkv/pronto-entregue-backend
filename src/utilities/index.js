@@ -1,4 +1,41 @@
 const crypto = require('crypto');
+const { Op } = require('sequelize')
+
+function sanitizeFilter(filter={}, options = { search: ['name', 'description'] }) {
+	let _filter = {
+		active: true,
+		showInactive: false,
+		search: '',
+
+		...filter,
+	}
+	
+	if (_filter.showInactive === true) delete _filter.active;
+	delete _filter.showInactive;
+
+	const search = _filter.search || '';
+	delete _filter.search;
+
+	if (search) {
+		_filter = {
+			..._filter,
+			[Op.or] : options.search.map(option => (
+				[{
+					[option] : { [Op.like] : `%${search}%` }
+				}]
+			))
+		}
+	}
+
+	return _filter;
+}
+
+function getSQLPagination({ page, rowsPerPage }) {
+	return {
+		offset: page && rowsPerPage ? page * rowsPerPage : null,
+		limit: rowsPerPage || null,
+	}
+}
 
 
 /*
@@ -50,5 +87,7 @@ function slugify(text) {
 
 module.exports = {
 	salt,
-	slugify
+	slugify,
+	getSQLPagination,
+	sanitizeFilter
 }

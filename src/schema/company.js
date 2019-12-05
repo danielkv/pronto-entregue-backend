@@ -1,8 +1,11 @@
+const { gql } = require('apollo-server');
+
 const sequelize = require('../services/connection');
 const Companies = require('../model/companies');
 const CompaniesMeta = require('../model/companies_meta');
+const Items = require('../model/items');
 const Users = require('../model/users');
-const {gql} = require('apollo-server');
+const { getSQLPagination, sanitizeFilter } = require('../utilities');
 
 module.exports.typeDefs = gql`
 	type CompanyMeta {
@@ -23,10 +26,12 @@ module.exports.typeDefs = gql`
 		last_month_revenue:Float!
 		user_relation: CompanyRelation!
 
-		users(filter:Filter):[User]! @hasRole(permission:"users_read", scope:"adm")
-		branches(filter:Filter): [Branch]!
 		assigned_branches: [Branch]! @hasRole(permission:"users_edit", scope:"adm")
-		items (filter:Filter):[Item]!
+
+		users(filter:Filter, pagination: Pagination): [User]! @hasRole(permission:"users_read", scope:"adm")
+
+		branches(filter:Filter, pagination: Pagination): [Branch]!
+		items(filter:Filter, pagination: Pagination): ItemsList!
 	}
 	
 	input CompanyMetaInput {
@@ -88,7 +93,7 @@ module.exports.resolvers = {
 
 			return ctx.user.getCompanies({through:{where:{active:true}}});
 		},
-		company:(parent, {id}, ctx) => {
+		company:(_, { id }, ctx) => {
 			return Companies.findByPk(id)
 			.then(company => {
 				if (!company) throw new Error('Empresa não encontrada');
@@ -98,17 +103,23 @@ module.exports.resolvers = {
 		}
 	},
 	Company: {
-		items : (parent, {filter}, ctx) => {
-			let where = {active: true};
-			if (filter && filter.showInactive) delete where.active; 
-			return parent.getItems({where});
+		items : (parent, { filter, pagination }) => {
+			const _fitler = sanitizeFilter(filter);
+			
+			return Items.findAndCountAll({
+				where: {
+					..._fitler,
+					company_id: parent.get('id'),
+				},
+				...getSQLPagination(pagination),
+			});
 		},
-		user_relation : (parent, args, ctx) => {
+		user_relation : (parent) => {
 			if (!parent.company_relation) throw new Error('Nenhum usuário selecionado');
 
 			return parent.company_relation.get();
 		},
-		assigned_branches : (parent, args, ctx) => {
+		assigned_branches : (parent) => {
 			if (!parent.company_relation) throw new Error('Nenhum usuário selecionado');
 			
 			return parent.getUsers({where:{id:parent.company_relation.user_id}})

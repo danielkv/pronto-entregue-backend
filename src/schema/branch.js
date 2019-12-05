@@ -51,7 +51,6 @@ module.exports.typeDefs = gql`
 		createdAt: String! @dateTime
 		updatedAt: String! @dateTime
 		company: Company!
-		orders (limit:Int, filter:Filter):[Order]!
 		user_relation: BranchRelation!
 		last_month_revenue: Float!
 
@@ -62,10 +61,12 @@ module.exports.typeDefs = gql`
 
 		paymentMethods: [PaymentMethod]!
 		deliveryAreas: [DeliveryArea]!
-		users(filter:Filter): [User]!
-		categories(filter:Filter): [Category]!
-		products(filter:Filter): [Product]!
 		featuredProducts(limit:Int): [Product]!
+
+		orders (limit:Int, filter:Filter, pagination: Pagination): [Order]!
+		users(filter:Filter, pagination: Pagination): [User]!
+		categories(filter:Filter, pagination: Pagination): [Category]!
+		products(filter:Filter, pagination: Pagination): [Product]!
 
 		orders_qty(filter:Filter):Int!
 		best_sellers (limit:Int!, createdAt:String): [ProductBestSeller]!
@@ -133,7 +134,7 @@ module.exports.resolvers = {
 				});
 			})
 		},
-		updateBranch: (parent, {id, data}, ctx) => {
+		updateBranch: (_, {id, data}, ctx) => {
 			return sequelize.transaction(transaction => {
 				return ctx.company.getBranches({where:{id}})
 				.then(([branch])=>{
@@ -149,7 +150,7 @@ module.exports.resolvers = {
 				})
 			})
 		},
-		enablePaymentMethod : (parent, {id}, ctx) => {
+		enablePaymentMethod : (_, {id}, ctx) => {
 			return PaymentMethods.findByPk(id)
 			.then (async (payment_method) => {
 				if (!payment_method) throw new Error('Método de pagamento não encontrado');

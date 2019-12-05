@@ -12,6 +12,11 @@ module.exports.typeDefs = gql`
 		order_options:[OrderOption]!
 	}
 
+	type ItemsList {
+		count: Int!
+		rows: [Item]!
+	}
+
 	input ItemInput {
 		name:String
 		description:String

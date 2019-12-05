@@ -31,9 +31,15 @@ const typeDefs = gql`
 	scalar Upload
 
 	input Filter {
-		showInactive:Boolean
-		status:String
-		createdAt:String
+		showInactive: Boolean
+		status: String
+		createdAt: String
+		search: String
+	}
+
+	input Pagination {
+		page: Int!
+		rowsPerPage: Int!
 	}
 
 	type File {

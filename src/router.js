@@ -2,6 +2,7 @@ const { Router, static } = require('express');
 const installDataBase = require('./services/setup'); //Configura banco de dados e relações das tabelas
 const path = require('path');
 const exportDB = require('./services/export');
+const importTable = require('./services/import_table');
 
 const route = Router();
 
@@ -21,6 +22,19 @@ route.get('/export', (req, res) => {
 	if (!process.env.SETUP) return res.sendStatus(404);
 
 	exportDB()
+		.then((data)=>{
+			res.json(data)
+		});
+	
+})
+
+route.get('/import/:table', (req, res) => {
+	if (!process.env.SETUP) return res.sendStatus(404);
+
+	const table = req.params.table;
+	const data = require('../items.json');
+
+	importTable(table, data)
 		.then((data)=>{
 			res.json(data)
 		});
