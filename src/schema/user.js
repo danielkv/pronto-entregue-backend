@@ -336,6 +336,20 @@ module.exports.resolvers = {
 
 			return parent.getMetas(where);
 		},
+		countCompanies: (parent, { filter }) => {
+			const _filter = sanitizeFilter(filter, { search: ['name', 'display_name'] });
+
+			if (parent.role == 'master')
+				return Companies.count({
+					where: _filter
+				});
+
+			return parent.countCompanies({
+				where: _filter,
+				through: { where: { active: true } }
+			});
+
+		},
 		companies: (parent, { filter, pagination }) => {
 			const _filter = sanitizeFilter(filter, { search: ['name', 'display_name'] });
 
