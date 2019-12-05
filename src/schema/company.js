@@ -29,9 +29,15 @@ module.exports.typeDefs = gql`
 		assigned_branches: [Branch]! @hasRole(permission:"users_edit", scope:"adm")
 
 		users(filter:Filter, pagination: Pagination): [User]! @hasRole(permission:"users_read", scope:"adm")
-
+		
 		branches(filter:Filter, pagination: Pagination): [Branch]!
-		items(filter:Filter, pagination: Pagination): ItemsList!
+		countItems(filter: Filter): Int!
+		items(filter:Filter, pagination: Pagination): [Item]!
+	}
+
+	type CompanyList {
+		count: Int!
+		rows: [Company]!
 	}
 	
 	input CompanyMetaInput {
@@ -103,14 +109,16 @@ module.exports.resolvers = {
 		}
 	},
 	Company: {
+		countItems : (parent, { filter }) => {
+			const _filter = sanitizeFilter(filter);
+
+			return parent.countItems({ where: _filter })
+		},
 		items : (parent, { filter, pagination }) => {
-			const _fitler = sanitizeFilter(filter);
-			
-			return Items.findAndCountAll({
-				where: {
-					..._fitler,
-					company_id: parent.get('id'),
-				},
+			const _filter = sanitizeFilter(filter);
+
+			return parent.getItems({
+				where: _filter,
 				...getSQLPagination(pagination),
 			});
 		},
