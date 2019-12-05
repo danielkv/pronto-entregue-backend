@@ -34,11 +34,6 @@ module.exports.typeDefs = gql`
 		countItems(filter: Filter): Int!
 		items(filter:Filter, pagination: Pagination): [Item]!
 	}
-
-	type CompanyList {
-		count: Int!
-		rows: [Company]!
-	}
 	
 	input CompanyMetaInput {
 		id:ID

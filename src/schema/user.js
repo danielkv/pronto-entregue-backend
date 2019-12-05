@@ -7,7 +7,7 @@ const UsersMeta = require('../model/users_meta');
 const Companies = require('../model/companies');
 const Branches = require('../model/branches');
 const Roles = require('../model/roles');
-const { salt, getSQLPagination } = require('../utilities');
+const { salt, getSQLPagination, sanitizeFilter } = require('../utilities');
 
 module.exports.typeDefs = gql`
 	type UserMeta {
@@ -44,6 +44,8 @@ module.exports.typeDefs = gql`
 		orders: [Order]!
 		branch_relation:BranchRelation!
 		company(company_id:ID!): Company!
+
+		countCompanies(filter:Filter): Int! @hasRole(permission:"companies_read", scope:"adm")
 		companies(filter:Filter, pagination: Pagination): [Company]! @hasRole(permission:"companies_read", scope:"adm")
 	}
 
@@ -120,10 +122,10 @@ module.exports.resolvers = {
 		users : (parent, args, ctx) => {
 			return Users.findAll();
 		},
-		user:(parent, { id }, ctx) => {
+		user: (parent, { id }, ctx) => {
 
 			if (
-				!ctx.user.can('users_read', { scope: 'adm' }) &&
+				(ctx.user && !ctx.user.can('users_read', { scope: 'adm' })) &&
 				!ctx.user.id === id
 			) throw new Error('Você não tem autorização')
 
@@ -335,19 +337,21 @@ module.exports.resolvers = {
 			return parent.getMetas(where);
 		},
 		companies: (parent, { filter, pagination }) => {
-			let where = { active: true };
-			if (filter && filter.showInactive) delete where.active;
+			const _filter = sanitizeFilter(filter, { search: ['name', 'display_name'] });
 
 			if (parent.role == 'master')
-				return Companies.findAll({ where });
+				return Companies.findAll({
+					where: _filter,
+					...getSQLPagination(pagination)
+				});
 
 			return parent.getCompanies({
-				where,
+				where: _filter,
 				...getSQLPagination(pagination),
 				through: { where: { active: true } }
 			});
 		},
-		company:(parent, {company_id}, ctx) => {
+		company:(parent, {company_id}) => {
 			return parent.getCompanies({where:{id:company_id}})
 				.then (([company])=>{
 					if (!company) throw new Error('Empresa não encontrada');
