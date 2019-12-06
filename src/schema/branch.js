@@ -3,6 +3,7 @@ const { gql } = require('apollo-server');
 const sequelize = require('../services/connection');
 const Sequelize = require('sequelize');
 const Branches = require('../model/branches');
+const Users = require('../model/users');
 const Products = require('../model/products');
 const OrdersProducts = require('../model/orders_products');
 const ProductsCategories = require('../model/products_categories');
@@ -65,7 +66,7 @@ module.exports.typeDefs = gql`
 		deliveryAreas: [DeliveryArea]!
 		featuredProducts(limit:Int): [Product]!
 
-		ordersCount(filter:Filter): Int!
+		countOrders(filter:Filter): Int!
 		orders(filter:Filter, pagination: Pagination): [Order]!
 
 		countUsers(filter:Filter): Int!
@@ -191,7 +192,7 @@ module.exports.resolvers = {
 
 			return parent.getUsers({
 				where: _filter,
-				order: [['name', 'ASC']],
+				order: [['first_name', 'ASC'], ['last_name', 'ASC']],
 				...getSQLPagination(pagination),
 			});
 		},
@@ -324,18 +325,22 @@ module.exports.resolvers = {
 				}
 			})
 		},
-		ordersCount: (parent, {filter}) => {
-			const _filter = sanitizeFilter(filter, { search: ['name'], excludeFilters: ['active'] });
+		countOrders: (parent, {filter}) => {
+			const search = ['street', 'complement', '$user.first_name$', '$user.last_name$', '$user.email$'];
+			const _filter = sanitizeFilter(filter, { search, excludeFilters: ['active'], table: 'orders' });
 
-			return parent.countOrders({ where: _filter });
+			return parent.countOrders({ where: _filter, include: [Users] });
 		},
 		orders: (parent, { filter, pagination }) => {
-			const _filter = sanitizeFilter(filter, { search: ['complement'], excludeFilters: ['active'] });
+			const search = ['street', 'complement', '$user.first_name$', '$user.last_name$', '$user.email$'];
+			const _filter = sanitizeFilter(filter, { search, excludeFilters: ['active'], table: 'orders' });
 
 			return parent.getOrders({
 				where: _filter,
 				order:[['createdAt', 'DESC']],
 				...getSQLPagination(pagination),
+
+				include: [Users]
 			});
 		},
 		user_relation: (parent) => {
@@ -348,10 +353,10 @@ module.exports.resolvers = {
 				}
 			});
 		},
-		last_month_revenue : (parent, args, ctx) => {
+		last_month_revenue : () => {
 			return 0;
 		},
-		best_sellers: (parent, {limit, createdAt}) => {
+		best_sellers: (_, {limit, createdAt}) => {
 			let where = {};
 
 			if (createdAt) {

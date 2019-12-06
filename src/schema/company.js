@@ -28,6 +28,7 @@ module.exports.typeDefs = gql`
 
 		assigned_branches: [Branch]! @hasRole(permission:"users_edit", scope:"adm")
 
+		countUsers(filter:Filter): Int! @hasRole(permission:"users_read", scope:"adm")
 		users(filter:Filter, pagination: Pagination): [User]! @hasRole(permission:"users_read", scope:"adm")
 		
 		countBranches(filter:Filter): Int!
@@ -167,12 +168,18 @@ module.exports.resolvers = {
 				})
 			});
 		},
-		users: (parent, { filter }) => {
-			let where = {active: true};
-			if (filter && filter.showInactive) delete where.active; 
+		countUsers: (parent, { filter }) => {
+			const _filter = sanitizeFilter(filter, { search: ['first_name', 'last_name', 'email']});
+
+			return parent.countUsers({ where: _filter });
+		},
+		users: (parent, { filter, pagination }) => {
+			const _filter = sanitizeFilter(filter, { search: ['first_name', 'last_name', 'email']});
+
 			return parent.getUsers({
-				where,
-				order: [['first_name', 'ASC'], ['last_name', 'ASC']]
+				where: _filter,
+				order: [['first_name', 'ASC'], ['last_name', 'ASC']],
+				...getSQLPagination(pagination),
 			});
 		},
 		metas: (parent) => {

@@ -5,6 +5,7 @@ function sanitizeFilter(_filter={}, _options = {}) {
 	let options = {
 		search: ['name', 'description'],
 		excludeFilters: [],
+		table: '',
 		..._options,
 	}
 
@@ -48,12 +49,10 @@ function sanitizeFilter(_filter={}, _options = {}) {
 		filter = {
 			[Sequelize.Op.and] : [
 				filter,
-				Sequelize.where(Sequelize.fn('date', Sequelize.col('created_at')), Sequelize.fn(createdAt)),
+				Sequelize.where(Sequelize.fn('date', Sequelize.col(`${options.table ? `${options.table}.`:''}created_at`)), Sequelize.fn(createdAt)),
 			]
 		}
 	}
-	
-	console.log(filter);
 	
 	return filter;
 }
