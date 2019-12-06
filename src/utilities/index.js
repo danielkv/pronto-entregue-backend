@@ -1,36 +1,64 @@
 const crypto = require('crypto');
-const { Op } = require('sequelize')
+const Sequelize = require('sequelize')
 
-function sanitizeFilter(filter={}, options = { search: ['name', 'description'] }) {
-	let _filter = {
+function sanitizeFilter(_filter={}, _options = {}) {
+	let options = {
+		search: ['name', 'description'],
+		excludeFilters: [],
+		..._options,
+	}
+
+	let filter = {
 		active: true,
 		showInactive: false,
 		search: '',
 
-		...filter,
+		..._filter,
+	}
+
+	//verify if user sent showInactive
+	if (filter.showInactive === true) delete filter.active;
+	delete filter.showInactive;
+	
+	// Remove some filters if necessary
+	if (options.excludeFilters.length) {
+		options.excludeFilters.map(exclude => {
+			delete filter[exclude];
+		})
 	}
 	
-	if (_filter.showInactive === true) delete _filter.active;
-	delete _filter.showInactive;
-
-	const search = _filter.search || '';
-	delete _filter.search;
-
+	const search = filter.search || '';
+	delete filter.search;
+	
 	if (search) {
-		_filter = {
-			..._filter,
-			[Op.or] : options.search.map(option => (
+		filter = {
+			...filter,
+			[Sequelize.Op.or] : options.search.map(option => (
 				[{
-					[option] : { [Op.like] : `%${search}%` }
+					[option] : { [Sequelize.Op.like] : `%${search}%` }
 				}]
-			))
+				))
+			}
+		}
+		
+		if (filter.createdAt) {
+		const createdAt = filter.createdAt;
+		delete filter.createdAt;
+		
+		filter = {
+			[Sequelize.Op.and] : [
+				filter,
+				Sequelize.where(Sequelize.fn('date', Sequelize.col('created_at')), Sequelize.fn(createdAt)),
+			]
 		}
 	}
-
-	return _filter;
+	
+	console.log(filter);
+	
+	return filter;
 }
 
-function getSQLPagination({ page, rowsPerPage }) {
+function getSQLPagination({ page=null, rowsPerPage=null } = {}) {
 	return {
 		offset: page && rowsPerPage ? page * rowsPerPage : null,
 		limit: rowsPerPage || null,

@@ -217,7 +217,7 @@ module.exports.resolvers = {
 					})
 			})
 		},
-		setUserScopeRole : (parent, {id, role}, ctx) => {
+		setUserScopeRole : (_, {id, role}, ctx) => {
 			return ctx.company.getUsers({where:{id}})
 				.then(async ([user])=>{
 					if (!user) throw new Error('Usuário não encontrada');
@@ -227,7 +227,7 @@ module.exports.resolvers = {
 					return user_updated;
 				});
 		},
-		setUserRole : (parent, {id, role_id}, ctx) => {
+		setUserRole : (_, {id, role_id}, ctx) => {
 			return ctx.branch.getUsers({where:{id}})
 				.then(async ([user])=>{
 					if (!user || !user.branch_relation) throw new Error('Usuário não encontrada');
@@ -313,7 +313,7 @@ module.exports.resolvers = {
 		},
 	},
 	User: {
-		addresses : (parent, args, ctx) => {
+		addresses : (parent) => {
 			return parent.getMetas({where:{meta_type:'address'}})
 			.then(metas=>{
 				return metas.map(meta=> {

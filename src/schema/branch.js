@@ -1,3 +1,5 @@
+const { gql } = require('apollo-server');
+
 const sequelize = require('../services/connection');
 const Sequelize = require('sequelize');
 const Branches = require('../model/branches');
@@ -6,7 +8,7 @@ const OrdersProducts = require('../model/orders_products');
 const ProductsCategories = require('../model/products_categories');
 const BranchesMeta = require('../model/branches_meta');
 const PaymentMethods = require('../model/payment_methods');
-const {gql} = require('apollo-server');
+const { sanitizeFilter, getSQLPagination } = require('../utilities');
 
 module.exports.typeDefs = gql`
 	type BranchMeta {
@@ -63,12 +65,18 @@ module.exports.typeDefs = gql`
 		deliveryAreas: [DeliveryArea]!
 		featuredProducts(limit:Int): [Product]!
 
-		orders (limit:Int, filter:Filter, pagination: Pagination): [Order]!
+		ordersCount(filter:Filter): Int!
+		orders(filter:Filter, pagination: Pagination): [Order]!
+
+		countUsers(filter:Filter): Int!
 		users(filter:Filter, pagination: Pagination): [User]!
+
+		countCategories(filter:Filter): Int!
 		categories(filter:Filter, pagination: Pagination): [Category]!
+
+		countProducts(filter:Filter): Int!
 		products(filter:Filter, pagination: Pagination): [Product]!
 
-		orders_qty(filter:Filter):Int!
 		best_sellers (limit:Int!, createdAt:String): [ProductBestSeller]!
 	}
 
@@ -173,16 +181,21 @@ module.exports.resolvers = {
 		
 	},
 	Branch: {
-		users: (parent, { filter }, ctx) => {
-			let where = { active: true };
-			if (filter && filter.showInactive) delete where.active;
+		countUsers: (parent, { filter }) => {
+			const _filter = sanitizeFilter(filter, { search: ['first_name', 'last_name', 'email']});
+
+			return parent.countUsers({ where: _filter });
+		},
+		users: (parent, { filter, pagination }) => {
+			const _filter = sanitizeFilter(filter, { search: ['first_name', 'last_name', 'email']});
 
 			return parent.getUsers({
-				where,
-				order: [['name', 'ASC']]
+				where: _filter,
+				order: [['name', 'ASC']],
+				...getSQLPagination(pagination),
 			});
 		},
-		address: (parent, { filter }, ctx) => {
+		address: (parent) => {
 			return parent.getMetas({where:{meta_type:'address'}})
 			.then (([address])=> {
 				if (!address) throw new Error('Não foi encontrado o endereço dessa filial');
@@ -190,7 +203,7 @@ module.exports.resolvers = {
 				return {id:address.id, ...JSON.parse(address.meta_value)};
 			})
 		},
-		metas: (parent, { type }, ctx) => {
+		metas: (parent, { type }) => {
 			let where = {};
 
 			if (type) {
@@ -208,23 +221,36 @@ module.exports.resolvers = {
 					}));
 				})
 		},
-		categories: (parent, { filter }, ctx) => {
-			let where = { active: true };
-			if (filter && filter.showInactive) delete where.active;
+		countCategories: (parent, { filter }) => {
+			const _filter = sanitizeFilter(filter);
+
+			return parent.countCategories({ where: _filter });
+		},
+		categories: (parent, { filter, pagination }) => {
+			const _filter = sanitizeFilter(filter);
 
 			return parent.getCategories({
-				where,
-				order: [['order', 'ASC']]
+				where: _filter,
+				order: [['order', 'ASC']],
+				...getSQLPagination(pagination),
 			});
 		},
-		products : (parent, { filter }) => {
-			let where = { active: true };
-			if (filter && filter.showInactive) delete where.active;
+		countProducts : (parent, { filter }) => {
+			const _filter = sanitizeFilter(filter);
+
+			return Products.count({
+				where: _filter,
+				include: [{ model: ProductsCategories, where: { branch_id: parent.get('id') } }],
+			})
+		},
+		products : (parent, { filter, pagination }) => {
+			const _filter = sanitizeFilter(filter);
 
 			return Products.findAll({
-				where,
+				where: _filter,
 				include: [{ model: ProductsCategories, where: { branch_id: parent.get('id') } }],
-				order: [['name', 'ASC']]
+				order: [['name', 'ASC']],
+				...getSQLPagination(pagination),
 			})
 		},
 		featuredProducts: (parent, { limit = 5 }) => {
@@ -298,42 +324,18 @@ module.exports.resolvers = {
 				}
 			})
 		},
-		orders_qty: (parent, {filter}) => {
-			let where = filter;
+		ordersCount: (parent, {filter}) => {
+			const _filter = sanitizeFilter(filter, { search: ['name'], excludeFilters: ['active'] });
 
-			if (filter.createdAt) {
-				const createdAt = filter.createdAt;
-				delete filter.createdAt;
-				where = {
-					[Sequelize.Op.and] : [
-						filter,
-						Sequelize.where(Sequelize.fn('date', Sequelize.col('created_at')), Sequelize.fn(createdAt)),
-					]
-				}
-			}
-			return parent.getOrders({where})
-			.then((orders)=>{
-				return orders.length;
-			})
+			return parent.countOrders({ where: _filter });
 		},
-		orders: (parent, { limit, filter }, ctx) => {
-			let where = filter;
-
-			if (filter && filter.createdAt) {
-				const createdAt = filter.createdAt;
-				delete filter.createdAt;
-				where = {
-					[Sequelize.Op.and] : [
-						filter,
-						Sequelize.where(Sequelize.fn('date', Sequelize.col('created_at')), Sequelize.fn(createdAt)),
-					]
-				}
-			}
+		orders: (parent, { filter, pagination }) => {
+			const _filter = sanitizeFilter(filter, { search: ['complement'], excludeFilters: ['active'] });
 
 			return parent.getOrders({
-				where,
-				limit,
-				order:[['createdAt', 'DESC']]
+				where: _filter,
+				order:[['createdAt', 'DESC']],
+				...getSQLPagination(pagination),
 			});
 		},
 		user_relation: (parent) => {
