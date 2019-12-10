@@ -78,7 +78,7 @@ module.exports.typeDefs = gql`
 		countProducts(filter:Filter): Int!
 		products(filter:Filter, pagination: Pagination): [Product]!
 
-		best_sellers (limit:Int!, createdAt:String): [ProductBestSeller]!
+		best_sellers (filter:Filter, pagination: Pagination): [ProductBestSeller]!
 	}
 
 	input BranchMetaInput {
@@ -356,12 +356,8 @@ module.exports.resolvers = {
 		last_month_revenue : () => {
 			return 0;
 		},
-		best_sellers: (_, {limit, createdAt}) => {
-			let where = {};
-
-			if (createdAt) {
-				where = Sequelize.where(Sequelize.fn('date', Sequelize.col('OrdersProducts.created_at')), Sequelize.fn(createdAt));
-			}
+		best_sellers: (_, { filter, pagination }) => {
+			const _filter = sanitizeFilter(filter, { excludeFilters: ['active'], table: 'OrdersProducts' });
 
 			return OrdersProducts.findAll({
 				attributes:[
@@ -373,12 +369,12 @@ module.exports.resolvers = {
 				group: ['product_id'],
 				order: [[Sequelize.fn('COUNT', Sequelize.col('product_id')), 'DESC'], [Sequelize.col('name'), 'ASC']],
 
-				limit,
-				where,
+				...getSQLPagination(pagination),
+				where: _filter,
 
 				include:[{
 					model: Products,
-					as:'productRelated'
+					as: 'productRelated'
 				}]
 			})
 			.then (products=> {

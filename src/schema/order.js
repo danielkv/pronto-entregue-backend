@@ -1,9 +1,11 @@
-const {gql} = require('apollo-server');
+const { gql, withFilter, PubSub } = require('apollo-server');
 const sequelize = require('../services/connection');
 const Orders = require('../model/orders');
 const OrderProducts = require('../model/orders_products');
 const OrderOptionsGroups = require('../model/orders_options_groups');
 const OrderOptions = require('../model/orders_options');
+
+const pubsub = new PubSub();
 
 module.exports.typeDefs = gql`
 	type Order {
@@ -83,17 +85,33 @@ module.exports.typeDefs = gql`
 		option_id:ID!
 	}
 
+	type Subscription {
+		orderCreated(branch_id: ID!): Order
+	}
+
 	extend type Query {
 		order (id:ID!): Order!
 	}
 
 	extend type Mutation {
-		createOrder(data:OrderInput!):Order!
-		updateOrder(id:ID!, data:OrderInput!):Order!
+		createOrder(data:OrderInput!): Order!
+		updateOrder(id:ID!, data:OrderInput!): Order!
 	}
 `;
 
+const ORDER_CREATED = 'ORDER_CREATED';
+
 module.exports.resolvers = {
+	Subscription: {
+		orderCreated: {
+			subscribe: withFilter (
+				()=> pubsub.asyncIterator([ORDER_CREATED]),
+				(payload, variables) => {
+					return payload.orderCreated.get('branch_id') == variables.branch_id;
+				}
+			)
+		}
+	},
 	Order: {
 		user: (parent) => {
 			return parent.getUser();
@@ -141,9 +159,11 @@ module.exports.resolvers = {
 	Mutation : {
 		createOrder: (parent, {data}, ctx) => {
 			return sequelize.transaction(transaction => {
-				return ctx.branch.createOrder(data, {transaction})
+				return ctx.branch.createOrder(data, { transaction })
 				.then(async (order)=> {
 					await OrderProducts.updateAll(data.products, order, transaction);
+
+					pubsub.publish(ORDER_CREATED, { orderCreated: order });
 
 					return order;
 				})
