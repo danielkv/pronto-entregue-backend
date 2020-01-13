@@ -4,5 +4,7 @@ node_modules/
 build/
 
 .env
+.eslintcache
+
 uploads/
 flakery-6c5b2b2fe628.json

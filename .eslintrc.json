@@ -1,0 +1,51 @@
+{
+    "env": {
+        "browser": true,
+        "es6": true
+    },
+    "extends": "eslint:recommended",
+    "globals": {
+        "Atomics": "readonly",
+        "SharedArrayBuffer": "readonly"
+    },
+    "parserOptions": {
+        "ecmaVersion": 2018,
+        "sourceType": "module"
+	},
+	"plugins": [
+		"eslint-plugin-import-helpers"
+	],
+    "rules": {
+		"object-curly-spacing": ["error", "always"],
+		"array-bracket-spacing": ["error", "never"],
+		"no-use-before-define": "off",
+		"comma-dangle": "off",
+		"linebreak-style": "off",
+		"indent": ["error", "tab"],
+		"no-tabs" : 0,
+		"arrow-body-style": 0,
+		"semi": 0,
+		"arrow-parens": 0,
+		"eol-last": 0,
+		"arrow-spacing":0,
+		"camelcase":0,
+		"max-len":["error", 150],
+		"no-param-reassign": ["error", { "props": false }],
+		"import/prefer-default-export" : 0,
+		"no-trailing-spaces": ["error", { "skipBlankLines": true, "ignoreComments": true }],
+		"object-curly-newline": ["error", { "multiline": true, "consistent": true }],
+		"import-helpers/order-imports": [
+			"warn",
+			{
+				"newlinesBetween": "always", // new line between groups
+				"groups": [
+					"module",
+					"/components/",
+					["parent", "sibling", "index"],
+					"/queries/"
+				],
+				"alphabetize": { "order": "asc", "ignoreCase": true }
+			}
+		]
+    }
+}
