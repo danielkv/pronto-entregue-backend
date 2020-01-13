@@ -1,6 +1,8 @@
 # Don't track content of these folders
 node_modules/
 
+build/
+
 .env
 uploads/
 flakery-6c5b2b2fe628.json
