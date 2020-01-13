@@ -1,27 +1,25 @@
-const {makeExecutableSchema, gql} = require('apollo-server');
-const {merge} = require('lodash');
-const directives = require('./directives');
-const { upload } = require('../config/uploads');
+import { makeExecutableSchema, gql }  from 'apollo-server';
+import { merge }  from 'lodash';
 
-//types
-const {typeDefs: Branch, resolvers: branchResolvers} = require('./branch');
-const {typeDefs: Category, resolvers: categoryResolvers} = require('./category');
-const {typeDefs: Company, resolvers: companyResolvers} = require('./company');
-const {typeDefs: Item, resolvers: itemResolvers} = require('./item');
-const {typeDefs: Option, resolvers: optionResolvers} = require('./option');
-const {typeDefs: OptionsGroup, resolvers: optionsGroupResolvers} = require('./options_group');
-const {typeDefs: OrderOption, resolvers: orderOptionResolvers} = require('./order_option');
-const {typeDefs: OrderOptionsGroup, resolvers: orderOptionsGroupResolvers} = require('./order_options_group');
-const {typeDefs: OrderProduct, resolvers: orderProductResolvers} = require('./order_product');
-const {typeDefs: Order, resolvers: orderResolvers} = require('./order');
-const {typeDefs: PaymentMethod, resolvers: paymentMethodResolvers} = require('./payment_method');
-const {typeDefs: Product, resolvers: productResolvers} = require('./product');
-const {typeDefs: Role, resolvers: roleResolvers} = require('./role');
-const {typeDefs: DeliveryArea, resolvers: deliveryAreaResolvers} = require('./delivery_area');
-const {typeDefs: User, resolvers: userResolvers} = require('./user');
-
-const {typeDefs: Address, resolvers: addressResolvers} = require('./address');
-const {typeDefs: Phone, resolvers: phoneResolvers} = require('./phone');
+import { upload }  from '../config/uploads';
+import { typeDefs as Address, resolvers as addressResolvers }  from './address';
+import { typeDefs as Branch, resolvers as branchResolvers }  from './branch';
+import { typeDefs as Category, resolvers as categoryResolvers }  from './category';
+import { typeDefs as Company, resolvers as companyResolvers }  from './company';
+import { typeDefs as DeliveryArea, resolvers as deliveryAreaResolvers }  from './delivery_area';
+import directives  from './directives';
+import { typeDefs as Item, resolvers as itemResolvers }  from './item';
+import { typeDefs as Option, resolvers as optionResolvers }  from './option';
+import { typeDefs as OptionsGroup, resolvers as optionsGroupResolvers }  from './options_group';
+import { typeDefs as Order, resolvers as orderResolvers }  from './order';
+import { typeDefs as OrderOption, resolvers as orderOptionResolvers }  from './order_option';
+import { typeDefs as OrderOptionsGroup, resolvers as orderOptionsGroupResolvers }  from './order_options_group';
+import { typeDefs as OrderProduct, resolvers as orderProductResolvers }  from './order_product';
+import { typeDefs as PaymentMethod, resolvers as paymentMethodResolvers }  from './payment_method';
+import { typeDefs as Phone, resolvers as phoneResolvers }  from './phone';
+import { typeDefs as Product, resolvers as productResolvers }  from './product';
+import { typeDefs as Role, resolvers as roleResolvers }  from './role';
+import { typeDefs as User, resolvers as userResolvers }  from './user';
 
 const typeDefs = gql`
 	directive @isAuthenticated on FIELD | FIELD_DEFINITION
@@ -67,7 +65,7 @@ const resolvers = {
 	}
 }
 
-module.exports = makeExecutableSchema({
+export default makeExecutableSchema({
 	typeDefs : [typeDefs, Branch, Category, Company, Item, Option, OptionsGroup, OrderOption, OrderOptionsGroup, OrderProduct, Order, PaymentMethod, Product, Role, DeliveryArea, User, Address, Phone],
 	resolvers : merge(resolvers, branchResolvers, categoryResolvers, companyResolvers, itemResolvers, optionResolvers, optionsGroupResolvers, orderOptionResolvers, orderOptionsGroupResolvers, orderProductResolvers, orderResolvers, paymentMethodResolvers, productResolvers, roleResolvers, deliveryAreaResolvers, userResolvers, addressResolvers, phoneResolvers),
 	directiveResolvers : directives,

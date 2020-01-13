@@ -1,6 +1,6 @@
-const importDB = require('./import');
-const data = require('./dummy.json');
+import data  from './dummy.json';
+import importDB  from './import';
 
-module.exports= () => {
+export default () => {
 	return importDB(data)
 }

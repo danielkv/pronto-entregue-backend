@@ -1,7 +1,8 @@
-const {gql} = require('apollo-server');
-const PaymentMethods = require('../model/payment_methods');
+import { gql }  from 'apollo-server';
 
-module.exports.typeDefs = gql`
+import PaymentMethods  from '../model/payment_methods';
+
+export const typeDefs =  gql`
 	type PaymentMethod {
 		id:ID!
 		name:String!
@@ -15,9 +16,9 @@ module.exports.typeDefs = gql`
 	}
 `;
 
-module.exports.resolvers = {
+export const resolvers =  {
 	Query: {
-		paymentMethods: (parent) => {
+		paymentMethods: () => {
 			return PaymentMethods.findAll();
 		}
 	}

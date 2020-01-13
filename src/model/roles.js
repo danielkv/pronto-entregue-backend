@@ -1,5 +1,6 @@
-const sequelize = require('../services/connection');
-const Sequelize = require('sequelize');
+import Sequelize  from 'sequelize';
+
+import sequelize  from '../services/connection';
 
 /*
  * Define modelo (tabela) de permissões
@@ -15,6 +16,6 @@ Roles.init({
 			return JSON.parse(this.getDataValue('permissions'));
 		}
 	},
-}, {modelName:'roles', sequelize});
+}, { modelName:'roles', sequelize });
 
-module.exports = Roles;
+export default Roles;

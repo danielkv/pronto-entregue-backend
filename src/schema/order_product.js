@@ -1,6 +1,6 @@
-const {gql} = require('apollo-server');
+import { gql }  from 'apollo-server';
 
-module.exports.typeDefs = gql`
+export const typeDefs =  gql`
 	type OrderProduct {
 		id: ID!
 		name: String!
@@ -12,12 +12,12 @@ module.exports.typeDefs = gql`
 	}
 `;
 
-module.exports.resolvers = {
+export const resolvers =  {
 	OrderProduct: {
 		options_groups : (parent) => {
 			return parent.getOptionsGroups();
 		},
-		product_related : (parent, {id}, ctx) => {
+		product_related : (parent) => {
 			return parent.getProductRelated();
 		},
 	}

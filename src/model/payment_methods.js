@@ -1,14 +1,15 @@
-const sequelize = require('../services/connection');
-const Sequelize = require('sequelize');
+import Sequelize  from 'sequelize';
+
+import sequelize  from '../services/connection';
 
 /*
  * Define modelo (tabela) de pedidos
  */
 
-class PaymentMethods extends Sequelize.Model {};
+class PaymentMethods extends Sequelize.Model {}
 PaymentMethods.init({
 	name: Sequelize.STRING,
 	display_name: Sequelize.STRING,
-}, {modelName:'payment_methods', underscored:true, sequelize, name:{singular:'PaymentMethod', plural:'PaymentMethods'}});
+}, { modelName:'payment_methods', underscored:true, sequelize, name:{ singular:'PaymentMethod', plural:'PaymentMethods' } });
 
-module.exports = PaymentMethods;
+export default PaymentMethods;

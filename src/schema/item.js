@@ -1,7 +1,8 @@
-const {gql} = require('apollo-server');
-const Items = require('../model/items');
+import { gql }  from 'apollo-server';
 
-module.exports.typeDefs = gql`
+import Items  from '../model/items';
+
+export const typeDefs =  gql`
 	type Item {
 		id:ID!
 		name:String!
@@ -33,25 +34,25 @@ module.exports.typeDefs = gql`
 	}
 `;
 
-module.exports.resolvers = {
+export const resolvers =  {
 	Query : {
-		item : (parent, {id}, ctx) => {
+		item : (_, { id }) => {
 			return Items.findByPk(id);
 		},
 	},
 	Mutation: {
-		createItem : (parent, {data}, ctx) => {
+		createItem : (_, { data }, ctx) => {
 			return ctx.company.createItem(data);
 		},
-		updateItem : (parent, {id, data}, ctx) => {
+		updateItem : (_, { id, data }) => {
 			return Items.findByPk(id)
-			.then(item =>{
-				return item.update(data, {fields:['name', 'description', 'active']});
-			});
+				.then(item =>{
+					return item.update(data, { fields:['name', 'description', 'active'] });
+				});
 		},
 	},
 	Item: {
-		order_options: (parent, args, ctx) => {
+		order_options: () => {
 
 		},
 	}

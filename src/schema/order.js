@@ -1,13 +1,11 @@
-const { gql, withFilter, PubSub } = require('apollo-server');
-const sequelize = require('../services/connection');
-const Orders = require('../model/orders');
-const OrderProducts = require('../model/orders_products');
-const OrderOptionsGroups = require('../model/orders_options_groups');
-const OrderOptions = require('../model/orders_options');
+import { gql, withFilter, PubSub }  from 'apollo-server';
+
+import OrderProducts  from '../model/orders_products';
+import sequelize  from '../services/connection';
 
 const pubsub = new PubSub();
 
-module.exports.typeDefs = gql`
+export const typeDefs =  gql`
 	type Order {
 		id: ID!
 		user: User!
@@ -101,7 +99,7 @@ module.exports.typeDefs = gql`
 
 const ORDER_CREATED = 'ORDER_CREATED';
 
-module.exports.resolvers = {
+export const resolvers =  {
 	Subscription: {
 		orderCreated: {
 			subscribe: withFilter (
@@ -116,17 +114,17 @@ module.exports.resolvers = {
 		user: (parent) => {
 			return parent.getUser();
 		},
-		products: (parent, args, ctx) => {
+		products: (parent) => {
 			return parent.getProducts();
 		},
-		products_qty: (parent, args, ctx) => {
+		products_qty: (parent) => {
 			return parent.getProducts()
-			.then(products=>products.length);
+				.then(products=>products.length);
 		},
-		payment_method: (parent, args, ctx) => {
+		payment_method: (parent) => {
 			return parent.getPaymentMethod();
 		},
-		createdDate : (parent, args, ctx) => {
+		createdDate : (parent) => {
 			const date = new Date(parent.get('createdAt'));
 			let day = date.getDate();
 			let month = date.getMonth()+1;
@@ -136,7 +134,7 @@ module.exports.resolvers = {
 
 			return `${day}/${month}`;
 		},
-		createdTime : (parent, args, ctx) => {
+		createdTime : (parent) => {
 			const date = new Date(parent.get('createdAt'));
 			let hours = date.getHours();
 			let minutes = date.getMinutes();
@@ -148,40 +146,40 @@ module.exports.resolvers = {
 		},
 	},
 	Query: {
-		order: (parent, {id}, ctx) => {
-			return ctx.branch.getOrders({where:{id}})
-			.then(([order])=>{
-				if (!order) throw new Error('Pedido não encontrado');
-				return order;
-			})
+		order: (_, { id }, ctx) => {
+			return ctx.branch.getOrders({ where:{ id } })
+				.then(([order])=>{
+					if (!order) throw new Error('Pedido não encontrado');
+					return order;
+				})
 		}
 	},
 	Mutation : {
-		createOrder: (parent, {data}, ctx) => {
+		createOrder: (_, { data }, ctx) => {
 			return sequelize.transaction(transaction => {
 				return ctx.branch.createOrder(data, { transaction })
-				.then(async (order)=> {
-					await OrderProducts.updateAll(data.products, order, transaction);
+					.then(async (order)=> {
+						await OrderProducts.updateAll(data.products, order, transaction);
 
-					pubsub.publish(ORDER_CREATED, { orderCreated: order });
+						pubsub.publish(ORDER_CREATED, { orderCreated: order });
 
-					return order;
-				})
+						return order;
+					})
 			});
 		},
-		updateOrder: (parent, {id, data}, ctx) => {
+		updateOrder: (_, { id, data }, ctx) => {
 			return sequelize.transaction(transaction => {
 				//return OrderOptionsGroups.create({name:'teste'}, {transaction});
 
-				return ctx.branch.getOrders({where:{id}})
-				.then(async ([order])=> {
-					if (!order) throw new Error('Pedido não encontrado');
-					const updated_order = await order.update(data, {transaction});
+				return ctx.branch.getOrders({ where:{ id } })
+					.then(async ([order])=> {
+						if (!order) throw new Error('Pedido não encontrado');
+						const updated_order = await order.update(data, { transaction });
 
-					if (data.products) await OrderProducts.updateAll(data.products, updated_order, transaction);
+						if (data.products) await OrderProducts.updateAll(data.products, updated_order, transaction);
 
-					return updated_order;
-				})
+						return updated_order;
+					})
 			});
 		}
 	}

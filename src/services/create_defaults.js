@@ -1,6 +1,5 @@
-const Roles = require('../model/roles');
-const PaymentMethods = require('../model/payment_methods');
-const Users = require('../model/users');
+import PaymentMethods  from '../model/payment_methods';
+import Roles  from '../model/roles';
 
 const roles = [
 	{
@@ -36,9 +35,9 @@ const payment_methods = [
 	},
 ];
 
-module.exports = function ({ host }) {
+export default function () {
 	return Roles.bulkCreate(roles)
-	.then(()=>{
-		return PaymentMethods.bulkCreate(payment_methods)
-	})
+		.then(()=>{
+			return PaymentMethods.bulkCreate(payment_methods)
+		})
 }

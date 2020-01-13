@@ -1,11 +1,12 @@
-const sequelize = require('../services/connection');
-const Sequelize = require('sequelize');
+import Sequelize  from 'sequelize';
+
+import sequelize  from '../services/connection';
 
 /*
  * Define modelo (tabela) de empresas
  */
 
-class Companies extends Sequelize.Model {};
+class Companies extends Sequelize.Model {}
 Companies.init({
 	name: Sequelize.STRING,
 	display_name: Sequelize.STRING,
@@ -13,6 +14,6 @@ Companies.init({
 		type: Sequelize.BOOLEAN,
 		defaultValue: 0,
 	},
-}, {modelName:'companies', underscored:true, sequelize});
+}, { modelName:'companies', underscored:true, sequelize });
 
-module.exports = Companies;
+export default Companies;

@@ -1,11 +1,15 @@
-const {gql} = require('apollo-server');
-const Products = require('../model/products');
-const ProductsCategories = require('../model/products_categories');
-const Branches = require('../model/branches');
-const OptionsGroups = require('../model/options_groups');
-const Op = require('sequelize').Op;
+import { gql }  from 'apollo-server';
+import conn from 'sequelize';
 
-module.exports.typeDefs = gql`
+import Branches  from '../model/branches';
+import OptionsGroups  from '../model/options_groups';
+import Products  from '../model/products';
+import ProductsCategories  from '../model/products_categories';
+
+const { Op } = conn;
+
+
+export const typeDefs =  gql`
 	type OptionsGroup {
 		id:ID!
 		name:String!
@@ -31,11 +35,11 @@ module.exports.typeDefs = gql`
 	}
 `;
 
-module.exports.resolvers = {
+export const resolvers =  {
 	Query : {
-		searchOptionsGroups: (parent, {search}, ctx) => {
+		searchOptionsGroups: (parent, { search }, ctx) => {
 			return OptionsGroups.findAll({
-				where:{name:{[Op.like]:`%${search}%`}, [`$product->category->branch.company_id$`]:ctx.company.get('id')},
+				where:{ name:{ [Op.like]:`%${search}%` }, [`$product->category->branch.company_id$`]:ctx.company.get('id') },
 				include:[{
 					model: Products,
 					include: [{
@@ -45,30 +49,30 @@ module.exports.resolvers = {
 				}]
 			});
 		},
-		optionsGroup : (parent, {id}) => {
+		optionsGroup : (_, { id }) => {
 			return OptionsGroups.findByPk(id);
 		},
 	},
 	OptionsGroup: {
-		options: (parent, {filter}, ctx) => {
-			let where = {active: true};
-			if (filter && filter.showInactive) delete where.active; 
+		options: (parent, { filter }) => {
+			let where = { active: true };
+			if (filter && filter.showInactive) delete where.active;
 
-			return parent.getOptions({where, order:[['order', 'ASC']]});
+			return parent.getOptions({ where, order:[['order', 'ASC']] });
 		},
-		options_qty: (parent, {filter}, ctx) => {
-			let where = {active: true};
-			if (filter && filter.showInactive) delete where.active; 
+		options_qty: (parent, { filter }) => {
+			let where = { active: true };
+			if (filter && filter.showInactive) delete where.active;
 
-			return parent.getOptions({where})
-			.then(options=>{
-				return options.length;
-			})
+			return parent.getOptions({ where })
+				.then(options=>{
+					return options.length;
+				})
 		},
-		groupRestrained: (parent, args, ctx) => {
+		groupRestrained: (parent) => {
 			return parent.getGroupRestrained();
 		},
-		restrainedBy: (parent, args, ctx) => {
+		restrainedBy: (parent) => {
 			return parent.getRestrainedBy();
 		},
 		product : (parent) => {

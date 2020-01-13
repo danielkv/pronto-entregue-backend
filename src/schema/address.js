@@ -1,6 +1,6 @@
-const {gql} = require('apollo-server');
+import { gql }  from 'apollo-server';
 
-module.exports.typeDefs = gql`
+export const typeDefs = gql`
 
 	type Address {
 		id: ID!
@@ -29,6 +29,6 @@ module.exports.typeDefs = gql`
 
 `;
 
-module.exports.resolvers = {
+export const resolvers =  {
 	
 }

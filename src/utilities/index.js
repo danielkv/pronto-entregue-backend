@@ -1,5 +1,5 @@
-const crypto = require('crypto');
-const Sequelize = require('sequelize')
+import crypto  from 'crypto';
+import Sequelize  from 'sequelize';
 
 function sanitizeFilter(_filter={}, _options = {}) {
 	let options = {
@@ -38,11 +38,11 @@ function sanitizeFilter(_filter={}, _options = {}) {
 				[{
 					[option] : { [Sequelize.Op.like] : `%${search}%` }
 				}]
-				))
-			}
+			))
 		}
+	}
 		
-		if (filter.createdAt) {
+	if (filter.createdAt) {
 		const createdAt = filter.createdAt;
 		delete filter.createdAt;
 		
@@ -70,10 +70,10 @@ function getSQLPagination({ page=null, rowsPerPage=null } = {}) {
  *
  */
 
-Object.filter = (obj, predicate) => 
-    Object.keys(obj)
-          .filter( key => predicate(obj[key], key) )
-          .reduce( (res, key) => (res[key] = obj[key], res), {} );
+Object.filter = (obj, predicate) =>
+	Object.keys(obj)
+		.filter( key => predicate(obj[key], key) )
+		.reduce( (res, key) => (res[key] = obj[key], res), {} );
 
 /*
  * Cria o salt para ser adicionado/verificar senha do usuário
@@ -98,21 +98,22 @@ function salt(password, salt=null) {
  */
 
 function slugify(text) {
-	text = text.trim().toLowerCase();
+	let newText = text.trim().toLowerCase();
 
-    text = text.replace(new RegExp('[ÁÀÂÃ][áàâã]','gi'), 'a');
-    text = text.replace(new RegExp('[ÉÈÊ][éèê]','gi'), 'e');
-    text = text.replace(new RegExp('[ÍÌÎ][íìî]','gi'), 'i');
-    text = text.replace(new RegExp('[ÓÒÔÕ][óòôõ]','gi'), 'o');
-    text = text.replace(new RegExp('[ÚÙÛ][úùû]','gi'), 'u');
-	text = text.replace(new RegExp('[Ç][ç]','gi'), 'c');
-	text = text.replace(new RegExp('[\(\)]', 'g'), '');
+	newText = newText.replace(new RegExp('[ÁÀÂÃ][áàâã]','gi'), 'a');
+	newText = newText.replace(new RegExp('[ÉÈÊ][éèê]','gi'), 'e');
+	newText = newText.replace(new RegExp('[ÍÌÎ][íìî]','gi'), 'i');
+	newText = newText.replace(new RegExp('[ÓÒÔÕ][óòôõ]','gi'), 'o');
+	newText = newText.replace(new RegExp('[ÚÙÛ][úùû]','gi'), 'u');
+	newText = newText.replace(new RegExp('[Ç][ç]','gi'), 'c');
+	// eslint-disable-next-line no-useless-escape
+	newText = newText.replace(new RegExp('[\(\)]', 'g'), '');
 	
-	text = text.replace(new RegExp(' - | ', 'g'), '-');
-    return text;                 
+	newText = newText.replace(new RegExp(' - | ', 'g'), '-');
+	return newText;
 }
 
-module.exports = {
+export default {
 	salt,
 	slugify,
 	getSQLPagination,

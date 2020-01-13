@@ -6,7 +6,10 @@
     "extends": "eslint:recommended",
     "globals": {
         "Atomics": "readonly",
-        "SharedArrayBuffer": "readonly"
+		"SharedArrayBuffer": "readonly",
+		"process": "readonly",
+		"require": "readonly",
+		"__dirname": "readonly"
     },
     "parserOptions": {
         "ecmaVersion": 2018,
@@ -21,7 +24,7 @@
 		"no-use-before-define": "off",
 		"comma-dangle": "off",
 		"linebreak-style": "off",
-		"indent": ["error", "tab"],
+		"indent": ["error", "tab", { "SwitchCase": 1 }],
 		"no-tabs" : 0,
 		"arrow-body-style": 0,
 		"semi": 0,
@@ -29,7 +32,7 @@
 		"eol-last": 0,
 		"arrow-spacing":0,
 		"camelcase":0,
-		"max-len":["error", 150],
+		"max-len": 0,
 		"no-param-reassign": ["error", { "props": false }],
 		"import/prefer-default-export" : 0,
 		"no-trailing-spaces": ["error", { "skipBlankLines": true, "ignoreComments": true }],

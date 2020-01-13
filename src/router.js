@@ -1,8 +1,8 @@
-const { Router, static } = require('express');
-const installDataBase = require('./services/setup'); //Configura banco de dados e relações das tabelas
-const path = require('path');
-const exportDB = require('./services/export');
-const importTable = require('./services/import_table');
+import { Router }  from 'express';
+
+import exportDB  from './services/export';
+import importTable  from './services/import_table';
+import installDataBase  from './services/setup'; //Configura banco de dados e relações das tabelas
 
 const route = Router();
 
@@ -12,7 +12,7 @@ route.get('/networkTest', (req, res)=>{
 });
 
 // configura rota estática
-route.use('/uploads', static(path.resolve(__dirname, '..', 'uploads')));
+// route.use('/uploads', static(path.resolve(__dirname, '..', 'uploads')));
 
 // porta de instalação
 route.get('/setup', installDataBase);
@@ -41,4 +41,4 @@ route.get('/import/:table', (req, res) => {
 	
 })
 
-module.exports = route;
+export default route;

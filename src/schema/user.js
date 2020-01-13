@@ -1,15 +1,18 @@
-const sequelize = require('../services/connection');
-const Op = require('sequelize').Op;
-const jwt = require('jsonwebtoken');
-const {gql} = require('apollo-server');
-const Users = require('../model/users');
-const UsersMeta = require('../model/users_meta');
-const Companies = require('../model/companies');
-const Branches = require('../model/branches');
-const Roles = require('../model/roles');
-const { salt, getSQLPagination, sanitizeFilter } = require('../utilities');
+import { gql }  from 'apollo-server';
+import jwt  from 'jsonwebtoken';
+import conn  from 'sequelize';
 
-module.exports.typeDefs = gql`
+import Branches  from '../model/branches';
+import Companies  from '../model/companies';
+import Roles  from '../model/roles';
+import Users  from '../model/users';
+import UsersMeta  from '../model/users_meta';
+import sequelize  from '../services/connection';
+import { salt, getSQLPagination, sanitizeFilter }  from '../utilities';
+
+const Op = conn.Op;
+
+export const typeDefs = gql`
 	type UserMeta {
 		id:ID!
 		meta_type:String!
@@ -114,15 +117,15 @@ module.exports.typeDefs = gql`
 
 `;
 
-module.exports.resolvers = {
+export const resolvers = {
 	Query : {
-		me: (parent, args, ctx) => {
+		me: (_, __, ctx) => {
 			return ctx.user;
 		},
-		users : (parent, args, ctx) => {
+		users: () => {
 			return Users.findAll();
 		},
-		user: (parent, { id }, ctx) => {
+		user: (_, { id }, ctx) => {
 
 			if (
 				(ctx.user && !ctx.user.can('users_read', { scope: 'adm' })) &&
@@ -130,18 +133,20 @@ module.exports.resolvers = {
 			) throw new Error('Você não tem autorização')
 
 			return Users.findByPk(id)
-			.then(user => {
-				if (!user) throw new Error('Usuário não encontrada');
-				return user;
-			});
+				.then(user => {
+					if (!user) throw new Error('Usuário não encontrada');
+					return user;
+				});
 		},
-		searchCompanyUsers: (parent, {search}, ctx) => {
-			return ctx.company.getUsers({where:{
-				[Op.or] : [{first_name:{[Op.like]:`%${search}%`}}, {last_name:{[Op.like]:`%${search}%`}}, {email:{[Op.like]:`%${search}%`}}]
-			}})
+		searchCompanyUsers: (parent, { search }, ctx) => {
+			return ctx.company.getUsers({
+				where:{
+					[Op.or] : [{ first_name:{ [Op.like]:`%${search}%` } }, { last_name:{ [Op.like]:`%${search}%` } }, { email:{ [Op.like]:`%${search}%` } }]
+				}
+			})
 		},
 		userAddress: (parent, { id }, ctx) => {
-			return ctx.user.getMetas({ where: { id }})
+			return ctx.user.getMetas({ where: { id } })
 				.then(([address]) => {
 					if (!address) throw new Error('Endereço não encontrado');
 
@@ -153,7 +158,7 @@ module.exports.resolvers = {
 		},
 	},
 	Mutation : {
-		createUser: (parent, {data}, ctx) => {
+		createUser: (parent, { data }, ctx) => {
 			if (data.role === 'default' || data.role === 'adm') {
 				if (!ctx.user.can('adm')) throw new Error(`Você não tem premissões para cadastrar um usuário com permissão ${data.role}`);
 			}
@@ -163,14 +168,14 @@ module.exports.resolvers = {
 			}
 
 			return sequelize.transaction(async transaction => {
-				await ctx.company.getUsers({where:{email:data.email}})
+				await ctx.company.getUsers({ where:{ email:data.email } })
 					.then((users)=>{
 						if (users.length) throw new Error('Já existe um usuário com esse email')
 					})
 
-				return Users.create(data, {include:[UsersMeta], transaction})
+				return Users.create(data, { include:[UsersMeta], transaction })
 					.then(async (user_created)=> {
-						await ctx.company.addUser(user_created, {through:{...data.assigned_company}, transaction});
+						await ctx.company.addUser(user_created, { through:{ ...data.assigned_company }, transaction });
 
 						return user_created;
 					})
@@ -182,7 +187,7 @@ module.exports.resolvers = {
 					})
 			});
 		},
-		updateUser: (parent, {id, data}, ctx) => {
+		updateUser: (parent, { id, data }, ctx) => {
 			if (data.role === 'default' || data.role === 'adm') {
 				if (!ctx.user.can('adm')) throw new Error(`Você não tem premissões para cadastrar um usuário com permissão ${data.role}`);
 			}
@@ -205,7 +210,7 @@ module.exports.resolvers = {
 						return user_updated;
 					})
 					.then(async (user_updated)=> {
-						await ctx.company.addUser(user_updated, {through:{...data.assigned_company}, transaction});
+						await ctx.company.addUser(user_updated, { through:{ ...data.assigned_company }, transaction });
 
 						return user_updated;
 					})
@@ -217,18 +222,18 @@ module.exports.resolvers = {
 					})
 			})
 		},
-		setUserScopeRole : (_, {id, role}, ctx) => {
-			return ctx.company.getUsers({where:{id}})
+		setUserScopeRole : (_, { id, role }, ctx) => {
+			return ctx.company.getUsers({ where:{ id } })
 				.then(async ([user])=>{
 					if (!user) throw new Error('Usuário não encontrada');
 
-					const user_updated = await user.update({role});
+					const user_updated = await user.update({ role });
 
 					return user_updated;
 				});
 		},
-		setUserRole : (_, {id, role_id}, ctx) => {
-			return ctx.branch.getUsers({where:{id}})
+		setUserRole : (_, { id, role_id }, ctx) => {
+			return ctx.branch.getUsers({ where:{ id } })
 				.then(async ([user])=>{
 					if (!user || !user.branch_relation) throw new Error('Usuário não encontrada');
 					const role = await Roles.findByPk(role_id);
@@ -244,9 +249,9 @@ module.exports.resolvers = {
 		* caso autenticação falhe, 'arremessa' um erro
 		* 
 		*/
-		login: (parent, {email, password}, ctx) => {
+		login: (parent, { email, password }) => {
 			return Users.findOne({
-				where : {email},
+				where : { email },
 			})
 				.then ((user_found)=>{
 					//Verifica se encontrou usuário
@@ -288,7 +293,7 @@ module.exports.resolvers = {
 
 					const removed = await address_found.destroy();
 
-					return {id, ...JSON.parse(removed.meta_value)};
+					return { id, ...JSON.parse(removed.meta_value) };
 				})
 		},
 		updateUserAddress: (parent, { id, data }, ctx) => {
@@ -298,7 +303,7 @@ module.exports.resolvers = {
 					
 					const updated = await address_found.update({ meta_value: JSON.stringify(data) })
 					
-					return {id, ...JSON.parse(updated.meta_value)};
+					return { id, ...JSON.parse(updated.meta_value) };
 				});
 		},
 		createUserAddress: (parent, { data }, ctx) => {
@@ -314,15 +319,15 @@ module.exports.resolvers = {
 	},
 	User: {
 		addresses : (parent) => {
-			return parent.getMetas({where:{meta_type:'address'}})
-			.then(metas=>{
-				return metas.map(meta=> {
-					return {
-						id: meta.id,
-						...JSON.parse(meta.meta_value)
-					}
-				});
-			})
+			return parent.getMetas({ where:{ meta_type:'address' } })
+				.then(metas=>{
+					return metas.map(meta=> {
+						return {
+							id: meta.id,
+							...JSON.parse(meta.meta_value)
+						}
+					});
+				})
 		},
 		full_name : (parent) => {
 			return `${parent.first_name} ${parent.last_name}`;
@@ -365,15 +370,15 @@ module.exports.resolvers = {
 				through: { where: { active: true } }
 			});
 		},
-		company:(parent, {company_id}) => {
-			return parent.getCompanies({where:{id:company_id}})
+		company:(parent, { company_id }) => {
+			return parent.getCompanies({ where:{ id:company_id } })
 				.then (([company])=>{
 					if (!company) throw new Error('Empresa não encontrada');
 
 					return company;
 				})
 		},
-		branch_relation: (parent, args, ctx) => {
+		branch_relation: (parent) => {
 			if (!parent.branches_users) throw new Error('Nenhum usuário selecionado');
 			
 			return parent.branches_users.getRole()

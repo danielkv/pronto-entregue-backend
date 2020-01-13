@@ -1,9 +1,11 @@
-const sequelize = require('../services/connection');
-const ProductsCagetories = require('../model/products_categories')
-const { upload } = require('../config/uploads');
-const {gql} = require('apollo-server');
+import { gql }  from 'apollo-server';
 
-module.exports.typeDefs = gql`
+import { upload }  from '../config/uploads';
+import ProductsCagetories  from '../model/products_categories';
+import sequelize  from '../services/connection';
+
+
+export const typeDefs =  gql`
 	type Category {
 		id:ID!
 		name:String!
@@ -39,64 +41,64 @@ module.exports.typeDefs = gql`
 	}
 `;
 
-module.exports.resolvers = {
+export const resolvers =  {
 	Mutation: {
-		createCategory : async (parent, {data}, ctx) => {
+		createCategory : async (parent, { data }, ctx) => {
 			if (data.file) {
 				data.image = await upload(ctx.company.name, await data.file);
 			}
 
 			return ctx.branch.createCategory(data);
 		},
-		updateCategory : async (parent, {id, data}, ctx) => {
+		updateCategory : async (parent, { id, data }, ctx) => {
 			if (data.file) {
 				data.image = await upload(ctx.company.name, await data.file);
 			}
 
-			return ctx.branch.getCategories({where:{id}})
-			.then (([category])=>{
-				if (!category) throw new Error('Categoria não encontrada');
+			return ctx.branch.getCategories({ where:{ id } })
+				.then (([category])=>{
+					if (!category) throw new Error('Categoria não encontrada');
 
-				return category.update(data, {fields:['name', 'description', 'image', 'active']});
-			})
+					return category.update(data, { fields:['name', 'description', 'image', 'active'] });
+				})
 		},
-		updateCategoriesOrder: (parent, {data}, ctx) => {
+		updateCategoriesOrder: (_, { data }) => {
 			return sequelize.transaction(transaction=>{
 				return Promise.all(data.map(category_obj => {
 					return ProductsCagetories.findByPk(category_obj.id).then(category=>{
 						if (!category) throw new Error('Categoria não encontrada');
 
-						return category.update({order:category_obj.order}, {transaction})
+						return category.update({ order:category_obj.order }, { transaction })
 					});
 				}))
 			});
 		}
 	},
 	Query : {
-		category: (parent, {id}, ctx) => {
+		category: (_, { id }) => {
 			return ProductsCagetories.findByPk(id)
-			.then(category => {
-				if (!category) throw new Error('Categoria não encontrada');
-				return category;
-			})
+				.then(category => {
+					if (!category) throw new Error('Categoria não encontrada');
+					return category;
+				})
 		},
 	},
 	Category : {
-		products: (parent, {filter}) => {
-			let where = {active: true};
-			if (filter && filter.showInactive) delete where.active; 
+		products: (parent, { filter }) => {
+			let where = { active: true };
+			if (filter && filter.showInactive) delete where.active;
 
-			return parent.getProducts({where});
+			return parent.getProducts({ where });
 		},
 		branch : (parent) => {
 			return parent.getBranch();
 		},
-		products_qty : (parent, {filter}) => {
-			let where = {active: true};
-			if (filter && filter.showInactive) delete where.active; 
+		products_qty : (parent, { filter }) => {
+			let where = { active: true };
+			if (filter && filter.showInactive) delete where.active;
 
-			return parent.getProducts({where})
-			.then (products=>products.length);
+			return parent.getProducts({ where })
+				.then (products=>products.length);
 		}
 	}
 }

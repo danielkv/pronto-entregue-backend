@@ -6,6 +6,6 @@ class ZipcodeError extends Error {
 	}
 }
 
-module.exports = {
+export default {
 	ZipcodeError,
 }

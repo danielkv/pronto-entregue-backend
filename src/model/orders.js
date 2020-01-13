@@ -1,11 +1,12 @@
-const sequelize = require('../services/connection');
-const Sequelize = require('sequelize');
+import Sequelize  from 'sequelize';
+
+import sequelize  from '../services/connection';
 
 /*
  * Define modelo (tabela) de pedidos
  */
 
-class Orders extends Sequelize.Model {};
+class Orders extends Sequelize.Model {}
 Orders.init({
 	//branch_id => criado em 'relations'
 	//user_id => criado em 'relations'
@@ -30,7 +31,7 @@ Orders.init({
 		type: Sequelize.DECIMAL(10, 2),
 		set (val) {
 			if (typeof val == 'string')
-				this.setDataValue('price', parseFloat(val.replace(/\,/g, '.')));
+				this.setDataValue('price', parseFloat(val.replace(',', '.')));
 			else
 				this.setDataValue('price', val);
 		},
@@ -42,7 +43,7 @@ Orders.init({
 		type: Sequelize.DECIMAL(10, 2),
 		set (val) {
 			if (typeof val == 'string')
-				this.setDataValue('discount', parseFloat(val.replace(/\,/g, '.')));
+				this.setDataValue('discount', parseFloat(val.replace(',', '.')));
 			else
 				this.setDataValue('discount', val);
 		},
@@ -69,6 +70,6 @@ Orders.init({
 	district: Sequelize.STRING,
 	zipcode: Sequelize.STRING,
 	
-}, {modelName:'orders', underscored:true, sequelize});
+}, { modelName:'orders', underscored:true, sequelize });
 
-module.exports = Orders;
+export default Orders;

@@ -1,11 +1,12 @@
-const sequelize = require('../services/connection');
-const Sequelize = require('sequelize');
+import Sequelize  from 'sequelize';
+
+import sequelize  from '../services/connection';
 
 /*
  * Define modelo (tabela) de relação de empresas e usuários
  */
 
-class BranchesUsers extends Sequelize.Model {};
+class BranchesUsers extends Sequelize.Model {}
 BranchesUsers.init({
 	id: {
 		type: Sequelize.INTEGER.UNSIGNED,
@@ -16,6 +17,6 @@ BranchesUsers.init({
 		type: Sequelize.BOOLEAN,
 		defaultValue: 1,
 	},
-}, {modelName:'branch_relation', tableName:'branches_users', underscored:true, sequelize});
+}, { modelName:'branch_relation', tableName:'branches_users', underscored:true, sequelize });
 
-module.exports = BranchesUsers;
+export default BranchesUsers;

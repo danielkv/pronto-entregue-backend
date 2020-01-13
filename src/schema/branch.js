@@ -1,17 +1,17 @@
-const { gql } = require('apollo-server');
+import { gql }  from 'apollo-server';
+import Sequelize  from 'sequelize';
 
-const sequelize = require('../services/connection');
-const Sequelize = require('sequelize');
-const Branches = require('../model/branches');
-const Users = require('../model/users');
-const Products = require('../model/products');
-const OrdersProducts = require('../model/orders_products');
-const ProductsCategories = require('../model/products_categories');
-const BranchesMeta = require('../model/branches_meta');
-const PaymentMethods = require('../model/payment_methods');
-const { sanitizeFilter, getSQLPagination } = require('../utilities');
+import Branches  from '../model/branches';
+import BranchesMeta  from '../model/branches_meta';
+import OrdersProducts  from '../model/orders_products';
+import PaymentMethods  from '../model/payment_methods';
+import Products  from '../model/products';
+import ProductsCategories  from '../model/products_categories';
+import Users  from '../model/users';
+import sequelize  from '../services/connection';
+import { sanitizeFilter, getSQLPagination }  from '../utilities';
 
-module.exports.typeDefs = gql`
+export const typeDefs =  gql`
 	type BranchMeta {
 		id:ID!
 		meta_type:String!
@@ -109,86 +109,86 @@ module.exports.typeDefs = gql`
 	}
 `;
 
-module.exports.resolvers = {
+export const resolvers =  {
 	Query : {
-		branch: (parent, {id}, ctx) => {
+		branch: (_, { id }) => {
 			return Branches.findByPk(id)
-			.then(branch => {
-				if (!branch) throw new Error('Filial não encontrada');
-				return branch;
-			})
+				.then(branch => {
+					if (!branch) throw new Error('Filial não encontrada');
+					return branch;
+				})
 		}
 	},
 	Mutation:{
-		updateBusinessHours: (parent, {data}, ctx) => {
-			return ctx.branch.getMetas({where:{meta_type:'business_hours'}})
-			.then(async ([business_hours])=>{
-				const meta_value = JSON.stringify(data);
-				if (!business_hours) {
+		updateBusinessHours: (parent, { data }, ctx) => {
+			return ctx.branch.getMetas({ where:{ meta_type:'business_hours' } })
+				.then(async ([business_hours])=>{
+					const meta_value = JSON.stringify(data);
+					if (!business_hours) {
 					//create
-					await ctx.branch.createMeta({meta_type: 'business_hours', meta_value});
-				} else {
+						await ctx.branch.createMeta({ meta_type: 'business_hours', meta_value });
+					} else {
 					//update
-					await business_hours.update({meta_value});
+						await business_hours.update({ meta_value });
 				
-				}
-				return data;
-			})
-		},
-		createBranch: (parent, {data}, ctx) => {
-			return sequelize.transaction(transaction => {
-				return Branches.create(data, {include:[BranchesMeta], transaction})
-				.then(branch => {
-					return ctx.company.addBranch(branch, {transaction});
-				});
-			})
-		},
-		updateBranch: (_, {id, data}, ctx) => {
-			return sequelize.transaction(transaction => {
-				return ctx.company.getBranches({where:{id}})
-				.then(([branch])=>{
-					if (!branch) throw new Error('Filial não encontrada');
-
-					return branch.update(data, { fields: ['name', 'active'], transaction });
-				})
-				.then(async (branch_updated) => {
-					if (data.metas) {
-						await BranchesMeta.updateAll(data.metas, branch_updated, transaction);
 					}
-					return branch_updated;
+					return data;
 				})
+		},
+		createBranch: (parent, { data }, ctx) => {
+			return sequelize.transaction(transaction => {
+				return Branches.create(data, { include:[BranchesMeta], transaction })
+					.then(branch => {
+						return ctx.company.addBranch(branch, { transaction });
+					});
 			})
 		},
-		enablePaymentMethod : (_, {id}, ctx) => {
-			return PaymentMethods.findByPk(id)
-			.then (async (payment_method) => {
-				if (!payment_method) throw new Error('Método de pagamento não encontrado');
+		updateBranch: (_, { id, data }, ctx) => {
+			return sequelize.transaction(transaction => {
+				return ctx.company.getBranches({ where:{ id } })
+					.then(([branch])=>{
+						if (!branch) throw new Error('Filial não encontrada');
 
-				const [method] = await ctx.branch.addPaymentMethods(payment_method);
+						return branch.update(data, { fields: ['name', 'active'], transaction });
+					})
+					.then(async (branch_updated) => {
+						if (data.metas) {
+							await BranchesMeta.updateAll(data.metas, branch_updated, transaction);
+						}
+						return branch_updated;
+					})
+			})
+		},
+		enablePaymentMethod : (_, { id }, ctx) => {
+			return PaymentMethods.findByPk(id)
+				.then (async (payment_method) => {
+					if (!payment_method) throw new Error('Método de pagamento não encontrado');
+
+					await ctx.branch.addPaymentMethods(payment_method);
 				
-				return ctx.branch;
-			})
+					return ctx.branch;
+				})
 		},
-		disablePaymentMethod : (parent, {id}, ctx) => {
+		disablePaymentMethod : (parent, { id }, ctx) => {
 			return PaymentMethods.findByPk(id)
-			.then (async (payment_method) => {
-				if (!payment_method) throw new Error('Método de pagamento não encontrado');
+				.then (async (payment_method) => {
+					if (!payment_method) throw new Error('Método de pagamento não encontrado');
 
-				const method = await ctx.branch.removePaymentMethod(payment_method);
+					await ctx.branch.removePaymentMethod(payment_method);
 
-				return ctx.branch;
-			})
+					return ctx.branch;
+				})
 		},
 		
 	},
 	Branch: {
 		countUsers: (parent, { filter }) => {
-			const _filter = sanitizeFilter(filter, { search: ['first_name', 'last_name', 'email']});
+			const _filter = sanitizeFilter(filter, { search: ['first_name', 'last_name', 'email'] });
 
 			return parent.countUsers({ where: _filter });
 		},
 		users: (parent, { filter, pagination }) => {
-			const _filter = sanitizeFilter(filter, { search: ['first_name', 'last_name', 'email']});
+			const _filter = sanitizeFilter(filter, { search: ['first_name', 'last_name', 'email'] });
 
 			return parent.getUsers({
 				where: _filter,
@@ -197,12 +197,12 @@ module.exports.resolvers = {
 			});
 		},
 		address: (parent) => {
-			return parent.getMetas({where:{meta_type:'address'}})
-			.then (([address])=> {
-				if (!address) throw new Error('Não foi encontrado o endereço dessa filial');
+			return parent.getMetas({ where:{ meta_type:'address' } })
+				.then (([address])=> {
+					if (!address) throw new Error('Não foi encontrado o endereço dessa filial');
 
-				return {id:address.id, ...JSON.parse(address.meta_value)};
-			})
+					return { id:address.id, ...JSON.parse(address.meta_value) };
+				})
 		},
 		metas: (parent, { type }) => {
 			let where = {};
@@ -280,52 +280,52 @@ module.exports.resolvers = {
 					})
 				})
 		},
-		paymentMethods: (parent, args, ctx) => {
+		paymentMethods: (parent) => {
 			return parent.getPaymentMethods();
 		},
-		deliveryAreas: (parent, args, ctx) => {
+		deliveryAreas: (parent) => {
 			return parent.getDeliveryAreas();
 		},
-		business_hours: (parent, args, ctx) => {
-			return parent.getMetas({where:{meta_type:'business_hours'}})
-			.then(([business_hours])=>{
-				if (!business_hours) {
-					return [
-						{
-							day_of_week:'Domingo',
-							hours:[{from:'', to:''}]
-						},
-						{
-							day_of_week:'Segunda-Feira',
-							hours:[{from:'', to:''}]
-						},
-						{
-							day_of_week:'Terça-Feira',
-							hours:[{from:'', to:''}]
-						},
-						{
-							day_of_week:'Quarta-Feira',
-							hours:[{from:'', to:''}]
-						},
-						{
-							day_of_week:'Quinta-Feira',
-							hours:[{from:'', to:''}]
-						},
-						{
-							day_of_week:'Sexta-Feira',
-							hours:[{from:'', to:''}]
-						},
-						{
-							day_of_week:'Sábado',
-							hours:[{from:'', to:''}]
-						},
-					]
-				} else {
-					return JSON.parse(business_hours.meta_value);
-				}
-			})
+		business_hours: (parent) => {
+			return parent.getMetas({ where:{ meta_type:'business_hours' } })
+				.then(([business_hours])=>{
+					if (!business_hours) {
+						return [
+							{
+								day_of_week:'Domingo',
+								hours:[{ from:'', to:'' }]
+							},
+							{
+								day_of_week:'Segunda-Feira',
+								hours:[{ from:'', to:'' }]
+							},
+							{
+								day_of_week:'Terça-Feira',
+								hours:[{ from:'', to:'' }]
+							},
+							{
+								day_of_week:'Quarta-Feira',
+								hours:[{ from:'', to:'' }]
+							},
+							{
+								day_of_week:'Quinta-Feira',
+								hours:[{ from:'', to:'' }]
+							},
+							{
+								day_of_week:'Sexta-Feira',
+								hours:[{ from:'', to:'' }]
+							},
+							{
+								day_of_week:'Sábado',
+								hours:[{ from:'', to:'' }]
+							},
+						]
+					} else {
+						return JSON.parse(business_hours.meta_value);
+					}
+				})
 		},
-		countOrders: (parent, {filter}) => {
+		countOrders: (parent, { filter }) => {
 			const search = ['street', 'complement', '$user.first_name$', '$user.last_name$', '$user.email$'];
 			const _filter = sanitizeFilter(filter, { search, excludeFilters: ['active'], table: 'orders' });
 
@@ -346,12 +346,12 @@ module.exports.resolvers = {
 		user_relation: (parent) => {
 			if (!parent.branch_relation) throw new Error('Nenhum usuário selecionado');
 			return parent.branch_relation.getRole()
-			.then(role => {
-				return {
-					...parent.branch_relation.get(),
-					role,
-				}
-			});
+				.then(role => {
+					return {
+						...parent.branch_relation.get(),
+						role,
+					}
+				});
 		},
 		last_month_revenue : () => {
 			return 0;
@@ -377,9 +377,9 @@ module.exports.resolvers = {
 					as: 'productRelated'
 				}]
 			})
-			.then (products=> {
-				return products.map(row=>row.get());
-			})
+				.then (products=> {
+					return products.map(row=>row.get());
+				})
 		}
 	}
 }

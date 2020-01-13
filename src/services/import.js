@@ -1,22 +1,20 @@
-const Companies = require('../model/companies');
-const CompaniesMeta = require('../model/companies_meta');
-const CompaniesUsers = require('../model/companies_users');
-const Branches = require('../model/branches');
-const BranchesPaymentMethods = require('../model/branches_payment_methods');
-const BranchesMeta = require('../model/branches_meta');
-const BranchesUsers = require('../model/branches_users');
-const DeliveryAreas = require('../model/delivery_areas');
+import Branches  from '../model/branches';
+import BranchesMeta  from '../model/branches_meta';
+import BranchesPaymentMethods  from '../model/branches_payment_methods';
+import BranchesUsers  from '../model/branches_users';
+import Companies  from '../model/companies';
+import CompaniesMeta  from '../model/companies_meta';
+import CompaniesUsers  from '../model/companies_users';
+import DeliveryAreas  from '../model/delivery_areas';
+import Items  from '../model/items';
+import Options  from '../model/options';
+import OptionsGroups  from '../model/options_groups';
+import Products  from '../model/products';
+import ProductsCategories  from '../model/products_categories';
+import Users  from '../model/users';
+import UsersMeta  from '../model/users_meta';
 
-const Users = require('../model/users');
-const UsersMeta = require('../model/users_meta');
-
-const ProductsCategories = require('../model/products_categories');
-const Products = require('../model/products');
-const OptionsGroups = require('../model/options_groups');
-const Options = require('../model/options');
-const Items = require('../model/items');
-
-module.exports = async (data) => {
+export default async (data) => {
 	await Companies.bulkCreate(data.companies);
 	await CompaniesMeta.bulkCreate(data.companies_meta);
 

@@ -1,5 +1,6 @@
-const sequelize = require('../services/connection');
-const Sequelize = require('sequelize');
+import Sequelize  from 'sequelize';
+
+import sequelize  from '../services/connection';
 
 /*
  * Define modelo (tabela) de relação entre produtos e filiais / empresas
@@ -18,8 +19,8 @@ class CompaniesMeta extends Sequelize.Model {
 		
 		const [removed, created, updated] = await Promise.all([
 			CompaniesMeta.destroy({ where: { id: metas_remove.map(r => r.id) }, transaction }).then(() => metas_remove),
-			Promise.all(metas_create.map(row => model_instance.createMeta(row, {transaction}))),
-			Promise.all(metas_update.map(row => model_instance.getMetas({where:{id:row.id}}).then(([meta]) => {if (!meta) throw new Error('Esse metadado não pertence a essa empresa'); return meta.update(row, {fields:['meta_value'], transaction})})))
+			Promise.all(metas_create.map(row => model_instance.createMeta(row, { transaction }))),
+			Promise.all(metas_update.map(row => model_instance.getMetas({ where:{ id:row.id } }).then(([meta]) => {if (!meta) throw new Error('Esse metadado não pertence a essa empresa'); return meta.update(row, { fields:['meta_value'], transaction })})))
 		]);
 
 		return {
@@ -28,7 +29,7 @@ class CompaniesMeta extends Sequelize.Model {
 			updated,
 		};
 	}
-};
+}
 CompaniesMeta.init({
 	meta_type: {
 		type:Sequelize.STRING,
@@ -58,6 +59,6 @@ CompaniesMeta.init({
 		type: Sequelize.BOOLEAN,
 		defaultValue: 0,
 	},
-}, {modelName:'companies_meta', underscored:true, sequelize, name:{singular:'meta', plural:'metas'}});
+}, { modelName:'companies_meta', underscored:true, sequelize, name:{ singular:'meta', plural:'metas' } });
 
-module.exports = CompaniesMeta;
+export default CompaniesMeta;

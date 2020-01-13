@@ -1,17 +1,19 @@
-const sequelize = require('../services/connection');
-const Sequelize = require('sequelize');
-const {salt} = require('../utilities');
+import Sequelize  from 'sequelize';
+
+import sequelize  from '../services/connection';
+import { salt }  from '../utilities';
 
 /*
  * Define modelo (tabela) de usuários
  */
 
-class Users extends Sequelize.Model {	
+class Users extends Sequelize.Model {
 	/**
 	 * Verifica as permissões de um usuário
 	 */
 
 	can(perms, options={}) {
+		// eslint-disable-next-line no-param-reassign
 		if (!Array.isArray(perms)) perms = [perms];
 		if (!this.permissions) throw new Error('As permissões não foram definidas');
 		
@@ -62,4 +64,4 @@ Users.init({
 	sequelize,
 });
 
-module.exports = Users;
+export default Users;

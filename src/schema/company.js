@@ -1,13 +1,12 @@
-const { gql } = require('apollo-server');
+import { gql }  from 'apollo-server';
 
-const sequelize = require('../services/connection');
-const Companies = require('../model/companies');
-const CompaniesMeta = require('../model/companies_meta');
-const Items = require('../model/items');
-const Users = require('../model/users');
-const { getSQLPagination, sanitizeFilter } = require('../utilities');
+import Companies  from '../model/companies';
+import CompaniesMeta  from '../model/companies_meta';
+import Users  from '../model/users';
+import sequelize  from '../services/connection';
+import { getSQLPagination, sanitizeFilter }  from '../utilities';
 
-module.exports.typeDefs = gql`
+export const typeDefs =  gql`
 	type CompanyMeta {
 		id:ID!
 		meta_type:String!
@@ -62,47 +61,47 @@ module.exports.typeDefs = gql`
 	}
 `;
 
-module.exports.resolvers = {
+export const resolvers =  {
 	Mutation : {
-		createCompany: (parent, {data}, ctx) => {
+		createCompany: (parent, { data }) => {
 			return sequelize.transaction(transaction => {
-				return Companies.create(data, {include:[CompaniesMeta], transaction})
+				return Companies.create(data, { include:[CompaniesMeta], transaction })
 			})
 		},
-		updateCompany: (parent, {id, data}, ctx) => {
+		updateCompany: (parent, { id, data }) => {
 			return sequelize.transaction(transaction => {
 				return Companies.findByPk(id)
-				.then(company=>{
-					if (!company) throw new Error('Empresa não encontrada');
+					.then(company=>{
+						if (!company) throw new Error('Empresa não encontrada');
 
-					return company.update(data, { fields: ['name', 'display_name', 'active'], transaction })
-				})
-				.then(async (company_updated) => {
-					if (data.metas) {
-						await CompaniesMeta.updateAll(data.metas, company_updated, transaction);
-					}
-					return company_updated;
-				})
+						return company.update(data, { fields: ['name', 'display_name', 'active'], transaction })
+					})
+					.then(async (company_updated) => {
+						if (data.metas) {
+							await CompaniesMeta.updateAll(data.metas, company_updated, transaction);
+						}
+						return company_updated;
+					})
 			})
 		}
 	},
 	Query : {
-		companies: (parent, args, ctx) => {
+		companies: () => {
 			return Companies.findAll();
 		},
-		userCompanies: (parent, args, ctx) => {
+		userCompanies: (_, __, ctx) => {
 			if (ctx.user.can('master'))
 				return Companies.findAll();
 
-			return ctx.user.getCompanies({through:{where:{active:true}}});
+			return ctx.user.getCompanies({ through:{ where:{ active:true } } });
 		},
-		company:(_, { id }, ctx) => {
+		company:(_, { id }) => {
 			return Companies.findByPk(id)
-			.then(company => {
-				if (!company) throw new Error('Empresa não encontrada');
+				.then(company => {
+					if (!company) throw new Error('Empresa não encontrada');
 
-				return company;
-			});
+					return company;
+				});
 		}
 	},
 	Company: {
@@ -127,12 +126,12 @@ module.exports.resolvers = {
 		assigned_branches : (parent) => {
 			if (!parent.company_relation) throw new Error('Nenhum usuário selecionado');
 			
-			return parent.getUsers({where:{id:parent.company_relation.user_id}})
-			.then(([user])=>{
-				if (!user) throw new Error('Usuário não encontrado');
+			return parent.getUsers({ where:{ id:parent.company_relation.user_id } })
+				.then(([user])=>{
+					if (!user) throw new Error('Usuário não encontrado');
 
-				return user.getBranches({ where: { company_id:parent.get('id') } });
-			})
+					return user.getBranches({ where: { company_id:parent.get('id') } });
+				})
 		},
 		branches: (parent, { filter, pagination }) => {
 			const _filter = sanitizeFilter(filter, { search: ['name'] });
@@ -143,38 +142,38 @@ module.exports.resolvers = {
 			});
 			
 			return Users.findByPk(parent.company_relation.get('user_id'))
-			.then(user=>{
+				.then(user=>{
 				//se Usuário for master pode buscar todas as filiais mesmo desativadas
-				if (user.get('role') === 'master') return parent.getBranches({
-					where: { ..._filter, company_id: parent.get('id') },
-					...getSQLPagination(pagination),
-				});
+					if (user.get('role') === 'master') return parent.getBranches({
+						where: { ..._filter, company_id: parent.get('id') },
+						...getSQLPagination(pagination),
+					});
 				
-				//se Usuário for adm pode buscar todas as filiais ativas
-				if (user.get('role') === 'adm') return parent.getBranches({
-					where: { ..._filter, company_id: parent.get('id') },
-					...getSQLPagination(pagination),
+					//se Usuário for adm pode buscar todas as filiais ativas
+					if (user.get('role') === 'adm') return parent.getBranches({
+						where: { ..._filter, company_id: parent.get('id') },
+						...getSQLPagination(pagination),
+					});
+
+					//caso chegue aqui usuário verá a lista de filiais que estão ativas e estão vinculadas a ele
+					return user.getBranches({
+						where: {
+							..._filter,
+							company_id: parent.get('id')
+						},
+						...getSQLPagination(pagination),
+
+						through: { where: { active: true } }
+					})
 				});
-
-				//caso chegue aqui usuário verá a lista de filiais que estão ativas e estão vinculadas a ele
-				return user.getBranches({
-					where: {
-						..._filter,
-						company_id: parent.get('id')
-					},
-					...getSQLPagination(pagination),
-
-					through: { where: { active: true } }
-				})
-			});
 		},
 		countUsers: (parent, { filter }) => {
-			const _filter = sanitizeFilter(filter, { search: ['first_name', 'last_name', 'email']});
+			const _filter = sanitizeFilter(filter, { search: ['first_name', 'last_name', 'email'] });
 
 			return parent.countUsers({ where: _filter });
 		},
 		users: (parent, { filter, pagination }) => {
-			const _filter = sanitizeFilter(filter, { search: ['first_name', 'last_name', 'email']});
+			const _filter = sanitizeFilter(filter, { search: ['first_name', 'last_name', 'email'] });
 
 			return parent.getUsers({
 				where: _filter,
@@ -185,7 +184,7 @@ module.exports.resolvers = {
 		metas: (parent) => {
 			return parent.getMetas();
 		},
-		last_month_revenue: (parent, args, ctx) => {
+		last_month_revenue: () => {
 			return 0;
 		},
 	}

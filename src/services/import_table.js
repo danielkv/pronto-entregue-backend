@@ -1,4 +1,3 @@
-
 const tables = {
 	companies: require('../model/companies'),
 	companiesMeta: require('../model/companies_meta'),
@@ -17,6 +16,6 @@ const tables = {
 	items: require('../model/items'),
 }
 
-module.exports = async (table, data) => {
+export default async (table, data) => {
 	return tables[table].bulkCreate(data);
 }

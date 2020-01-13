@@ -1,6 +1,6 @@
-const {gql} = require('apollo-server');
+import { gql }  from 'apollo-server';
 
-module.exports.typeDefs = gql`
+export const typeDefs =  gql`
 	type Option {
 		id:ID!
 		name:String!
@@ -14,9 +14,9 @@ module.exports.typeDefs = gql`
 	}
 `;
 
-module.exports.resolvers = {
+export const resolvers =  {
 	Option: {
-		item: (parent, args, ctx) => {
+		item: (parent) => {
 			return parent.getItem();
 		},
 	}

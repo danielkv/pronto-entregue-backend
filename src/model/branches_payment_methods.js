@@ -1,11 +1,12 @@
-const sequelize = require('../services/connection');
-const Sequelize = require('sequelize');
+import Sequelize  from 'sequelize';
+
+import sequelize  from '../services/connection';
 
 /*
  * Define modelo (tabela) de métodos de pagamentos das filiais
  */
 
-class BranchesPaymentMethods extends Sequelize.Model {};
+class BranchesPaymentMethods extends Sequelize.Model {}
 BranchesPaymentMethods.init({
 	id: {
 		type: Sequelize.INTEGER.UNSIGNED,
@@ -21,6 +22,6 @@ BranchesPaymentMethods.init({
 			return JSON.parse(this.getDataValue('settings'));
 		}
 	},
-}, {modelName:'association', tableName:'branches_payment_methods', underscored:true, sequelize, name:{singular:'PaymentMethod', plural:'PaymentMethods'}});
+}, { modelName:'association', tableName:'branches_payment_methods', underscored:true, sequelize, name:{ singular:'PaymentMethod', plural:'PaymentMethods' } });
 
-module.exports = BranchesPaymentMethods;
+export default BranchesPaymentMethods;

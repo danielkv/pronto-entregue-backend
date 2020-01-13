@@ -1,6 +1,7 @@
-const sequelize = require('../services/connection');
-const Sequelize = require('sequelize');
-const Options = require('../model/options');
+import Sequelize  from 'sequelize';
+
+import Options  from '../model/options';
+import sequelize  from '../services/connection';
 
 /*
  * Define modelo (tabela) de grupos de opções
@@ -11,23 +12,24 @@ class OptionsGroups extends Sequelize.Model {
 		return Promise.all(
 			groups.map((group) => {
 				let group_model;
+				// eslint-disable-next-line no-async-promise-executor
 				return new Promise(async (resolve, reject) => {
 					try {
 						if (!['create', 'remove', 'update'].includes(group.action)) return resolve(group);
 
 						if (group.id && group.action === "remove") {
-							group_model = await product.removeOptionsGroup(group_model, {transaction});
+							group_model = await product.removeOptionsGroup(group_model, { transaction });
 							return resolve(group_model);
 						} else if (group.action === 'create') {
-							group_model = await product.createOptionsGroup(group, {transaction});
+							group_model = await product.createOptionsGroup(group, { transaction });
 						} else if (group.id && group.action === 'update') {
-							[group_model] = await product.getOptionsGroups({where:{id:group.id}});
-							group_model = await group_model.update(group, {fields:['name', 'active', 'type', 'min_select', 'max_select', 'order', 'max_select_restrain'], transaction});
+							[group_model] = await product.getOptionsGroups({ where:{ id:group.id } });
+							group_model = await group_model.update(group, { fields:['name', 'active', 'type', 'min_select', 'max_select', 'order', 'max_select_restrain'], transaction });
 						}
 						
 						if (group_model) {
 							if (!group.remove && group.options) group.options = await Options.updateAll(group.options, group_model, transaction);
-							return resolve({...group_model.get(), options: group.options});
+							return resolve({ ...group_model.get(), options: group.options });
 						} else {
 							return reject('Grupo não foi encontrado');
 						}
@@ -38,7 +40,7 @@ class OptionsGroups extends Sequelize.Model {
 			})
 		);
 	}
-};
+}
 
 OptionsGroups.init({
 	name: Sequelize.STRING,
@@ -57,8 +59,8 @@ OptionsGroups.init({
 		defaultValue: 0,
 		allowNull:false,
 		validate : {
-			notEmpty:{msg:'Você deve definir uma ordem'},
-			notNull:{msg:'Você deve definir uma ordem'},
+			notEmpty:{ msg:'Você deve definir uma ordem' },
+			notNull:{ msg:'Você deve definir uma ordem' },
 		}
 	},
 	min_select: Sequelize.INTEGER,
@@ -74,6 +76,6 @@ OptionsGroups.init({
 		type: Sequelize.BOOLEAN,
 		defaultValue: 1,
 	},
-}, {modelName:'options_groups', underscored:true, sequelize, name:{singular:'OptionsGroup', plural:'OptionsGroups'}});
+}, { modelName:'options_groups', underscored:true, sequelize, name:{ singular:'OptionsGroup', plural:'OptionsGroups' } });
 
-module.exports = OptionsGroups;
+export default OptionsGroups;

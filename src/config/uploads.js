@@ -1,7 +1,8 @@
-const { extname, basename } = require('path');
-const crypto = require('crypto');
-const {slugify} = require('../utilities');
-const { storage } = require('../services/gcloud');
+import crypto  from 'crypto';
+import { extname, basename }  from 'path';
+
+import { storage }  from '../services/gcloud';
+import { slugify }  from '../utilities';
 
 const upload = async (bucketName, file) => {
 	const bucket = await getFileBucket(bucketName);
@@ -40,7 +41,7 @@ const startUpload = async (bucket, file) => {
 		const writeStream = newFile.createWriteStream({
 			resumable: false,
 			public: true,
-			gzip: true, 
+			gzip: true,
 			metadata: {
 				contentType: mimetype
 			}
@@ -56,6 +57,6 @@ const startUpload = async (bucket, file) => {
 	});
 }
 
-module.exports = {
+export default {
 	upload
 }

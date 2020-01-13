@@ -1,18 +1,19 @@
-const sequelize = require('../services/connection');
-const Sequelize = require('sequelize');
+import Sequelize  from 'sequelize';
+
+import sequelize  from '../services/connection';
 
 /*
  * Define modelo (tabela) de locais de entrega
  */
 
-class DeliveryAreas extends Sequelize.Model {};
+class DeliveryAreas extends Sequelize.Model {}
 DeliveryAreas.init({
 	name: {
 		type: Sequelize.STRING,
 		allowNull:false,
 		validate : {
-			notEmpty:{msg:'Você deve definir um nome para o local de entrega'},
-			notNull:{msg:'Você deve definir um nome para o local de entrega'},
+			notEmpty:{ msg:'Você deve definir um nome para o local de entrega' },
+			notNull:{ msg:'Você deve definir um nome para o local de entrega' },
 		}
 	},
 	type: {
@@ -20,8 +21,8 @@ DeliveryAreas.init({
 		allowNull:false,
 		comment : 'single | joker | set',
 		validate: {
-			notEmpty:{msg:'O tipo do local de entrega não pode ser vazio'},
-			notNull:{msg:'O tipo do local de entrega não pode ser vazio'},
+			notEmpty:{ msg:'O tipo do local de entrega não pode ser vazio' },
+			notNull:{ msg:'O tipo do local de entrega não pode ser vazio' },
 			isIn: {
 				args: [['single', 'joker', 'set']],
 				msg:'O tipo local de entrega é inválido',
@@ -32,8 +33,8 @@ DeliveryAreas.init({
 		type: Sequelize.INTEGER,
 		allowNull:false,
 		validate : {
-			notEmpty:{msg:'Você deve definir o CEP para o local de entrega'},
-			notNull:{msg:'Você deve definir o CEP para o local de entrega'},
+			notEmpty:{ msg:'Você deve definir o CEP para o local de entrega' },
+			notNull:{ msg:'Você deve definir o CEP para o local de entrega' },
 		}
 	},
 	zipcode_b: {
@@ -46,6 +47,6 @@ DeliveryAreas.init({
 		type: Sequelize.DECIMAL(10,2),
 		defaultValue: 0
 	},
-}, {modelName:'delivery_areas', underscored:true, sequelize, name:{singular:'DeliveryArea', plural:'DeliveryAreas'}});
+}, { modelName:'delivery_areas', underscored:true, sequelize, name:{ singular:'DeliveryArea', plural:'DeliveryAreas' } });
 
-module.exports = DeliveryAreas;
+export default DeliveryAreas;

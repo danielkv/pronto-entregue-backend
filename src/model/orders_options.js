@@ -1,5 +1,6 @@
-const sequelize = require('../services/connection');
-const Sequelize = require('sequelize');
+import Sequelize  from 'sequelize';
+
+import sequelize  from '../services/connection';
 
 /*
  * Define modelo (tabela) de opções de produtos de pedidos
@@ -12,12 +13,12 @@ class OrdersOptions extends Sequelize.Model {
 		return Promise.all(
 			options.map((option) => {
 				delete option.id;
-				return group_model.createOption(option, {transaction});
+				return group_model.createOption(option, { transaction });
 			})
 		);
 		
 	}
-};
+}
 OrdersOptions.init({
 	id: {
 		type: Sequelize.INTEGER.UNSIGNED,
@@ -29,7 +30,7 @@ OrdersOptions.init({
 		type: Sequelize.DECIMAL(10, 2),
 		set (val) {
 			if (typeof val == 'string')
-				this.setDataValue('price', parseFloat(val.replace(/\,/g, '.')));
+				this.setDataValue('price', parseFloat(val.replace(',', '.')));
 			else
 				this.setDataValue('price', val);
 		},
@@ -37,6 +38,6 @@ OrdersOptions.init({
 			return parseFloat(this.getDataValue('price'));
 		}
 	},
-}, {modelName:'orders_options', underscored:true, sequelize});
+}, { modelName:'orders_options', underscored:true, sequelize });
 
-module.exports = OrdersOptions;
+export default OrdersOptions;

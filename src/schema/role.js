@@ -1,7 +1,8 @@
-const {gql} = require('apollo-server');
-const Roles = require('../model/roles');
+import { gql }  from 'apollo-server';
 
-module.exports.typeDefs = gql`
+import Roles  from '../model/roles';
+
+export const typeDefs = gql`
 	type Role {
 		id:ID!
 		name:String!
@@ -12,9 +13,9 @@ module.exports.typeDefs = gql`
 	}
 `;
 
-module.exports.resolvers = {
+export const resolvers = {
 	Query: {
-		roles : async (parent, args, ctx) => {
+		roles : async () => {
 			return Roles.findAll();
 		}
 	}
