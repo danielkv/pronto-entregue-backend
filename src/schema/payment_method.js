@@ -7,8 +7,8 @@ export const typeDefs =  gql`
 		id: ID!
 		name: String!
 		displayName: String!
-		createdAt: String!
-		updatedAt: String!
+		createdAt: DateTime!
+		updatedAt: DateTime!
 	}
 
 	extend type Query {

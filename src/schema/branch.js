@@ -44,8 +44,8 @@ export const typeDefs =  gql`
 		id: ID!
 		name: String!
 		active: Boolean!
-		createdAt: String! @dateTime
-		updatedAt: String! @dateTime
+		createdAt: DateTime!
+		updatedAt: DateTime!
 		company: Company!
 		userRelation: BranchRelation!
 		lastMonthRevenue: Float!

@@ -1,4 +1,6 @@
 import { makeExecutableSchema, gql }  from 'apollo-server';
+import { GraphQLScalarType } from 'graphql';
+import { Kind } from 'graphql/language';
 import { merge }  from 'lodash';
 
 import { upload }  from '../controller/uploads';
@@ -22,39 +24,39 @@ import { typeDefs as Role, resolvers as roleResolvers }  from './role';
 import { typeDefs as User, resolvers as userResolvers }  from './user';
 
 const typeDefs = gql`
-	directive @isAuthenticated on FIELD | FIELD_DEFINITION
-	directive @hasRole(permission: String!, scope: String = "master") on FIELD | FIELD_DEFINITION
-	directive @dateTime on FIELD | FIELD_DEFINITION
+directive @isAuthenticated on FIELD | FIELD_DEFINITION
+directive @hasRole(permission: String!, scope: String = "master") on FIELD | FIELD_DEFINITION
 
-	scalar Upload
+scalar Upload
+scalar DateTime
 
-	input Filter {
-		showInactive: Boolean
-		status: String
-		createdAt: String
-		search: String
-	}
+input Filter {
+	showInactive: Boolean
+	status: String
+	createdAt: DateTime!
+	search: String
+}
 
-	input Pagination {
-		page: Int!
-		rowsPerPage: Int!
-	}
+input Pagination {
+	page: Int!
+	rowsPerPage: Int!
+}
 
-	type File {
-		filename: String!
-		mimetype: String!
-		encoding: String!
-	}
+type File {
+	filename: String!
+	mimetype: String!
+	encoding: String!
+}
 
-	type Query {
-		companies: [Company]!
-		roles: [Role]! @hasRole(permission: "roles_edit", scope: "adm")
-		users: [User]! @hasRole(permission: "master")
-	}
+type Query {
+	companies: [Company]!
+	roles: [Role]! @hasRole(permission: "roles_edit", scope: "adm")
+	users: [User]! @hasRole(permission: "master")
+}
 
-	type Mutation {
-		uploadFile(file: Upload!): String! @hasRole(permission: "master")
-	}
+type Mutation {
+	uploadFile(file: Upload!): String! @hasRole(permission: "master")
+}
 `
 
 const resolvers = {
@@ -62,7 +64,23 @@ const resolvers = {
 		uploadFile: async (_, { file }) => {
 			return await upload('testea', await file);
 		}
-	}
+	},
+	DateTime: new GraphQLScalarType({
+		name: 'Date',
+		description: 'Date custom scalar type',
+		parseValue(value) {
+			return new Date(value); // value from the client
+		},
+		serialize(value) {
+			return value.getTime(); // value sent to the client
+		},
+		parseLiteral(ast) {
+			if (ast.kind === Kind.INT) {
+				return parseInt(ast.value, 10); // ast value is always in string format
+			}
+			return null;
+		},
+	})
 }
 
 export default makeExecutableSchema({

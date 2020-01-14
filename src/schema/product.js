@@ -13,20 +13,20 @@ const { Op } = conn;
 export const typeDefs =  gql`
 	type Product {
 		id: ID!
-		name:String!
-		description:String!
-		image:String!
-		order:Int!
-		type:String!
-		price:Float!
+		name: String!
+		description: String!
+		image: String!
+		order: Int!
+		type: String!
+		price: Float!
 		featured: Boolean!
 
-		active:Boolean!
-		createdAt:String! @dateTime
-		updatedAt:String! @dateTime
+		active: Boolean!
+		createdAt: DateTime!
+		updatedAt: DateTime!
 
-		optionsQty(filter:Filter):Int!
-		optionGroups(filter:Filter):[OptionsGroup]!
+		optionsQty(filter:Filter): Int!
+		optionGroups(filter:Filter): [OptionsGroup]!
 		category:Category!
 	}
 

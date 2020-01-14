@@ -7,8 +7,8 @@ export const typeDefs =  gql`
 		order: Int!
 		active: Boolean!
 		price: Float!
-		createdAt: String!
-		updatedAt: String!
+		createdAt: DateTime!
+		updatedAt: DateTime!
 		maxSelectRestrainOther: Int
 	}
 `;

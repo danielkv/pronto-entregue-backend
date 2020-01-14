@@ -18,8 +18,8 @@ export const typeDefs =  gql`
 		minSelect: Int!
 		maxSelect: Int!
 		active: Boolean!
-		createdAt: String!
-		updatedAt: String!
+		createdAt: DateTime!
+		updatedAt: DateTime!
 		product: Product!
 		optionsQty(filter: Filter): Int!
 

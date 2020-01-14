@@ -32,8 +32,8 @@ export const typeDefs = gql`
 		email: String!
 		role: String!
 		active: Boolean!
-		createdAt: String! @dateTime
-		updatedAt: String! @dateTime
+		createdAt: DateTime!
+		updatedAt: DateTime!
 
 		metas (type: String): [Meta]!
 		addresses: [Address]!

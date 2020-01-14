@@ -14,8 +14,8 @@ export const typeDefs =  gql`
 		branch: Branch!
 		image: String!
 		order: Int!
-		createdAt: String!
-		updatedAt: String!
+		createdAt: DateTime!
+		updatedAt: DateTime!
 		productsQty(filter: Filter): Int!
 
 		products(filter: Filter): [Product]!

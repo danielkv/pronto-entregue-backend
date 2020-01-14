@@ -12,8 +12,8 @@ export const typeDefs =  gql`
 		price: Float!
 		zipcodeA: Int!
 		zipcodeB: Int
-		createdAt: String!
-		updatedAt: String!
+		createdAt: DateTime!
+		updatedAt: DateTime!
 	}
 
 	input DeliveryAreaInput {

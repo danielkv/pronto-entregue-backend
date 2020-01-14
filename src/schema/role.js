@@ -8,8 +8,8 @@ export const typeDefs = gql`
 		name: String!
 		displayName: String!
 		permissions: [String]!
-		createdAt: String!
-		updatedAt: String!
+		createdAt: DateTime!
+		updatedAt: DateTime!
 	}
 `;
 
