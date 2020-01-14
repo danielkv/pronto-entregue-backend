@@ -2,14 +2,14 @@ import Branch  from '../model/branch';
 import BranchMeta  from '../model/branchMeta';
 import BranchPaymentMethod  from '../model/branchPaymentMethod';
 import BranchUser  from '../model/branchUser';
-import CompanyUser  from '../model/companyUser';
+import Category  from '../model/category';
 import Company  from '../model/company';
 import CompanyMeta  from '../model/companyMeta';
+import CompanyUser  from '../model/companyUser';
 import DeliveryArea  from '../model/deliveryArea';
 import Option  from '../model/option';
 import OptionGroup  from '../model/optionGroup';
 import Product  from '../model/product';
-import Category  from '../model/category';
 import Users  from '../model/user';
 import UserMeta  from '../model/userMeta';
 

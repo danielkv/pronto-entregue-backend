@@ -3,8 +3,8 @@ import conn from 'sequelize';
 
 import { upload }  from '../controller/uploads';
 import Category from '../model/category';
-import OptionGroup  from '../model/optionGroup';
 import Option  from '../model/option';
+import OptionGroup  from '../model/optionGroup';
 import Product  from '../model/product';
 import sequelize  from '../services/connection';
 
