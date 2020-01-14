@@ -6,16 +6,19 @@ import conn from '../services/connection';
  * Define modelo (tabela) de permissões
  */
 
-class Roles extends Sequelize.Model {}
-Roles.init({
+class Role extends Sequelize.Model {}
+Role.init({
 	name: Sequelize.STRING,
-	display_name: Sequelize.STRING,
+	displayName: Sequelize.STRING,
 	permissions: {
 		type: Sequelize.TEXT,
 		get () {
 			return JSON.parse(this.getDataValue('permissions'));
 		}
 	},
-}, { modelName:'roles', sequelize: conn });
+}, {
+	modelName: 'roles',
+	sequelize: conn
+});
 
-export default Roles;
+export default Role;

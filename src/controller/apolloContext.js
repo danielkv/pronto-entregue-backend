@@ -6,12 +6,12 @@ export const createContext = async ({ req, connection }) => {
 	if (connection) {
 		console.log(connection.context)
 	} else {
-		const { authorization, company_id, branch_id } = req.headers;
+		const { authorization, companyId, branchId } = req.headers;
 		let user = null, company = null, branch = null;
 		
 		if (authorization) user = await authenticate(authorization);
-		if (company_id) company = await selectCompany(company_id, user);
-		if (branch_id) branch = await selectBranch(company, user, branch_id);
+		if (companyId) company = await selectCompany(companyId, user);
+		if (branchId) branch = await selectBranch(company, user, branchId);
 		
 		ctx = {
 			user,

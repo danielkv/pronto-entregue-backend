@@ -2,11 +2,11 @@ import { gql }  from 'apollo-server';
 import jwt  from 'jsonwebtoken';
 import conn  from 'sequelize';
 
-import Branches  from '../model/branches';
-import Companies  from '../model/companies';
-import Roles  from '../model/roles';
-import Users  from '../model/users';
-import UsersMeta  from '../model/users_meta';
+import Branches  from '../model/branch';
+import Companies  from '../model/company';
+import Roles  from '../model/role';
+import Users  from '../model/user';
+import UsersMeta  from '../model/userMeta';
 import sequelize  from '../services/connection';
 import { salt, getSQLPagination, sanitizeFilter }  from '../utilities';
 
@@ -14,103 +14,103 @@ const Op = conn.Op;
 
 export const typeDefs = gql`
 	type UserMeta {
-		id:ID!
-		meta_type:String!
-		meta_value:String!
-		createdAt:String! @dateTime
+		id: ID!
+		key: String!
+		value: String!
+		createdAt: String! @dateTime
 	}
 
 	type CompanyRelation {
-		active:Boolean!
+		active: Boolean!
 	}
 
 	type BranchRelation {
-		active:Boolean!
+		active: Boolean!
 		role: Role!
-		role_id: Int!
+		roleId: Int!
 	}
 
 	type User {
-		id:ID!
-		full_name:String!
-		first_name:String!
-		last_name:String!
-		email:String!
-		role:String!
-		active:Boolean!
-		createdAt:String! @dateTime
-		updatedAt:String! @dateTime
+		id: ID!
+		fullName: String!
+		firstName: String!
+		lastName: String!
+		email: String!
+		role: String!
+		active: Boolean!
+		createdAt: String! @dateTime
+		updatedAt: String! @dateTime
 
 		metas (type: String): [UserMeta]!
-		addresses:[Address]!
+		addresses: [Address]!
 		
 		orders: [Order]!
-		branch_relation:BranchRelation!
-		company(company_id:ID!): Company!
+		branchRelation: BranchRelation!
+		company(companyId: ID!): Company!
 
-		countCompanies(filter:Filter): Int! @hasRole(permission:"companies_read", scope:"adm")
-		companies(filter:Filter, pagination: Pagination): [Company]! @hasRole(permission:"companies_read", scope:"adm")
+		countCompanies(filter: Filter): Int! @hasRole(permission: "companies_read", scope: "adm")
+		companies(filter: Filter, pagination: Pagination): [Company]! @hasRole(permission: "companies_read", scope: "adm")
 	}
 
 	input UserInput {
-		first_name:String
-		last_name:String
-		password:String
-		role:String
-		email:String
-		active:Boolean
+		firstName: String
+		lastName: String
+		password: String
+		role: String
+		email: String
+		active: Boolean
 
-		assigned_branches:[AssignedBranchInput]
-		assigned_company:AssignedCompanyInput
-		metas:[UserMetaInput]
+		assignedBranches: [AssignedBranchInput]
+		assignedCompany: AssignedCompanyInput
+		metas: [UserMetaInput]
 	}
 
 	input AssignedCompanyInput {
-		active:Boolean!
+		active: Boolean!
 	}
 
 	input AssignedBranchInput {
-		id:ID!
-		action:String!
-		user_relation: BranchUserRelationInput!
+		id: ID!
+		action: String!
+		userRelation: BranchUserRelationInput!
 	}
 
 	input BranchUserRelationInput {
-		active:Boolean!
-		role_id:ID!
+		active: Boolean!
+		roleId: ID!
 	}
 
 	input UserMetaInput {
-		id:ID
-		action:String! #create | update | delete
-		meta_type:String
-		meta_value:String
+		id: ID
+		action: String! #create | update | delete
+		key: String
+		value: String
 	}
 
 	type Login {
-		user:User!
-		token:String!
+		user: User!
+		token: String!
 	}
 
 	extend type Mutation {
-		login (email:String!, password:String!): Login!
-		authenticate (token:String!): User!
+		login (email: String!, password: String!): Login!
+		authenticate (token: String!): User!
 		
-		createUser (data:UserInput!): User!
-		updateUser (id:ID!, data:UserInput!): User!
+		createUser (data: UserInput!): User!
+		updateUser (id: ID!, data: UserInput!): User!
 		
-		setUserRole (id:ID!, role_id:ID!):User! @hasRole(permission:"adm")
-		setUserScopeRole (id:ID!, role:String!):User! @hasRole(permission:"adm")
+		setUserRole (id: ID!, roleId: ID!): User! @hasRole(permission: "adm")
+		setUserScopeRole (id: ID!, role: String!): User! @hasRole(permission: "adm")
 
 		removeUserAddress (id: ID!): Address! @isAuthenticated
-		updateUserAddress (id: ID!, data: UserAddressInput!): Address! @isAuthenticated
-		createUserAddress (data: UserAddressInput!): Address! @isAuthenticated
+		updateUserAddress (id: ID!, data: AddressInput!): Address! @isAuthenticated
+		createUserAddress (data: AddressInput!): Address! @isAuthenticated
 	}
 
 	extend type Query {
-		user(id:ID!): User!
-		searchCompanyUsers(search:String!):[User]!
-		me:User! @isAuthenticated
+		user(id: ID!): User!
+		searchCompanyUsers(search: String!): [User]!
+		me: User! @isAuthenticated
 
 		userAddress (id: ID!): Address! @isAuthenticated
 	}
@@ -118,7 +118,7 @@ export const typeDefs = gql`
 `;
 
 export const resolvers = {
-	Query : {
+	Query: {
 		me: (_, __, ctx) => {
 			return ctx.user;
 		},
@@ -140,8 +140,8 @@ export const resolvers = {
 		},
 		searchCompanyUsers: (parent, { search }, ctx) => {
 			return ctx.company.getUsers({
-				where:{
-					[Op.or] : [{ first_name:{ [Op.like]:`%${search}%` } }, { last_name:{ [Op.like]:`%${search}%` } }, { email:{ [Op.like]:`%${search}%` } }]
+				where: {
+					[Op.or]: [{ firstName: { [Op.like]: `%${search}%` } }, { lastName: { [Op.like]: `%${search}%` } }, { email: { [Op.like]: `%${search}%` } }]
 				}
 			})
 		},
@@ -152,12 +152,12 @@ export const resolvers = {
 
 					return {
 						id: address.id,
-						...JSON.parse(address.meta_value)
+						...JSON.parse(address.value)
 					};
 				})
 		},
 	},
-	Mutation : {
+	Mutation: {
 		createUser: (parent, { data }, ctx) => {
 			if (data.role === 'default' || data.role === 'adm') {
 				if (!ctx.user.can('adm')) throw new Error(`Você não tem premissões para cadastrar um usuário com permissão ${data.role}`);
@@ -168,22 +168,22 @@ export const resolvers = {
 			}
 
 			return sequelize.transaction(async transaction => {
-				await ctx.company.getUsers({ where:{ email:data.email } })
+				await ctx.company.getUsers({ where: { email: data.email } })
 					.then((users)=>{
 						if (users.length) throw new Error('Já existe um usuário com esse email')
 					})
 
-				return Users.create(data, { include:[UsersMeta], transaction })
-					.then(async (user_created)=> {
-						await ctx.company.addUser(user_created, { through:{ ...data.assigned_company }, transaction });
+				return Users.create(data, { include: [UsersMeta], transaction })
+					.then(async (userCreated)=> {
+						await ctx.company.addUser(userCreated, { through: { ...data.assignedCompany }, transaction });
 
-						return user_created;
+						return userCreated;
 					})
-					.then(async (user_created)=> {
-						if (data.assigned_branches) {
-							await Branches.assignAll(data.assigned_branches, user_created, transaction);
+					.then(async (userCreated)=> {
+						if (data.assignedBranches) {
+							await Branches.assignAll(data.assignedBranches, userCreated, transaction);
 						}
-						return user_created;
+						return userCreated;
 					})
 			});
 		},
@@ -201,45 +201,45 @@ export const resolvers = {
 					.then(user=>{
 						if (!user) throw new Error('Usuário não encontrada');
 
-						return user.update(data, { fields: ['first_name', 'last_name', 'password', 'role', 'active'], transaction })
+						return user.update(data, { fields: ['firstName', 'lastName', 'password', 'role', 'active'], transaction })
 					})
-					.then(async (user_updated) => {
+					.then(async (userUpdated) => {
 						if (data.metas) {
-							await UsersMeta.updateAll(data.metas, user_updated, transaction);
+							await UsersMeta.updateAll(data.metas, userUpdated, transaction);
 						}
-						return user_updated;
+						return userUpdated;
 					})
-					.then(async (user_updated)=> {
-						await ctx.company.addUser(user_updated, { through:{ ...data.assigned_company }, transaction });
+					.then(async (userUpdated)=> {
+						await ctx.company.addUser(userUpdated, { through: { ...data.assignedCompany }, transaction });
 
-						return user_updated;
+						return userUpdated;
 					})
-					.then(async (user_updated)=> {
-						if (data.assigned_branches) {
-							await Branches.assignAll(data.assigned_branches, user_updated, transaction);
+					.then(async (userUpdated)=> {
+						if (data.assignedBranches) {
+							await Branches.assignAll(data.assignedBranches, userUpdated, transaction);
 						}
-						return user_updated;
+						return userUpdated;
 					})
 			})
 		},
-		setUserScopeRole : (_, { id, role }, ctx) => {
-			return ctx.company.getUsers({ where:{ id } })
+		setUserScopeRole: (_, { id, role }, ctx) => {
+			return ctx.company.getUsers({ where: { id } })
 				.then(async ([user])=>{
 					if (!user) throw new Error('Usuário não encontrada');
 
-					const user_updated = await user.update({ role });
+					const userUpdated = await user.update({ role });
 
-					return user_updated;
+					return userUpdated;
 				});
 		},
-		setUserRole : (_, { id, role_id }, ctx) => {
-			return ctx.branch.getUsers({ where:{ id } })
+		setUserRole: (_, { id, roleId }, ctx) => {
+			return ctx.branch.getUsers({ where: { id } })
 				.then(async ([user])=>{
-					if (!user || !user.branch_relation) throw new Error('Usuário não encontrada');
-					const role = await Roles.findByPk(role_id);
+					if (!user || !user.branchRelation) throw new Error('Usuário não encontrada');
+					const role = await Roles.findByPk(roleId);
 					if (!role) throw new Error('Função não encontrada');
 
-					await user.branch_relation.setRole(role);
+					await user.branchRelation.setRole(role);
 					
 					return user;
 				});
@@ -251,28 +251,28 @@ export const resolvers = {
 		*/
 		login: (parent, { email, password }) => {
 			return Users.findOne({
-				where : { email },
+				where: { email },
 			})
-				.then ((user_found)=>{
+				.then ((userFound)=>{
 					//Verifica se encontrou usuário
-					if (!user_found) throw new Error('Usuário não encotrado');
+					if (!userFound) throw new Error('Usuário não encotrado');
 			
 					//gera token com senha recebidos e salt encontrado e verifica se token salvo é igual
-					const salted = salt(password, user_found.salt);
-					if (user_found.password != salted.password) throw new Error('Senha incorreta');
+					const salted = salt(password, userFound.salt);
+					if (userFound.password != salted.password) throw new Error('Senha incorreta');
 					
 					//Gera webtoken com id e email
 					const token = jwt.sign({
-						id: user_found.id,
-						email: user_found.email,
+						id: userFound.id,
+						email: userFound.email,
 					}, process.env.SECRET);
 					
 					//Retira campos para retornar usuário
-					const authorized = user_found.get();
+					const authorized = userFound.get();
 			
 					return {
 						token,
-						user:authorized,
+						user: authorized,
 					};
 				});
 		},
@@ -280,69 +280,69 @@ export const resolvers = {
 			const { id, email } = jwt.verify(token, process.env.SECRET);
 
 			return Users.findAll({ where: { id, email } })
-				.then(([user_found])=>{
-					if (!user_found) throw new Error('Usuário não encotrado');
+				.then(([userFound])=>{
+					if (!userFound) throw new Error('Usuário não encotrado');
 
-					return user_found;
+					return userFound;
 				})
 		},
 		removeUserAddress: (parent, { id }) => {
 			return UsersMeta.findByPk(id)
-				.then(async (address_found)=>{
-					if (!address_found) throw new Error('Endereço não encontrado');
+				.then(async (addressFound)=>{
+					if (!addressFound) throw new Error('Endereço não encontrado');
 
-					const removed = await address_found.destroy();
+					const removed = await addressFound.destroy();
 
-					return { id, ...JSON.parse(removed.meta_value) };
+					return { id, ...JSON.parse(removed.value) };
 				})
 		},
-		updateUserAddress: (parent, { id, data }, ctx) => {
-			return ctx.user.getMetas({ where: { meta_type: 'address', id } })
-				.then(async ([address_found])=>{
-					if (!address_found) throw new Error('Endereço não encontrado');
+		updateUserAddress: (_, { id, data }, ctx) => {
+			return ctx.user.getMetas({ where: { key: 'address', id } })
+				.then(async ([addressFound])=>{
+					if (!addressFound) throw new Error('Endereço não encontrado');
 					
-					const updated = await address_found.update({ meta_value: JSON.stringify(data) })
+					const updated = await addressFound.update({ value: JSON.stringify(data) })
 					
-					return { id, ...JSON.parse(updated.meta_value) };
+					return { id, ...JSON.parse(updated.value) };
 				});
 		},
-		createUserAddress: (parent, { data }, ctx) => {
-			return ctx.user.createMeta({ meta_type: 'address', meta_value: JSON.stringify(data) })
-				.then((meta_address) => {
-					console.log(meta_address.get());
+		createUserAddress: (_, { data }, ctx) => {
+			return ctx.user.createMeta({ key: 'address', value: JSON.stringify(data) })
+				.then((metaAddress) => {
+					console.log(metaAddress.get());
 					return {
-						id: meta_address.get('id'),
-						...JSON.parse(meta_address.get('meta_value'))
+						id: metaAddress.get('id'),
+						...JSON.parse(metaAddress.get('value'))
 					}
 				})
 		},
 	},
 	User: {
-		addresses : (parent) => {
-			return parent.getMetas({ where:{ meta_type:'address' } })
+		addresses: (parent) => {
+			return parent.getMetas({ where: { key: 'address' } })
 				.then(metas=>{
 					return metas.map(meta=> {
 						return {
 							id: meta.id,
-							...JSON.parse(meta.meta_value)
+							...JSON.parse(meta.value)
 						}
 					});
 				})
 		},
-		full_name : (parent) => {
-			return `${parent.first_name} ${parent.last_name}`;
+		fullName: (parent) => {
+			return `${parent.firstName} ${parent.lastName}`;
 		},
 		metas: (parent, { type }) => {
 			let where = {};
 
 			if (type) {
-				where = { where: { meta_type: type } }
+				where = { where: { key: type } }
 			}
 
 			return parent.getMetas(where);
 		},
 		countCompanies: (parent, { filter }) => {
-			const _filter = sanitizeFilter(filter, { search: ['name', 'display_name'] });
+			const _filter = sanitizeFilter(filter, { search: ['name', 'displayName'] });
 
 			if (parent.role == 'master')
 				return Companies.count({
@@ -356,7 +356,7 @@ export const resolvers = {
 
 		},
 		companies: (parent, { filter, pagination }) => {
-			const _filter = sanitizeFilter(filter, { search: ['name', 'display_name'] });
+			const _filter = sanitizeFilter(filter, { search: ['name', 'displayName'] });
 
 			if (parent.role == 'master')
 				return Companies.findAll({
@@ -370,22 +370,22 @@ export const resolvers = {
 				through: { where: { active: true } }
 			});
 		},
-		company:(parent, { company_id }) => {
-			return parent.getCompanies({ where:{ id:company_id } })
+		company: (parent, { companyId }) => {
+			return parent.getCompanies({ where: { id: companyId } })
 				.then (([company])=>{
 					if (!company) throw new Error('Empresa não encontrada');
 
 					return company;
 				})
 		},
-		branch_relation: (parent) => {
-			if (!parent.branches_users) throw new Error('Nenhum usuário selecionado');
+		branchRelation: (parent) => {
+			if (!parent.branchUsers) throw new Error('Nenhum usuário selecionado');
 			
-			return parent.branches_users.getRole()
+			return parent.branchUsers.getRole()
 				.then(role => {
 					return {
 						role,
-						active:parent.branches_users.active
+						active: parent.branchUsers.active
 					}
 				})
 		},

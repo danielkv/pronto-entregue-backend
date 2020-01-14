@@ -3,7 +3,7 @@
         "browser": true,
         "es6": true
     },
-    "extends": "eslint:recommended",
+    "extends": "eslint: ecommended",
     "globals": {
         "Atomics": "readonly",
 		"SharedArrayBuffer": "readonly",
@@ -19,24 +19,26 @@
 		"eslint-plugin-import-helpers"
 	],
     "rules": {
+		"key-spacing": "error",
 		"object-curly-spacing": ["error", "always"],
 		"array-bracket-spacing": ["error", "never"],
 		"no-use-before-define": "off",
 		"comma-dangle": "off",
 		"linebreak-style": "off",
 		"indent": ["error", "tab", { "SwitchCase": 1 }],
-		"no-tabs" : 0,
+		"no-tabs": 0,
 		"arrow-body-style": 0,
 		"semi": 0,
 		"arrow-parens": 0,
 		"eol-last": 0,
-		"arrow-spacing":0,
-		"camelcase":0,
+		"arrow-spacing": 0,
+		"camelcase": "error",
 		"max-len": 0,
 		"no-param-reassign": ["error", { "props": false }],
 		"import/prefer-default-export" : 0,
 		"no-trailing-spaces": ["error", { "skipBlankLines": true, "ignoreComments": true }],
 		"object-curly-newline": ["error", { "multiline": true, "consistent": true }],
+		"switch-colon-spacing": ["error", {"after": true, "before": false}],
 		"import-helpers/order-imports": [
 			"warn",
 			{

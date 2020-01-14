@@ -29,7 +29,7 @@ const server = new ApolloServer({
 app.use(routes);
 
 //configura apollo server
-server.applyMiddleware({ app, path:'/graphql' });
+server.applyMiddleware({ app, path: '/graphql' });
 
 //configura subscriptions handlers
 const httpServer = http.createServer(app);
@@ -38,5 +38,5 @@ server.installSubscriptionHandlers(httpServer);
 //ouve porta
 httpServer.listen({ port }, () => {
 	console.log(`Server ready at port ${port}${server.graphqlPath}`)
-	console.log(`Subscriptions ready at ws://localhost:${port}${server.subscriptionsPath}`)
+	console.log(`Subscriptions ready at ws: /localhost: {port}${server.subscriptionsPath}`)
 });

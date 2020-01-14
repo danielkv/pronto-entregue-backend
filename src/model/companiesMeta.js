@@ -59,6 +59,6 @@ CompaniesMeta.init({
 		type: Sequelize.BOOLEAN,
 		defaultValue: 0,
 	},
-}, { modelName: 'companies_meta',  sequelize: conn, name: { singular: 'meta', plural: 'metas' } });
+}, { tableName: 'company_metas',  sequelize: conn, name: { singular: 'meta', plural: 'metas' } });
 
 export default CompaniesMeta;

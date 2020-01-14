@@ -6,13 +6,13 @@ import conn from '../services/connection';
  * Define modelo (tabela) de pedidos
  */
 
-class PaymentMethods extends Sequelize.Model {}
-PaymentMethods.init({
+class PaymentMethod extends Sequelize.Model {}
+PaymentMethod.init({
 	name: Sequelize.STRING,
 	displayName: Sequelize.STRING,
 }, {
-	tableName: 'payment_methods',
-	sequelize: conn
+	modelName: 'payment_methods',
+	sequelize: conn,
 });
 
-export default PaymentMethods;
+export default PaymentMethod;

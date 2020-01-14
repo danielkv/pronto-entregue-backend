@@ -4,14 +4,14 @@ let config;
 
 if (process.env.NODE_ENV == 'production') {
 	config = {
-		secure:true,
-		host:'mail.iocus.com.br',
-		port:465,
+		secure: true,
+		host: 'mail.iocus.com.br',
+		port: 465,
 		auth: {
 			user: process.env.EMAIL_ACCOUNT,
 			pass: process.env.EMAIL_PASS,
 		},
-		debug:false
+		debug: false
 	}
 } else {
 	//address: adeline.ryan30@ethereal.email

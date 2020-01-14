@@ -10,8 +10,8 @@ class BranchesPaymentMethods extends Sequelize.Model {}
 BranchesPaymentMethods.init({
 	id: {
 		type: Sequelize.INTEGER.UNSIGNED,
-		primaryKey:true,
-		autoIncrement:true
+		primaryKey: true,
+		autoIncrement: true
 	},
 	settings: {
 		type: Sequelize.TEXT,
@@ -22,6 +22,10 @@ BranchesPaymentMethods.init({
 			return JSON.parse(this.getDataValue('settings'));
 		}
 	},
-}, { modelName:'association', tableName:'branches_payment_methods', underscored:true, sequelize: conn, name:{ singular:'PaymentMethod', plural:'PaymentMethods' } });
+}, {
+	tableName: 'branch_payment_methods',
+	sequelize: conn,
+	name: { singular: 'PaymentMethod', plural: 'PaymentMethods' }
+});
 
 export default BranchesPaymentMethods;

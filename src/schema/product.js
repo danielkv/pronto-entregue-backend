@@ -2,17 +2,17 @@ import { gql }  from 'apollo-server';
 import conn from 'sequelize';
 
 import { upload }  from '../controller/uploads';
-import Options  from '../model/options';
-import OptionsGroups  from '../model/options_groups';
-import Products  from '../model/products';
-import ProductsCategories  from '../model/products_categories';
+import Category from '../model/category';
+import OptionGroup  from '../model/optionGroup';
+import Option  from '../model/option';
+import Product  from '../model/product';
 import sequelize  from '../services/connection';
 
 const { Op } = conn;
 
 export const typeDefs =  gql`
 	type Product {
-		id:ID!
+		id: ID!
 		name:String!
 		description:String!
 		image:String!
@@ -25,49 +25,49 @@ export const typeDefs =  gql`
 		createdAt:String! @dateTime
 		updatedAt:String! @dateTime
 
-		options_qty(filter:Filter):Int!
-		options_groups(filter:Filter):[OptionsGroup]!
+		optionsQty(filter:Filter):Int!
+		optionGroups(filter:Filter):[OptionsGroup]!
 		category:Category!
 	}
 
 	input ProductInput {
-		name:String
-		description:String
+		name: String
+		description: String
 		featured: Boolean
-		file:Upload
-		type:String
-		price:Float
-		active:Boolean
-		category_id:ID
-		options_groups:[OptionsGroupInput]
+		file: Upload
+		type: String
+		price: Float
+		active: Boolean
+		categoryId: ID
+		optionGroups: [OptionsGroupInput]
 	}
 
 	input OptionsGroupInput {
-		id:ID
-		action:String! #create | update | delete
-		name:String
-		type:String
-		order:Int
-		min_select:Int
-		max_select:Int
-		active:Boolean
-		options:[OptionInput]
-		max_select_restrain:ID
+		id: ID
+		action: String! #create | update | delete
+		name: String
+		type: String
+		order: Int
+		minSelect: Int
+		maxSelect: Int
+		active: Boolean
+		options: [OptionInput] 
+		maxSelectRestrain: ID
 	}
 
 	input OptionInput {
-		id:ID
-		action:String! #create | update | delete
-		name:String
-		order:Int
-		active:Boolean
-		price:Float
-		max_select_restrain_other:Int
+		id: ID
+		action: String! #create | update | delete
+		name: String
+		order: Int
+		active: Boolean
+		price: Float
+		maxSelectRestrainOther: Int
 	}
 
 	extend type Query {
-		product(id:ID!): Product!
-		searchBranchProducts(search:String!, filter:Filter):[Product]!
+		product(id: ID!): Product!
+		searchBranchProducts(search: String!, filter: Filter): [Product]!
 	}
 
 	extend type Mutation {
@@ -84,50 +84,50 @@ export const resolvers =  {
 			}
 
 			return sequelize.transaction(transaction => {
-				return ctx.branch.getCategories({ where:{ id:data.category_id } })
+				return ctx.branch.getCategories({ where: { id: data.categoryId } })
 					.then(async ([category]) => {
 						if (!category) throw new Error('Categoria não encontrada');
 
 						const product = await category.createProduct(data, { transaction });
 
-						if (data.options_groups)
-							await OptionsGroups.updateAll(data.options_groups, product, transaction);
+						if (data.optionGroups)
+							await OptionGroup.updateAll(data.optionGroups, product, transaction);
 					
 						return product;
 					})
 				
 			})
 		},
-		updateProduct : async (_, { id, data }, ctx) => {
+		updateProduct: async (_, { id, data }, ctx) => {
 			if (data.file) {
 				data.image = await upload(ctx.company.name, await data.file);
 			}
 
 			return sequelize.transaction(transaction => {
-				return Products.findByPk(id)
+				return Product.findByPk(id)
 					.then(async (product) => {
 						if (!product) throw new Error('Produto não encontrado');
-						const product_updated = await product.update(data, { fields:['name', 'description', 'price', 'order', 'featured', 'active', 'image', 'type'], transaction });
+						const productUpdated = await product.update(data, { fields: ['name', 'description', 'price', 'order', 'featured', 'active', 'image', 'type'], transaction });
 					
-						if (data.category_id) {
-							const [category] = await ctx.branch.getCategories({ where:{ id:data.category_id } })
+						if (data.categoryId) {
+							const [category] = await ctx.branch.getCategories({ where: { id: data.categoryId } })
 							if (!category) throw new Error('Categoria não encontrada');
 
-							await product_updated.setCategory(category, { transaction });
+							await productUpdated.setCategory(category, { transaction });
 						}
 
-						if (data.options_groups)
-							await OptionsGroups.updateAll(data.options_groups, product, transaction);
+						if (data.optionGroups)
+							await OptionGroup.updateAll(data.optionGroups, product, transaction);
 					
-						return product_updated;
+						return productUpdated;
 					})
 				
 			})
 		},
 	},
-	Query : {
+	Query: {
 		product: (_, { id }) => {
-			return Products.findByPk(id)
+			return Product.findByPk(id)
 				.then(product => {
 					if (!product) throw new Error('Produto não encontrada');
 					return product;
@@ -136,27 +136,25 @@ export const resolvers =  {
 		searchBranchProducts: (_, { search, filter }, ctx) => {
 			let where = { active: true };
 			if (filter && filter.showInactive) delete where.active;
-			return Products.findAll({
-				where:{ ...where, name:{ [Op.like]:`%${search}%` }, ['$category.branch_id$']: ctx.branch.get('id') },
-				include: [{
-					model:ProductsCategories
-				}]
+			return Product.findAll({
+				where: { ...where, name: { [Op.like]: `%${search}%` }, ['$category.branchId$']: ctx.branch.get('id') },
+				include: [{ model: Category				}]
 			})
 		},
 	},
 	Product: {
-		options_qty : (parent, { filter }) => {
+		optionsQty: (parent, { filter }) => {
 			let where = { active: true };
 			if (filter && filter.showInactive) delete where.active;
 
-			return Options.count({ where, include:[{ model:OptionsGroups, where:{ product_id:parent.get('id') } }] });
+			return Option.count({ where, include: [{ model: OptionGroup, where: { productId: parent.get('id') } }] });
 		},
-		options_groups: (parent, { filter }) => {
+		optionGroups: (parent, { filter }) => {
 			let where = { active: true };
 			if (filter && filter.showInactive) delete where.active;
-			return parent.getOptionsGroups({ where, order:[['order', 'ASC']] });
+			return parent.getOptionGroup({ where, order: [['order', 'ASC']] });
 		},
-		category : (parent) => {
+		category: (parent) => {
 			return parent.getCategory();
 		},
 	}

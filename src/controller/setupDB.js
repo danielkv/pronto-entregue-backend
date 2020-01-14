@@ -1,15 +1,15 @@
 import PaymentMethods  from '../model/payment_methods';
-import Roles  from '../model/roles';
+import Role  from '../model/role';
 import conn from '../services/connection';
 import { importDB } from './helper.js';
 
 import dummyData from '../data/dummy.json';
 import paymentMethods from '../data/paymentMethods.json'
-import roles from '../data/roles.json';
+import role from '../data/roles.json';
 
 
 export function setupDefaultData () {
-	return Roles.bulkCreate(roles)
+	return Role.bulkCreate(role)
 		.then(()=>{
 			return PaymentMethods.bulkCreate(paymentMethods)
 		})

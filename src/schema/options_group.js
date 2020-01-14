@@ -2,55 +2,55 @@ import { gql }  from 'apollo-server';
 import conn from 'sequelize';
 
 import Branches  from '../model/branches';
-import OptionsGroups  from '../model/options_groups';
-import Products  from '../model/products';
-import ProductsCategories  from '../model/products_categories';
+import Category  from '../model/category';
+import OptionGroup  from '../model/optionGroup';
+import Products  from '../model/product';
 
 const { Op } = conn;
 
 
 export const typeDefs =  gql`
 	type OptionsGroup {
-		id:ID!
-		name:String!
-		type:String!
-		order:Int!
-		min_select:Int!
-		max_select:Int!
-		active:Boolean!
-		createdAt:String!
-		updatedAt:String!
-		product:Product!
-		options_qty(filter:Filter):Int!
+		id: ID!
+		name: String!
+		type: String!
+		order: Int!
+		minSelect: Int!
+		maxSelect: Int!
+		active: Boolean!
+		createdAt: String!
+		updatedAt: String!
+		product: Product!
+		optionsQty(filter: Filter): Int!
 
-		groupRestrained:OptionsGroup
-		restrainedBy:OptionsGroup
+		groupRestrained: OptionsGroup
+		restrainedBy: OptionsGroup
 
-		options(filter:Filter):[Option]!
+		options(filter: Filter): [Option]!
 	}
 
 	extend type Query {
-		searchOptionsGroups(search:String!):[OptionsGroup]! @hasRole(permission:"products_edit", scope:"adm")
-		optionsGroup(id:ID!):OptionsGroup!
+		searchOptionGroup(search: String!): [OptionsGroup]! @hasRole(permission: "products_edit", scope: "adm")
+		optionsGroup(id: ID!): OptionsGroup!
 	}
 `;
 
 export const resolvers =  {
-	Query : {
-		searchOptionsGroups: (parent, { search }, ctx) => {
-			return OptionsGroups.findAll({
-				where:{ name:{ [Op.like]:`%${search}%` }, [`$product->category->branch.company_id$`]:ctx.company.get('id') },
-				include:[{
+	Query: {
+		searchOptionGroup: (parent, { search }, ctx) => {
+			return OptionGroup.findAll({
+				where: { name: { [Op.like]: `%${search}%` }, [`$product->category->branch.companyId$`]: ctx.company.get('id') },
+				include: [{
 					model: Products,
 					include: [{
-						model:ProductsCategories,
-						include:[Branches]
+						model: Category,
+						include: [Branches]
 					}]
 				}]
 			});
 		},
-		optionsGroup : (_, { id }) => {
-			return OptionsGroups.findByPk(id);
+		optionsGroup: (_, { id }) => {
+			return OptionGroup.findByPk(id);
 		},
 	},
 	OptionsGroup: {
@@ -58,9 +58,9 @@ export const resolvers =  {
 			let where = { active: true };
 			if (filter && filter.showInactive) delete where.active;
 
-			return parent.getOptions({ where, order:[['order', 'ASC']] });
+			return parent.getOptions({ where, order: [['order', 'ASC']] });
 		},
-		options_qty: (parent, { filter }) => {
+		optionsQty: (parent, { filter }) => {
 			let where = { active: true };
 			if (filter && filter.showInactive) delete where.active;
 
@@ -75,7 +75,7 @@ export const resolvers =  {
 		restrainedBy: (parent) => {
 			return parent.getRestrainedBy();
 		},
-		product : (parent) => {
+		product: (parent) => {
 			return parent.getProduct();
 		},
 	}

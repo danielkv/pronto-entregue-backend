@@ -1,26 +1,26 @@
-import Sequelize  from 'sequelize';
+import Sequelize from 'sequelize';
 
 import conn from '../services/connection';
 
 /*
- * Define modelo (tabela) de relação entre produtos e filiais / empresas
+ * Define modelo (tabela) de usuários
  */
 
-class CompaniesMeta extends Sequelize.Model {
+class UserMeta extends Sequelize.Model {
 	/**
 	 * Atualiza, Remove e Cria todas metas
 	 * 
 	 */
-
-	static async updateAll(metas, modelInstance, transaction=null) {
+	
+	static async updateAll(metas, modelInstance, transaction) {
 		const metasCreate = metas.filter(row=>!row.id && row.action==='create');
 		const metasUpdate = metas.filter(row=>row.id && row.action==='update');
 		const metasRemove = metas.filter(row=>row.id && row.action==='delete');
 		
 		const [removed, created, updated] = await Promise.all([
-			CompaniesMeta.destroy({ where: { id: metasRemove.map(r => r.id) }, transaction }).then(() => metasRemove),
+			UserMeta.destroy({ where: { id: metasRemove.map(r => r.id) } , transaction }).then(() => metasRemove),
 			Promise.all(metasCreate.map(row => modelInstance.createMeta(row, { transaction }))),
-			Promise.all(metasUpdate.map(row => modelInstance.getMetas({ where: { id: row.id } }).then(([meta]) => {if (!meta) throw new Error('Esse metadado não pertence a essa empresa'); return meta.update(row, { fields: ['value'], transaction })})))
+			Promise.all(metasUpdate.map(row => modelInstance.getMetas({ where: { id: row.id } }).then(([meta]) => {if (!meta) throw new Error('Esse metadado não pertence a esse usuário'); return meta.update(row, { fields: ['value'], transaction })})))
 		]);
 
 		return {
@@ -30,12 +30,13 @@ class CompaniesMeta extends Sequelize.Model {
 		};
 	}
 }
-CompaniesMeta.init({
+
+UserMeta.init({
 	key: {
 		type: Sequelize.STRING,
-		comment: 'phone | email | document | business_hours | address | ...',
+		comment: 'phone | email | document | address | ...',
 		set(val) {
-			const uniqueTypes = ['document', 'business_hours'];
+			const uniqueTypes = ['document'];
 			if (uniqueTypes.includes(val))
 				this.setDataValue('unique', true);
 			
@@ -43,7 +44,7 @@ CompaniesMeta.init({
 		},
 		validate: {
 			async isUnique (value, done) {
-				const meta = await CompaniesMeta.findOne({ where: { companyId: this.getDataValue('companyId'), key: value } });
+				const meta = await UserMeta.findOne({ where: { userId: this.getDataValue('userId'), key: value } });
 				const unique = this.getDataValue('unique');
 				if (meta) {
 					if (meta.unique === true) return done(new Error('Esse metadado já existe, você pode apenas altera-lo'));
@@ -59,6 +60,10 @@ CompaniesMeta.init({
 		type: Sequelize.BOOLEAN,
 		defaultValue: 0,
 	},
-}, { modelName: 'companies_meta',  sequelize: conn, name: { singular: 'meta', plural: 'metas' } });
+}, {
+	tableName: 'user_metas',
+	sequelize: conn,
+	name: { singular: 'meta', plural: 'metas' }
+});
 
-export default CompaniesMeta;
+export default UserMeta;

@@ -7,7 +7,7 @@ import { salt }  from '../utilities';
  * Define modelo (tabela) de usuários
  */
 
-class Users extends Sequelize.Model {
+class User extends Sequelize.Model {
 	/**
 	 * Verifica as permissões de um usuário
 	 */
@@ -19,27 +19,27 @@ class Users extends Sequelize.Model {
 		
 		const every = options.every || true;
 		const scope = options.scope || 'master';
-		const user_permissions = this.permissions;
+		const userPermissions = this.permissions;
 
-		if (user_permissions.includes('master')) return true;
-		if (scope && user_permissions.includes(scope)) return true;
+		if (userPermissions.includes('master')) return true;
+		if (scope && userPermissions.includes(scope)) return true;
 		
 		if (every) {
-			if (perms.every(r => user_permissions.includes(r))) return true;
+			if (perms.every(r => userPermissions.includes(r))) return true;
 		} else {
-			if (user_permissions.some(r => perms.includes(r))) return true;
+			if (userPermissions.some(r => perms.includes(r))) return true;
 		}
 
 		return false;
 	}
 }
-Users.init({
-	first_name: Sequelize.STRING,
-	last_name: Sequelize.STRING,
+User.init({
+	firstName: Sequelize.STRING,
+	lastName: Sequelize.STRING,
 	email: Sequelize.STRING,
 	password: {
 		type: Sequelize.STRING,
-		allowNull:false,
+		allowNull: false,
 		set(val) {
 			//Adiciona o salt para salvar a senha do usuário
 			const salted = salt(val);
@@ -59,9 +59,9 @@ Users.init({
 		comment: 'master | adm | customer | default'
 	}
 },{
-	modelName : 'users', //nome da tabela
+	tableName: 'users', //nome da tabela
 	underscored: true,
 	sequelize: conn,
 });
 
-export default Users;
+export default User;

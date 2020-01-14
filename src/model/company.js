@@ -6,14 +6,17 @@ import conn from '../services/connection';
  * Define modelo (tabela) de empresas
  */
 
-class Companies extends Sequelize.Model {}
-Companies.init({
+class Company extends Sequelize.Model {}
+Company.init({
 	name: Sequelize.STRING,
-	display_name: Sequelize.STRING,
+	displayName: Sequelize.STRING,
 	active: {
 		type: Sequelize.BOOLEAN,
 		defaultValue: 0,
 	},
-}, { modelName:'companies', underscored:true, sequelize: conn });
+}, {
+	modelName: 'companies',
+	sequelize: conn
+});
 
-export default Companies;
+export default Company;

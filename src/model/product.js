@@ -6,8 +6,8 @@ import conn from '../services/connection';
  * Define modelo (tabela) de produtos
  */
 
-class Products extends Sequelize.Model {}
-Products.init({
+class Product extends Sequelize.Model {}
+Product.init({
 	active: {
 		type: Sequelize.BOOLEAN,
 		defaultValue: 1,
@@ -23,18 +23,18 @@ Products.init({
 	order: {
 		type: Sequelize.INTEGER,
 		defaultValue: 0,
-		allowNull:false,
-		validate : {
-			notEmpty:{ msg:'Você deve definir uma ordem' },
-			notNull:{ msg:'Você deve definir uma ordem' },
+		allowNull: false,
+		validate: {
+			notEmpty: { msg: 'Você deve definir uma ordem' },
+			notNull: { msg: 'Você deve definir uma ordem' },
 		}
 	},
 	type: {
 		type: Sequelize.STRING(50),
 		comment: 'inline | panel',
 		validate: {
-			isIn : {
-				args : [['inline', 'panel']],
+			isIn: {
+				args: [['inline', 'panel']],
 				msg: 'Tipo de produto inválido'
 			}
 		}
@@ -51,6 +51,6 @@ Products.init({
 			return parseFloat(this.getDataValue('price'));
 		}
 	},
-}, { modelName:'products', underscored:true, sequelize: conn });
+}, { modelName: 'products',  sequelize: conn });
 
-export default Products;
+export default Product;

@@ -1,50 +1,50 @@
 import { gql }  from 'apollo-server';
 import Sequelize  from 'sequelize';
 
-import Branches  from '../model/branches';
-import BranchesMeta  from '../model/branches_meta';
-import OrdersProducts  from '../model/orders_products';
-import PaymentMethods  from '../model/payment_methods';
-import Products  from '../model/products';
-import ProductsCategories  from '../model/products_categories';
-import Users  from '../model/users';
+import Branch  from '../model/branch';
+import BranchMeta  from '../model/branchMeta';
+import Category  from '../model/category';
+import OrderProduct  from '../model/orderProduct';
+import PaymentMethods  from '../model/paymentMethod';
+import Product  from '../model/product';
+import User  from '../model/user';
 import sequelize  from '../services/connection';
 import { sanitizeFilter, getSQLPagination }  from '../utilities';
 
 export const typeDefs =  gql`
 	type BranchMeta {
-		id:ID!
-		meta_type:String!
-		meta_value:String!
-		createdAt:String!
+		id: ID!
+		key: String!
+		value: String!
+		createdAt: String!
 	}
 
 	type BusinessTime {
-		from:String
-		to:String
+		from: String
+		to: String
 	}
 
 
 	type BusinessHour {
-		day_of_week:String!
-		hours:[BusinessTime]!
+		dayOfWeek: String!
+		hours: [BusinessTime]!
 	}
 
 	input BusinessTimeInput {
-		from:String
-		to:String
+		from: String
+		to: String
 	}
 	
 	input BusinessHourInput {
-		day_of_week:String!
-		hours:[BusinessTimeInput!]!
+		dayOfWeek: String!
+		hours: [BusinessTimeInput!]!
 	}
 
 	type ProductBestSeller {
-		id:ID!
-		name:String!
-		image:String!
-		qty:Int!
+		id: ID!
+		name: String!
+		image: String!
+		qty: Int!
 	}
 
 	type Branch {
@@ -54,82 +54,82 @@ export const typeDefs =  gql`
 		createdAt: String! @dateTime
 		updatedAt: String! @dateTime
 		company: Company!
-		user_relation: BranchRelation!
-		last_month_revenue: Float!
+		userRelation: BranchRelation!
+		lastMonthRevenue: Float!
 
 		metas: [BranchMeta]!
 		phones: [Phone]!
 		address: Address!
-		business_hours: [BusinessHour]!
+		businessHours: [BusinessHour]!
 
 		paymentMethods: [PaymentMethod]!
 		deliveryAreas: [DeliveryArea]!
-		featuredProducts(limit:Int): [Product]!
+		featuredProduct(limit: Int): [Product]!
 
-		countOrders(filter:Filter): Int!
-		orders(filter:Filter, pagination: Pagination): [Order]!
+		countOrders(filter: Filter): Int!
+		orders(filter: Filter, pagination: Pagination): [Order]!
 
-		countUsers(filter:Filter): Int!
-		users(filter:Filter, pagination: Pagination): [User]!
+		countUser(filter: Filter): Int!
+		user(filter: Filter, pagination: Pagination): [User]!
 
-		countCategories(filter:Filter): Int!
-		categories(filter:Filter, pagination: Pagination): [Category]!
+		countCategories(filter: Filter): Int!
+		categories(filter: Filter, pagination: Pagination): [Category]!
 
-		countProducts(filter:Filter): Int!
-		products(filter:Filter, pagination: Pagination): [Product]!
+		countProduct(filter: Filter): Int!
+		product(filter: Filter, pagination: Pagination): [Product]!
 
-		best_sellers (filter:Filter, pagination: Pagination): [ProductBestSeller]!
+		bestSellers (filter: Filter, pagination: Pagination): [ProductBestSeller]!
 	}
 
 	input BranchMetaInput {
-		id:ID
-		action:String! #create | update | delete
-		meta_type:String
-		meta_value:String
+		id: ID
+		action: String! #create | update | delete
+		key: String
+		value: String
 	}
 	
 	input BranchInput {
-		name:String
-		active:Boolean
-		metas:[BranchMetaInput]
+		name: String
+		active: Boolean
+		metas: [BranchMetaInput]
 	}
 
 	extend type Query {
-		branch(id:ID!): Branch!
+		branch(id: ID!): Branch!
 	}
 
 	extend type Mutation {
-		createBranch(data:BranchInput!):Branch! @hasRole(permission:"branches_edit", scope:"adm")
-		updateBranch(id:ID!, data:BranchInput!): Branch! @hasRole(permission:"branches_edit", scope:"adm")
+		createBranch(data: BranchInput!): Branch! @hasRole(permission: "branchEdit", scope: "adm")
+		updateBranch(id: ID!, data: BranchInput!): Branch! @hasRole(permission: "branchEdit", scope: "adm")
 
-		enablePaymentMethod(id:ID!):Branch! @hasRole(permission:"payment_methods_edit", scope:"adm")
-		disablePaymentMethod(id:ID!):Branch! @hasRole(permission:"payment_methods_edit", scope:"adm")
+		enablePaymentMethod(id: ID!): Branch! @hasRole(permission: "paymentMethodsEdit", scope: "adm")
+		disablePaymentMethod(id: ID!): Branch! @hasRole(permission: "paymentMethodsEdit", scope: "adm")
 
-		updateBusinessHours(data:[BusinessHourInput]!):[BusinessHour]! @hasRole(permission:"branches_edit", scope:"adm")
+		updateBusinessHours(data: [BusinessHourInput]!): [BusinessHour]! @hasRole(permission: "branchEdit", scope: "adm")
 	}
 `;
 
 export const resolvers =  {
-	Query : {
+	Query: {
 		branch: (_, { id }) => {
-			return Branches.findByPk(id)
+			return Branch.findByPk(id)
 				.then(branch => {
 					if (!branch) throw new Error('Filial não encontrada');
 					return branch;
 				})
 		}
 	},
-	Mutation:{
+	Mutation: {
 		updateBusinessHours: (parent, { data }, ctx) => {
-			return ctx.branch.getMetas({ where:{ meta_type:'business_hours' } })
-				.then(async ([business_hours])=>{
-					const meta_value = JSON.stringify(data);
-					if (!business_hours) {
+			return ctx.branch.getMetas({ where: { key: 'businessHours' } })
+				.then(async ([businessHours])=>{
+					const value = JSON.stringify(data);
+					if (!businessHours) {
 					//create
-						await ctx.branch.createMeta({ meta_type: 'business_hours', meta_value });
+						await ctx.branch.createMeta({ key: 'businessHours', value });
 					} else {
 					//update
-						await business_hours.update({ meta_value });
+						await businessHours.update({ value });
 				
 					}
 					return data;
@@ -137,7 +137,7 @@ export const resolvers =  {
 		},
 		createBranch: (parent, { data }, ctx) => {
 			return sequelize.transaction(transaction => {
-				return Branches.create(data, { include:[BranchesMeta], transaction })
+				return Branch.create(data, { include: [BranchMeta], transaction })
 					.then(branch => {
 						return ctx.company.addBranch(branch, { transaction });
 					});
@@ -145,36 +145,36 @@ export const resolvers =  {
 		},
 		updateBranch: (_, { id, data }, ctx) => {
 			return sequelize.transaction(transaction => {
-				return ctx.company.getBranches({ where:{ id } })
+				return ctx.company.getBranch({ where: { id } })
 					.then(([branch])=>{
 						if (!branch) throw new Error('Filial não encontrada');
 
 						return branch.update(data, { fields: ['name', 'active'], transaction });
 					})
-					.then(async (branch_updated) => {
+					.then(async (branchUpdated) => {
 						if (data.metas) {
-							await BranchesMeta.updateAll(data.metas, branch_updated, transaction);
+							await BranchMeta.updateAll(data.metas, branchUpdated, transaction);
 						}
-						return branch_updated;
+						return branchUpdated;
 					})
 			})
 		},
-		enablePaymentMethod : (_, { id }, ctx) => {
+		enablePaymentMethod: (_, { id }, ctx) => {
 			return PaymentMethods.findByPk(id)
-				.then (async (payment_method) => {
-					if (!payment_method) throw new Error('Método de pagamento não encontrado');
+				.then (async (paymentMethod) => {
+					if (!paymentMethod) throw new Error('Método de pagamento não encontrado');
 
-					await ctx.branch.addPaymentMethods(payment_method);
+					await ctx.branch.addPaymentMethods(paymentMethod);
 				
 					return ctx.branch;
 				})
 		},
-		disablePaymentMethod : (parent, { id }, ctx) => {
+		disablePaymentMethod: (parent, { id }, ctx) => {
 			return PaymentMethods.findByPk(id)
-				.then (async (payment_method) => {
-					if (!payment_method) throw new Error('Método de pagamento não encontrado');
+				.then (async (paymentMethod) => {
+					if (!paymentMethod) throw new Error('Método de pagamento não encontrado');
 
-					await ctx.branch.removePaymentMethod(payment_method);
+					await ctx.branch.removePaymentMethod(paymentMethod);
 
 					return ctx.branch;
 				})
@@ -182,43 +182,43 @@ export const resolvers =  {
 		
 	},
 	Branch: {
-		countUsers: (parent, { filter }) => {
-			const _filter = sanitizeFilter(filter, { search: ['first_name', 'last_name', 'email'] });
+		countUser: (parent, { filter }) => {
+			const _filter = sanitizeFilter(filter, { search: ['firstName', 'lastName', 'email'] });
 
-			return parent.countUsers({ where: _filter });
+			return parent.countUser({ where: _filter });
 		},
-		users: (parent, { filter, pagination }) => {
-			const _filter = sanitizeFilter(filter, { search: ['first_name', 'last_name', 'email'] });
+		user: (parent, { filter, pagination }) => {
+			const _filter = sanitizeFilter(filter, { search: ['firstName', 'lastName', 'email'] });
 
-			return parent.getUsers({
+			return parent.getUser({
 				where: _filter,
-				order: [['first_name', 'ASC'], ['last_name', 'ASC']],
+				order: [['firstName', 'ASC'], ['lastName', 'ASC']],
 				...getSQLPagination(pagination),
 			});
 		},
 		address: (parent) => {
-			return parent.getMetas({ where:{ meta_type:'address' } })
+			return parent.getMetas({ where: { key: 'address' } })
 				.then (([address])=> {
 					if (!address) throw new Error('Não foi encontrado o endereço dessa filial');
 
-					return { id:address.id, ...JSON.parse(address.meta_value) };
+					return { id: address.id, ...JSON.parse(address.value) };
 				})
 		},
 		metas: (parent, { type }) => {
 			let where = {};
 
 			if (type) {
-				where = { where: { meta_type: type } }
+				where = { where: { key: type } }
 			}
 
 			return parent.getMetas(where);
 		},
 		phones: (parent) => {
-			return parent.getMetas({ where: { meta_type: 'phone' } })
+			return parent.getMetas({ where: { key: 'phone' } })
 				.then((phones) => {
 					return phones.map((phone) => ({
 						id: phone.id,
-						number: phone.meta_value
+						number: phone.value
 					}));
 				})
 		},
@@ -236,46 +236,46 @@ export const resolvers =  {
 				...getSQLPagination(pagination),
 			});
 		},
-		countProducts : (parent, { filter }) => {
+		countProduct: (parent, { filter }) => {
 			const _filter = sanitizeFilter(filter);
 
-			return Products.count({
+			return Product.count({
 				where: _filter,
-				include: [{ model: ProductsCategories, where: { branch_id: parent.get('id') } }],
+				include: [{ model: Category, where: { branchId: parent.get('id') } }],
 			})
 		},
-		products : (parent, { filter, pagination }) => {
+		product: (parent, { filter, pagination }) => {
 			const _filter = sanitizeFilter(filter);
 
-			return Products.findAll({
+			return Product.findAll({
 				where: _filter,
-				include: [{ model: ProductsCategories, where: { branch_id: parent.get('id') } }],
+				include: [{ model: Category, where: { branchId: parent.get('id') } }],
 				order: [['name', 'ASC']],
 				...getSQLPagination(pagination),
 			})
 		},
-		featuredProducts: (parent, { limit = 5 }) => {
-			return Products.findAll({
+		featuredProduct: (parent, { limit = 5 }) => {
+			return Product.findAll({
 				where: {
 					featured: true,
-					['$category.branch_id$']: parent.get('id')
+					['$category.branchId$']: parent.get('id')
 				},
 				limit,
 				include: [{
-					model:ProductsCategories
+					model: Category
 				}],
 				order: [['updatedAt', 'DESC']]
 			})
-				.then(products => {
-					if (products.length > 0) return products;
+				.then(product => {
+					if (product.length > 0) return product;
 
-					return Products.findAll({
+					return Product.findAll({
 						where: {
-							['$category.branch_id$']: parent.get('id')
+							['$category.branchId$']: parent.get('id')
 						},
 						limit,
 						include: [{
-							model:ProductsCategories
+							model: Category
 						}]
 					})
 				})
@@ -286,99 +286,99 @@ export const resolvers =  {
 		deliveryAreas: (parent) => {
 			return parent.getDeliveryAreas();
 		},
-		business_hours: (parent) => {
-			return parent.getMetas({ where:{ meta_type:'business_hours' } })
-				.then(([business_hours])=>{
-					if (!business_hours) {
+		businessHours: (parent) => {
+			return parent.getMetas({ where: { key: 'businessHours' } })
+				.then(([businessHours])=>{
+					if (!businessHours) {
 						return [
 							{
-								day_of_week:'Domingo',
-								hours:[{ from:'', to:'' }]
+								dayOfWeek: 'Domingo',
+								hours: [{ from: '', to: '' }]
 							},
 							{
-								day_of_week:'Segunda-Feira',
-								hours:[{ from:'', to:'' }]
+								dayOfWeek: 'Segunda-Feira',
+								hours: [{ from: '', to: '' }]
 							},
 							{
-								day_of_week:'Terça-Feira',
-								hours:[{ from:'', to:'' }]
+								dayOfWeek: 'Terça-Feira',
+								hours: [{ from: '', to: '' }]
 							},
 							{
-								day_of_week:'Quarta-Feira',
-								hours:[{ from:'', to:'' }]
+								dayOfWeek: 'Quarta-Feira',
+								hours: [{ from: '', to: '' }]
 							},
 							{
-								day_of_week:'Quinta-Feira',
-								hours:[{ from:'', to:'' }]
+								dayOfWeek: 'Quinta-Feira',
+								hours: [{ from: '', to: '' }]
 							},
 							{
-								day_of_week:'Sexta-Feira',
-								hours:[{ from:'', to:'' }]
+								dayOfWeek: 'Sexta-Feira',
+								hours: [{ from: '', to: '' }]
 							},
 							{
-								day_of_week:'Sábado',
-								hours:[{ from:'', to:'' }]
+								dayOfWeek: 'Sábado',
+								hours: [{ from: '', to: '' }]
 							},
 						]
 					} else {
-						return JSON.parse(business_hours.meta_value);
+						return JSON.parse(businessHours.value);
 					}
 				})
 		},
 		countOrders: (parent, { filter }) => {
-			const search = ['street', 'complement', '$user.first_name$', '$user.last_name$', '$user.email$'];
+			const search = ['street', 'complement', '$user.firstName$', '$user.lastName$', '$user.email$'];
 			const _filter = sanitizeFilter(filter, { search, excludeFilters: ['active'], table: 'orders' });
 
-			return parent.countOrders({ where: _filter, include: [Users] });
+			return parent.countOrders({ where: _filter, include: [User] });
 		},
 		orders: (parent, { filter, pagination }) => {
-			const search = ['street', 'complement', '$user.first_name$', '$user.last_name$', '$user.email$'];
+			const search = ['street', 'complement', '$user.firstName$', '$user.lastName$', '$user.email$'];
 			const _filter = sanitizeFilter(filter, { search, excludeFilters: ['active'], table: 'orders' });
 
 			return parent.getOrders({
 				where: _filter,
-				order:[['createdAt', 'DESC']],
+				order: [['createdAt', 'DESC']],
 				...getSQLPagination(pagination),
 
-				include: [Users]
+				include: [User]
 			});
 		},
-		user_relation: (parent) => {
-			if (!parent.branch_relation) throw new Error('Nenhum usuário selecionado');
-			return parent.branch_relation.getRole()
+		userRelation: (parent) => {
+			if (!parent.branchRelation) throw new Error('Nenhum usuário selecionado');
+			return parent.branchRelation.getRole()
 				.then(role => {
 					return {
-						...parent.branch_relation.get(),
+						...parent.branchRelation.get(),
 						role,
 					}
 				});
 		},
-		last_month_revenue : () => {
+		lastMonthRevenue: () => {
 			return 0;
 		},
-		best_sellers: (_, { filter, pagination }) => {
-			const _filter = sanitizeFilter(filter, { excludeFilters: ['active'], table: 'OrdersProducts' });
+		bestSellers: (_, { filter, pagination }) => {
+			const _filter = sanitizeFilter(filter, { excludeFilters: ['active'], table: 'OrderProduct' });
 
-			return OrdersProducts.findAll({
-				attributes:[
-					[Sequelize.col('product_id'), 'id'],
+			return OrderProduct.findAll({
+				attributes: [
+					[Sequelize.col('productId'), 'id'],
 					[Sequelize.col('productRelated.name'), 'name'],
 					[Sequelize.col('productRelated.image'), 'image'],
-					[Sequelize.fn('COUNT', Sequelize.col('product_id')), 'qty']
+					[Sequelize.fn('COUNT', Sequelize.col('productId')), 'qty']
 				],
-				group: ['product_id'],
-				order: [[Sequelize.fn('COUNT', Sequelize.col('product_id')), 'DESC'], [Sequelize.col('name'), 'ASC']],
+				group: ['productId'],
+				order: [[Sequelize.fn('COUNT', Sequelize.col('productId')), 'DESC'], [Sequelize.col('name'), 'ASC']],
 
 				...getSQLPagination(pagination),
 				where: _filter,
 
-				include:[{
-					model: Products,
+				include: [{
+					model: Product,
 					as: 'productRelated'
 				}]
 			})
-				.then (products=> {
-					return products.map(row=>row.get());
+				.then (product=> {
+					return product.map(row=>row.get());
 				})
 		}
 	}

@@ -46,13 +46,13 @@ const typeDefs = gql`
 	}
 
 	type Query {
-		companies:[Company]!
-		roles:[Role]! @hasRole(permission:"roles_edit", scope:"adm")
-		users:[User]! @hasRole(permission:"master")
+		companies: [Company]!
+		roles: [Role]! @hasRole(permission: "roles_edit", scope: "adm")
+		users: [User]! @hasRole(permission: "master")
 	}
 
 	type Mutation {
-		uploadFile(file: Upload!): String! @hasRole(permission:"master")
+		uploadFile(file: Upload!): String! @hasRole(permission: "master")
 	}
 `
 
@@ -65,7 +65,7 @@ const resolvers = {
 }
 
 export default makeExecutableSchema({
-	typeDefs : [typeDefs, Branch, Category, Company, Option, OptionsGroup, OrderOption, OrderOptionsGroup, OrderProduct, Order, PaymentMethod, Product, Role, DeliveryArea, User, Address, Phone],
-	resolvers : merge(resolvers, branchResolvers, categoryResolvers, companyResolvers, optionResolvers, optionsGroupResolvers, orderOptionResolvers, orderOptionsGroupResolvers, orderProductResolvers, orderResolvers, paymentMethodResolvers, productResolvers, roleResolvers, deliveryAreaResolvers, userResolvers, addressResolvers, phoneResolvers),
-	directiveResolvers : directives,
+	typeDefs: [typeDefs, Branch, Category, Company, Option, OptionsGroup, OrderOption, OrderOptionsGroup, OrderProduct, Order, PaymentMethod, Product, Role, DeliveryArea, User, Address, Phone],
+	resolvers: merge(resolvers, branchResolvers, categoryResolvers, companyResolvers, optionResolvers, optionsGroupResolvers, orderOptionResolvers, orderOptionsGroupResolvers, orderProductResolvers, orderResolvers, paymentMethodResolvers, productResolvers, roleResolvers, deliveryAreaResolvers, userResolvers, addressResolvers, phoneResolvers),
+	directiveResolvers: directives,
 })

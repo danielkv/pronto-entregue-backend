@@ -6,8 +6,8 @@ import conn from '../services/connection';
  * Define modelo (tabela) de locais de entrega
  */
 
-class DeliveryAreas extends Sequelize.Model {}
-DeliveryAreas.init({
+class DeliveryArea extends Sequelize.Model {}
+DeliveryArea.init({
 	name: {
 		type: Sequelize.STRING,
 		allowNull: false,
@@ -47,6 +47,9 @@ DeliveryAreas.init({
 		type: Sequelize.DECIMAL(10,2),
 		defaultValue: 0
 	},
-}, { modelName: 'delivery_areas',  sequelize: conn, name: { singular: 'DeliveryArea', plural: 'DeliveryAreas' } });
+}, {
+	tableName: 'delivery_areas',
+	sequelize: conn,
+});
 
-export default DeliveryAreas;
+export default DeliveryArea;

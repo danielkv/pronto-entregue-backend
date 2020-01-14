@@ -14,7 +14,7 @@ export const typeDefs = gql`
 		state: String!
 	}
 
-	input UserAddressInput {
+	input AddressInput {
 		name: String!
 		street: String!
 		number: String!

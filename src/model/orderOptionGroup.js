@@ -1,18 +1,18 @@
 import Sequelize  from 'sequelize';
 
 import conn from '../services/connection';
-import OrdersOptions  from './orders_options';
+import OrdersOptions  from './orderOption';
 
 /*
  * Define modelo (tabela) de grupos de opções de produtos de pedidos
  */
 
-class OrdersOptionsGroups extends Sequelize.Model {
+class OrderOptionGroup extends Sequelize.Model {
 	static updateAll (groups, product, transaction=null) {
 
 
 		//deleta grupos e opções antigas
-		return OrdersOptionsGroups.destroy({ where: { orderProductId: product.get('id') }, transaction })
+		return OrderOptionGroup.destroy({ where: { orderProductId: product.get('id') }, transaction })
 
 		//cria novos grupos
 			.then (()=> {
@@ -40,11 +40,11 @@ class OrdersOptionsGroups extends Sequelize.Model {
 		
 	}
 }
-OrdersOptionsGroups.init({
+OrderOptionGroup.init({
 	name: Sequelize.STRING,
 }, {
 	tableName: 'order_option_groups',
 	sequelize: conn
 });
 
-export default OrdersOptionsGroups;
+export default OrderOptionGroup;

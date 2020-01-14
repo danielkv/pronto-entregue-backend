@@ -6,7 +6,7 @@ import conn from '../services/connection';
  * Define modelo (tabela) de opções de produtos de pedidos
  */
 
-class OrdersOptions extends Sequelize.Model {
+class OrderOption extends Sequelize.Model {
 	static updateAll (options, groupModel, transaction=null) {
 
 		//cria novas opções
@@ -19,7 +19,7 @@ class OrdersOptions extends Sequelize.Model {
 		
 	}
 }
-OrdersOptions.init({
+OrderOption.init({
 	id: {
 		type: Sequelize.INTEGER.UNSIGNED,
 		primaryKey: true,
@@ -38,6 +38,9 @@ OrdersOptions.init({
 			return parseFloat(this.getDataValue('price'));
 		}
 	},
-}, { modelName: 'orders_options',  sequelize: conn });
+}, {
+	modelName: 'order_options',
+	sequelize: conn
+});
 
-export default OrdersOptions;
+export default OrderOption;

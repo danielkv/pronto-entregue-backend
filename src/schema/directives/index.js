@@ -1,8 +1,8 @@
-import Users  from '../../model/users';
+import User  from '../../model/user';
 
 export default {
 	hasRole: (next, _, { permission, scope }, ctx) => {
-		if (!(ctx.user instanceof Users)) throw new Error('Usuário não autenticado');
+		if (!(ctx.user instanceof User)) throw new Error('Usuário não autenticado');
 		//if (!(ctx.company instanceof Companies)) throw new Error('Empresa não selecionada');
 		//if (!(ctx.branch instanceof Branches)) throw new Error('Filial não selecionada');
 		
@@ -12,7 +12,7 @@ export default {
 		return next();
 	},
 	isAuthenticated: (next, _, __, ctx) => {
-		if (!(ctx.user instanceof Users)) throw new Error('Usuário não autenticado')
+		if (!(ctx.user instanceof User)) throw new Error('Usuário não autenticado')
 		
 		return next();
 	},
@@ -29,6 +29,6 @@ export default {
 		if (hours < 10) hours = `0${hours}`;
 		if (minutes < 10) minutes = `0${minutes}`;
 
-		return `${day}/${month}/${year} ${hours}:${minutes}`;
+		return `${day}/${month}/${year} ${hours}: {minutes}`;
 	}
 }

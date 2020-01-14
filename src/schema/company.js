@@ -1,89 +1,89 @@
 import { gql }  from 'apollo-server';
 
-import Companies  from '../model/companies';
-import CompaniesMeta  from '../model/companies_meta';
-import Users  from '../model/users';
+import Companies  from '../model/company';
+import CompaniesMeta  from '../model/companyMeta';
+import Users  from '../model/user';
 import sequelize  from '../services/connection';
 import { getSQLPagination, sanitizeFilter }  from '../utilities';
 
 export const typeDefs =  gql`
 	type CompanyMeta {
-		id:ID!
-		meta_type:String!
-		meta_value:String!
-		createdAt:String! @dateTime
+		id: ID!
+		key: String!
+		value: String!
+		createdAt: String! @dateTime
 	}
 
 	type Company {
-		id:ID!
-		name:String!
-		display_name:String!
-		active:Boolean!
-		createdAt:String! @dateTime
-		updatedAt:String! @dateTime
-		metas:[CompanyMeta]!
-		last_month_revenue:Float!
-		user_relation: CompanyRelation!
+		id: ID!
+		name: String!
+		displayName: String!
+		active: Boolean!
+		createdAt: String! @dateTime
+		updatedAt: String! @dateTime
+		metas: [CompanyMeta]!
+		lastMonthRevenue: Float!
+		userRelation: CompanyRelation!
 
-		assigned_branches: [Branch]! @hasRole(permission:"users_edit", scope:"adm")
+		assignedBranches: [Branch]! @hasRole(permission: "users_edit", scope: "adm")
 
-		countUsers(filter:Filter): Int! @hasRole(permission:"users_read", scope:"adm")
-		users(filter:Filter, pagination: Pagination): [User]! @hasRole(permission:"users_read", scope:"adm")
+		countUsers(filter: Filter): Int! @hasRole(permission: "users_read", scope: "adm")
+		users(filter: Filter, pagination: Pagination): [User]! @hasRole(permission: "users_read", scope: "adm")
 		
-		countBranches(filter:Filter): Int!
-		branches(filter:Filter, pagination: Pagination): [Branch]!
+		countBranches(filter: Filter): Int!
+		branches(filter: Filter, pagination: Pagination): [Branch]!
 	}
 	
 	input CompanyMetaInput {
-		id:ID
-		action:String! #create | update | delete
-		meta_type:String
-		meta_value:String
+		id: ID
+		action: String! #create | update | delete
+		key: String
+		value: String
 	}
 
 	input CompanyInput {
-		name:String
-		display_name:String
-		active:Boolean
-		metas:[CompanyMetaInput]
+		name: String
+		displayName: String
+		active: Boolean
+		metas: [CompanyMetaInput]
 	}
 
 	extend type Mutation {
-		createCompany(data:CompanyInput!):Company! @hasRole(permission:"companies_edit", scope:"adm")
-		updateCompany(id:ID!, data:CompanyInput!):Company! @hasRole(permission:"companies_edit", scope:"adm")
+		createCompany(data: CompanyInput!): Company! @hasRole(permission: "companies_edit", scope: "adm")
+		updateCompany(id: ID!, data: CompanyInput!): Company! @hasRole(permission: "companies_edit", scope: "adm")
 	}
 
 	extend type Query {
-		company(id:ID!): Company!
-		userCompanies: [Company!] @hasRole(permission:"companies_read", scope:"adm")
+		company(id: ID!): Company!
+		userCompanies: [Company!] @hasRole(permission: "companies_read", scope: "adm")
 	}
 `;
 
 export const resolvers =  {
-	Mutation : {
-		createCompany: (parent, { data }) => {
+	Mutation: {
+		createCompany: (_, { data }) => {
 			return sequelize.transaction(transaction => {
-				return Companies.create(data, { include:[CompaniesMeta], transaction })
+				return Companies.create(data, { include: [CompaniesMeta], transaction })
 			})
 		},
-		updateCompany: (parent, { id, data }) => {
+		updateCompany: (_, { id, data }) => {
 			return sequelize.transaction(transaction => {
 				return Companies.findByPk(id)
 					.then(company=>{
 						if (!company) throw new Error('Empresa não encontrada');
 
-						return company.update(data, { fields: ['name', 'display_name', 'active'], transaction })
+						return company.update(data, { fields: ['name', 'displayName', 'active'], transaction })
 					})
-					.then(async (company_updated) => {
+					.then(async (companyUpdated) => {
 						if (data.metas) {
-							await CompaniesMeta.updateAll(data.metas, company_updated, transaction);
+							await CompaniesMeta.updateAll(data.metas, companyUpdated, transaction);
 						}
-						return company_updated;
+						return companyUpdated;
 					})
 			})
 		}
 	},
-	Query : {
+	Query: {
 		companies: () => {
 			return Companies.findAll();
 		},
@@ -91,9 +91,9 @@ export const resolvers =  {
 			if (ctx.user.can('master'))
 				return Companies.findAll();
 
-			return ctx.user.getCompanies({ through:{ where:{ active:true } } });
+			return ctx.user.getCompanies({ through: { where: { active: true } } });
 		},
-		company:(_, { id }) => {
+		company: (_, { id }) => {
 			return Companies.findByPk(id)
 				.then(company => {
 					if (!company) throw new Error('Empresa não encontrada');
@@ -103,40 +103,40 @@ export const resolvers =  {
 		}
 	},
 	Company: {
-		user_relation : (parent) => {
-			if (!parent.company_relation) throw new Error('Nenhum usuário selecionado');
+		userRelation: (parent) => {
+			if (!parent.companyRelation) throw new Error('Nenhum usuário selecionado');
 
-			return parent.company_relation.get();
+			return parent.companyRelation.get();
 		},
-		assigned_branches : (parent) => {
-			if (!parent.company_relation) throw new Error('Nenhum usuário selecionado');
+		assignedBranches: (parent) => {
+			if (!parent.companyRelation) throw new Error('Nenhum usuário selecionado');
 			
-			return parent.getUsers({ where:{ id:parent.company_relation.user_id } })
+			return parent.getUsers({ where: { id: parent.companyRelation.userId } })
 				.then(([user])=>{
 					if (!user) throw new Error('Usuário não encontrado');
 
-					return user.getBranches({ where: { company_id:parent.get('id') } });
+					return user.getBranches({ where: { companyId: parent.get('id') } });
 				})
 		},
 		branches: (parent, { filter, pagination }) => {
 			const _filter = sanitizeFilter(filter, { search: ['name'] });
 
-			if (!parent.company_relation) return parent.getBranches({
+			if (!parent.companyRelation) return parent.getBranches({
 				where: _filter,
 				...getSQLPagination(pagination),
 			});
 			
-			return Users.findByPk(parent.company_relation.get('user_id'))
+			return Users.findByPk(parent.companyRelation.get('userId'))
 				.then(user=>{
 				//se Usuário for master pode buscar todas as filiais mesmo desativadas
 					if (user.get('role') === 'master') return parent.getBranches({
-						where: { ..._filter, company_id: parent.get('id') },
+						where: { ..._filter, companyId: parent.get('id') },
 						...getSQLPagination(pagination),
 					});
 				
 					//se Usuário for adm pode buscar todas as filiais ativas
 					if (user.get('role') === 'adm') return parent.getBranches({
-						where: { ..._filter, company_id: parent.get('id') },
+						where: { ..._filter, companyId: parent.get('id') },
 						...getSQLPagination(pagination),
 					});
 
@@ -144,7 +144,7 @@ export const resolvers =  {
 					return user.getBranches({
 						where: {
 							..._filter,
-							company_id: parent.get('id')
+							companyId: parent.get('id')
 						},
 						...getSQLPagination(pagination),
 
@@ -153,23 +153,23 @@ export const resolvers =  {
 				});
 		},
 		countUsers: (parent, { filter }) => {
-			const _filter = sanitizeFilter(filter, { search: ['first_name', 'last_name', 'email'] });
+			const _filter = sanitizeFilter(filter, { search: ['firstName', 'lastName', 'email'] });
 
 			return parent.countUsers({ where: _filter });
 		},
 		users: (parent, { filter, pagination }) => {
-			const _filter = sanitizeFilter(filter, { search: ['first_name', 'last_name', 'email'] });
+			const _filter = sanitizeFilter(filter, { search: ['firstName', 'lastName', 'email'] });
 
 			return parent.getUsers({
 				where: _filter,
-				order: [['first_name', 'ASC'], ['last_name', 'ASC']],
+				order: [['firstName', 'ASC'], ['lastName', 'ASC']],
 				...getSQLPagination(pagination),
 			});
 		},
 		metas: (parent) => {
 			return parent.getMetas();
 		},
-		last_month_revenue: () => {
+		lastMonthRevenue: () => {
 			return 0;
 		},
 	}

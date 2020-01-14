@@ -33,9 +33,9 @@ class CompaniesMeta extends Sequelize.Model {
 CompaniesMeta.init({
 	key: {
 		type: Sequelize.STRING,
-		comment: 'phone | email | document | business_hours | address | ...',
+		comment: 'phone | email | document | businessHours | address | ...',
 		set(val) {
-			const uniqueTypes = ['document', 'business_hours'];
+			const uniqueTypes = ['document', 'businessHours'];
 			if (uniqueTypes.includes(val))
 				this.setDataValue('unique', true);
 			
@@ -59,6 +59,10 @@ CompaniesMeta.init({
 		type: Sequelize.BOOLEAN,
 		defaultValue: 0,
 	},
-}, { modelName: 'companies_meta',  sequelize: conn, name: { singular: 'meta', plural: 'metas' } });
+}, {
+	tableName: 'company_metas',
+	sequelize: conn,
+	name: { singular: 'meta', plural: 'metas' }
+});
 
 export default CompaniesMeta;

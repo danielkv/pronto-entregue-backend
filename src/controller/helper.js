@@ -1,78 +1,78 @@
-import Branches  from '../model/branches';
-import BranchesMeta  from '../model/branches_meta';
-import BranchesPaymentMethods  from '../model/branches_payment_methods';
-import BranchesUsers  from '../model/branches_users';
-import Companies  from '../model/companies';
-import CompaniesMeta  from '../model/companies_meta';
-import CompaniesUsers  from '../model/companies_users';
-import DeliveryAreas  from '../model/delivery_areas';
-import Options  from '../model/options';
-import OptionsGroups  from '../model/options_groups';
-import Products  from '../model/products';
-import ProductsCategories  from '../model/products_categories';
-import Users  from '../model/users';
-import UsersMeta  from '../model/users_meta';
+import Branch  from '../model/branch';
+import BranchMeta  from '../model/branchMeta';
+import BranchPaymentMethod  from '../model/branchPaymentMethod';
+import BranchUser  from '../model/branchUser';
+import CompanyUser  from '../model/companyUser';
+import Company  from '../model/company';
+import CompanyMeta  from '../model/companyMeta';
+import DeliveryArea  from '../model/deliveryArea';
+import Option  from '../model/option';
+import OptionGroup  from '../model/optionGroup';
+import Product  from '../model/product';
+import Category  from '../model/category';
+import Users  from '../model/user';
+import UserMeta  from '../model/userMeta';
 
 export const exportDB = async (exclude) => {
 	return {
 		users: await Users.findAll({ attributes: { exclude } }),
-		users_meta: await UsersMeta.findAll({ attributes: { exclude } }),
+		userMeta: await UserMeta.findAll({ attributes: { exclude } }),
 
-		companies: await Companies.findAll({ attributes: { exclude }, include: [{ model: CompaniesMeta, attributes: { exclude } }] }),
-		companies_meta: await CompaniesMeta.findAll({ attributes: { exclude } }),
-		companies_users: await CompaniesUsers.findAll({ attributes: { exclude } }),
+		company: await Company.findAll({ attributes: { exclude }, include: [{ model: CompanyMeta, attributes: { exclude } }] }),
+		companyMeta: await CompanyMeta.findAll({ attributes: { exclude } }),
+		companyUser: await CompanyUser.findAll({ attributes: { exclude } }),
 
-		branches: await Branches.findAll({ attributes: { exclude }, include: [{ model: BranchesMeta, attributes: { exclude } }] }),
-		branches_meta: await BranchesMeta.findAll({ attributes: { exclude } }),
-		branches_users: await BranchesUsers.findAll({ attributes: { exclude } }),
-		branches_payment_methods: await BranchesPaymentMethods.findAll({ attributes: { exclude } }),
+		branch: await Branch.findAll({ attributes: { exclude }, include: [{ model: BranchMeta, attributes: { exclude } }] }),
+		branchMeta: await BranchMeta.findAll({ attributes: { exclude } }),
+		branchUser: await BranchUser.findAll({ attributes: { exclude } }),
+		branchPaymentMethod: await BranchPaymentMethod.findAll({ attributes: { exclude } }),
 		
-		delivery_areas: await DeliveryAreas.findAll({ attributes: { exclude } }),
-		products_categories: await ProductsCategories.findAll({ attributes: { exclude } }),
-		products: await Products.findAll({ attributes: { exclude } }),
-		options_groups: await OptionsGroups.findAll({ attributes: { exclude } }),
-		options: await Options.findAll({ attributes: { exclude } }),
+		deliveryArea: await DeliveryArea.findAll({ attributes: { exclude } }),
+		Category: await Category.findAll({ attributes: { exclude } }),
+		product: await Product.findAll({ attributes: { exclude } }),
+		optionGroup: await OptionGroup.findAll({ attributes: { exclude } }),
+		option: await Option.findAll({ attributes: { exclude } }),
 	}
 }
 
 export const importDB = async (data) => {
-	await Companies.bulkCreate(data.companies);
-	await CompaniesMeta.bulkCreate(data.companies_meta);
+	await Company.bulkCreate(data.company);
+	await CompanyMeta.bulkCreate(data.companyMeta);
 
-	await Branches.bulkCreate(data.branches);
-	await BranchesMeta.bulkCreate(data.branches_meta);
-	await BranchesPaymentMethods.bulkCreate(data.branches_payment_methods);
+	await Branch.bulkCreate(data.branch);
+	await BranchMeta.bulkCreate(data.branchMeta);
+	await BranchPaymentMethod.bulkCreate(data.branchPaymentMethod);
 
 	await Users.bulkCreate(data.users);
-	await UsersMeta.bulkCreate(data.users_meta);
+	await UserMeta.bulkCreate(data.userMeta);
 
-	await CompaniesUsers.bulkCreate(data.companies_users);
-	await BranchesUsers.bulkCreate(data.branches_users);
+	await CompanyUser.bulkCreate(data.companyUser);
+	await BranchUser.bulkCreate(data.branchUser);
 	
-	await DeliveryAreas.bulkCreate(data.delivery_areas);
+	await DeliveryArea.bulkCreate(data.deliveryArea);
 
-	await ProductsCategories.bulkCreate(data.products_categories);
-	await Products.bulkCreate(data.products);
-	await OptionsGroups.bulkCreate(data.options_groups);
-	await Options.bulkCreate(data.options);
+	await Category.bulkCreate(data.Category);
+	await Product.bulkCreate(data.product);
+	await OptionGroup.bulkCreate(data.optionGroup);
+	await Option.bulkCreate(data.option);
 }
 
 export const importTable = async (table, data) => {
 	const tables = {
-		companies: Companies,
-		companiesMeta: CompaniesMeta,
-		companiesUsers: CompaniesUsers,
-		branches: Branches,
-		branchesPaymentMethods: BranchesPaymentMethods,
-		branchesMeta: BranchesMeta,
-		branchesUsers: BranchesUsers,
-		deliveryAreas: DeliveryAreas,
+		company: Company,
+		companyMeta: CompanyMeta,
+		companyUser: CompanyUser,
+		branch: Branch,
+		branchPaymentMethod: BranchPaymentMethod,
+		branchMeta: BranchMeta,
+		branchUser: BranchUser,
+		deliveryArea: DeliveryArea,
 		users: Users,
-		usersMeta: UsersMeta,
-		productsCategories: ProductsCategories,
-		products: Products,
-		optionsGroups: OptionsGroups,
-		options: Options,
+		userMeta: UserMeta,
+		Category: Category,
+		product: Product,
+		optionGroup: OptionGroup,
+		option: Option,
 	}
 
 	return tables[table].bulkCreate(data);

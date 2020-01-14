@@ -1,13 +1,13 @@
 import Sequelize  from 'sequelize';
 
 import conn from '../services/connection';
-import OrdersOptionsGroups  from './orderOptionGroups';
+import OrdersOptionsGroups  from './orderOptionGroup';
 
 /*
  * Define modelo (tabela) de pedidos
  */
 
-class OrdersProducts extends Sequelize.Model {
+class OrderProduct extends Sequelize.Model {
 	static updateAll(products, order, transaction) {
 		return Promise.all(
 			products.map(product => {
@@ -42,7 +42,7 @@ class OrdersProducts extends Sequelize.Model {
 		)
 	}
 }
-OrdersProducts.init({
+OrderProduct.init({
 	id: {
 		type: Sequelize.INTEGER.UNSIGNED,
 		primaryKey: true,
@@ -57,4 +57,4 @@ OrdersProducts.init({
 	sequelize: conn
 });
 
-export default OrdersProducts;
+export default OrderProduct;

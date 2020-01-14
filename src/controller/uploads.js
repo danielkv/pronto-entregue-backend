@@ -24,13 +24,13 @@ const getFileBucket = async (bucketName) => {
 		})
 }
 
-const newFileName = (file_name, bytes=16) => {
-	const fileExtension = extname(file_name);
-	const fileName = basename(file_name, fileExtension)
+const newFileName = (fileName, bytes=16) => {
+	const fileExtension = extname(fileName);
+	const baseName = basename(fileName, fileExtension);
 	const hash = crypto.randomBytes(bytes);
-	const new_name = `${slugify(fileName)}-${hash.toString("hex")}${fileExtension}`;
+	const newName = `${slugify(baseName)}-${hash.toString("hex")}${fileExtension}`;
 
-	return new_name;
+	return newName;
 }
 
 const startUpload = async (bucket, file) => {
@@ -50,7 +50,7 @@ const startUpload = async (bucket, file) => {
 		createReadStream().pipe(writeStream)
 			.on('error', reject)
 			.on('finish', ()=>{
-				const url = `https://${newFile.storage.apiEndpoint}/${newFile.bucket.name}/${newFile.name}`;
+				const url = `https: /${newFile.storage.apiEndpoint}/${newFile.bucket.name}/${newFile.name}`;
 				
 				resolve({ file: newFile, url });
 			});

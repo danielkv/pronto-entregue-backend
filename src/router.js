@@ -25,7 +25,7 @@ route.get('/export', (req, res) => {
 })
 
 // import only one table
-route.get('/import/:table', (req, res) => {
+route.get('/import/: able', (req, res) => {
 	if (!process.env.SETUP) return res.sendStatus(404);
 
 	const table = req.params.table;

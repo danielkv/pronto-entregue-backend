@@ -7,17 +7,17 @@ export const typeDefs =  gql`
 		quantity: Int!
 		price: Float!
 		message: String!
-		product_related: Product!
-		options_groups: [OrderOptionsGroup]!
+		productRelated: Product!
+		optionsGroups: [OrderOptionsGroup]!
 	}
 `;
 
 export const resolvers =  {
 	OrderProduct: {
-		options_groups : (parent) => {
+		optionsGroups: (parent) => {
 			return parent.getOptionsGroups();
 		},
-		product_related : (parent) => {
+		productRelated: (parent) => {
 			return parent.getProductRelated();
 		},
 	}

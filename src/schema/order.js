@@ -1,6 +1,6 @@
 import { gql, withFilter, PubSub }  from 'apollo-server';
 
-import OrderProducts  from '../model/orders_products';
+import OrderProduct  from '../model/orderProduct';
 import sequelize  from '../services/connection';
 
 const pubsub = new PubSub();
@@ -9,8 +9,8 @@ export const typeDefs =  gql`
 	type Order {
 		id: ID!
 		user: User!
-		payment_fee: Float!
-		delivery_price: Float!
+		paymentFee: Float!
+		deliveryPrice: Float!
 		price: Float!
 		type: String!
 		discount: Float!
@@ -18,29 +18,29 @@ export const typeDefs =  gql`
 		message: String!
 		updatedAt: String!
 		products: [OrderProduct]!
-		payment_method: PaymentMethod!
+		paymentMethod: PaymentMethod!
 		
-		street:String
-		number:Int
-		complement:String
-		city:String
-		state:String
-		district:String
-		zipcode:String
+		street: String
+		number: Int
+		complement: String
+		city: String
+		state: String
+		district: String
+		zipcode: String
 
-		products_qty:Int!
-		createdDate:String!
-		createdTime:String!
+		productsQty: Int!
+		createdDate: String!
+		createdTime: String!
 	}	
 
 	input OrderInput {
-		user_id: ID
+		userId: ID
 		type: String
 		status: String
-		payment_method_id: ID
+		paymentMethodId: ID
 
-		payment_fee: Float
-		delivery_price: Float
+		paymentFee: Float
+		deliveryPrice: Float
 		discount: Float
 		price: Float
 		message: String
@@ -57,42 +57,42 @@ export const typeDefs =  gql`
 	}
 
 	input OrderProductInput {
-		id:ID
-		action:String!
+		id: ID
+		action: String!
 		quantity: Int!
-		name:String!
-		price:Float!
-		message:String!
-		product_id:ID
-		options_groups:[OrderOptionsGroupInput!]
+		name: String!
+		price: Float!
+		message: String!
+		productId: ID
+		optionGroups: [OrderOptionGroupInput!]
 	}
 
-	input OrderOptionsGroupInput {
-		id:ID
-		name:String!
-		options_group_id:ID!
+	input OrderOptionGroupInput {
+		id: ID
+		name: String!
+		optionGroupId: ID!
 		
-		options:[OrderOptionInput!]
+		options: [OrderOptionInput!]
 	}
 
 	input OrderOptionInput {
-		id:ID
-		name:String!
-		price:Float!
-		option_id:ID!
+		id: ID
+		name: String!
+		price: Float!
+		optionId: ID!
 	}
 
 	type Subscription {
-		orderCreated(branch_id: ID!): Order
+		orderCreated(branchId: ID!): Order
 	}
 
 	extend type Query {
-		order (id:ID!): Order!
+		order (id: ID!): Order!
 	}
 
 	extend type Mutation {
-		createOrder(data:OrderInput!): Order!
-		updateOrder(id:ID!, data:OrderInput!): Order!
+		createOrder(data: OrderInput!): Order!
+		updateOrder(id: ID!, data: OrderInput!): Order!
 	}
 `;
 
@@ -104,7 +104,7 @@ export const resolvers =  {
 			subscribe: withFilter (
 				()=> pubsub.asyncIterator([ORDER_CREATED]),
 				(payload, variables) => {
-					return payload.orderCreated.get('branch_id') == variables.branch_id;
+					return payload.orderCreated.get('branchId') == variables.branchId;
 				}
 			)
 		}
@@ -116,14 +116,14 @@ export const resolvers =  {
 		products: (parent) => {
 			return parent.getProducts();
 		},
-		products_qty: (parent) => {
+		productsQty: (parent) => {
 			return parent.getProducts()
 				.then(products=>products.length);
 		},
-		payment_method: (parent) => {
+		paymentMethod: (parent) => {
 			return parent.getPaymentMethod();
 		},
-		createdDate : (parent) => {
+		createdDate: (parent) => {
 			const date = new Date(parent.get('createdAt'));
 			let day = date.getDate();
 			let month = date.getMonth()+1;
@@ -133,7 +133,7 @@ export const resolvers =  {
 
 			return `${day}/${month}`;
 		},
-		createdTime : (parent) => {
+		createdTime: (parent) => {
 			const date = new Date(parent.get('createdAt'));
 			let hours = date.getHours();
 			let minutes = date.getMinutes();
@@ -141,24 +141,24 @@ export const resolvers =  {
 			if (hours < 10) hours = `0${hours}`;
 			if (minutes < 10) minutes = `0${minutes}`;
 
-			return `${hours}:${minutes}`;
+			return `${hours}: {minutes}`;
 		},
 	},
 	Query: {
 		order: (_, { id }, ctx) => {
-			return ctx.branch.getOrders({ where:{ id } })
+			return ctx.branch.getOrders({ where: { id } })
 				.then(([order])=>{
 					if (!order) throw new Error('Pedido não encontrado');
 					return order;
 				})
 		}
 	},
-	Mutation : {
+	Mutation: {
 		createOrder: (_, { data }, ctx) => {
 			return sequelize.transaction(transaction => {
 				return ctx.branch.createOrder(data, { transaction })
 					.then(async (order)=> {
-						await OrderProducts.updateAll(data.products, order, transaction);
+						await OrderProduct.updateAll(data.products, order, transaction);
 
 						pubsub.publish(ORDER_CREATED, { orderCreated: order });
 
@@ -168,16 +168,16 @@ export const resolvers =  {
 		},
 		updateOrder: (_, { id, data }, ctx) => {
 			return sequelize.transaction(transaction => {
-				//return OrderOptionsGroups.create({name:'teste'}, {transaction});
+				//return OrderOptionsGroups.create({name: teste'}, {transaction});
 
-				return ctx.branch.getOrders({ where:{ id } })
+				return ctx.branch.getOrders({ where: { id } })
 					.then(async ([order])=> {
 						if (!order) throw new Error('Pedido não encontrado');
-						const updated_order = await order.update(data, { transaction });
+						const updatedOrder = await order.update(data, { transaction });
 
-						if (data.products) await OrderProducts.updateAll(data.products, updated_order, transaction);
+						if (data.products) await OrderProduct.updateAll(data.products, updatedOrder, transaction);
 
-						return updated_order;
+						return updatedOrder;
 					})
 			});
 		}

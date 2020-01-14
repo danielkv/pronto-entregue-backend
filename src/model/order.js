@@ -8,10 +8,6 @@ import conn  from '../services/connection';
 
 class Orders extends Sequelize.Model {}
 Orders.init({
-	//branch_id => criado em 'relations'
-	//user_id => criado em 'relations'
-	//payment_method_id => criado em 'relations'
-
 	//Dados principais
 	paymentFee: Sequelize.DECIMAL(10,2),
 	deliveryPrice: Sequelize.STRING,

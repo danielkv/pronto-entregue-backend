@@ -1,7 +1,7 @@
 import crypto  from 'crypto';
 import Sequelize  from 'sequelize';
 
-function sanitizeFilter(_filter={}, _options = {}) {
+function sanitizeFilter(_filter = {}, _options = {}) {
 	let options = {
 		search: ['name', 'description'],
 		excludeFilters: [],
@@ -34,9 +34,9 @@ function sanitizeFilter(_filter={}, _options = {}) {
 	if (search) {
 		filter = {
 			...filter,
-			[Sequelize.Op.or] : options.search.map(option => (
+			[Sequelize.Op.or]: options.search.map(option => (
 				[{
-					[option] : { [Sequelize.Op.like] : `%${search}%` }
+					[option]: { [Sequelize.Op.like]: `%${search}%` }
 				}]
 			))
 		}
@@ -47,9 +47,9 @@ function sanitizeFilter(_filter={}, _options = {}) {
 		delete filter.createdAt;
 		
 		filter = {
-			[Sequelize.Op.and] : [
+			[Sequelize.Op.and]: [
 				filter,
-				Sequelize.where(Sequelize.fn('date', Sequelize.col(`${options.table ? `${options.table}.`:''}created_at`)), Sequelize.fn(createdAt)),
+				Sequelize.where(Sequelize.fn('date', Sequelize.col(`${options.table ? `${options.table}.`: ''}createdAt`)), Sequelize.fn(createdAt)),
 			]
 		}
 	}
@@ -86,8 +86,8 @@ function salt(password, salt=null) {
 	hash.update(password);
 	let _password = hash.digest('hex');
 	return {
-		password:_password,
-		salt:_salt,
+		password: _password,
+		salt: _salt,
 	}
 }
 

@@ -1,13 +1,13 @@
 import Sequelize  from 'sequelize';
 
-import Options  from '../model/options';
 import conn from '../services/connection';
+import Option  from './option';
 
 /*
  * Define modelo (tabela) de grupos de opções
  */
 
-class OptionsGroups extends Sequelize.Model {
+class OptionGroup extends Sequelize.Model {
 	static updateAll (groups, product, transaction=null) {
 		return Promise.all(
 			groups.map((group) => {
@@ -18,17 +18,17 @@ class OptionsGroups extends Sequelize.Model {
 						if (!['create', 'remove', 'update'].includes(group.action)) return resolve(group);
 
 						if (group.id && group.action === "remove") {
-							groupModel = await product.removeOptionsGroup(groupModel, { transaction });
+							groupModel = await product.removeOptionGroup(groupModel, { transaction });
 							return resolve(groupModel);
 						} else if (group.action === 'create') {
-							groupModel = await product.createOptionsGroup(group, { transaction });
+							groupModel = await product.createOptionGroup(group, { transaction });
 						} else if (group.id && group.action === 'update') {
-							[groupModel] = await product.getOptionsGroups({ where: { id: group.id } });
-							groupModel = await groupModel.update(group, { fields: ['name', 'active', 'type', 'minSelect', 'maxSelect', 'order', 'maxSelect_restrain'], transaction });
+							[groupModel] = await product.getOptionGroup({ where: { id: group.id } });
+							groupModel = await groupModel.update(group, { fields: ['name', 'active', 'type', 'minSelect', 'maxSelect', 'order', 'maxSelectRestrain'], transaction });
 						}
 						
 						if (groupModel) {
-							if (!group.remove && group.options) group.options = await Options.updateAll(group.options, groupModel, transaction);
+							if (!group.remove && group.options) group.options = await Option.updateAll(group.options, groupModel, transaction);
 							return resolve({ ...groupModel.get(), options: group.options });
 						} else {
 							return reject('Grupo não foi encontrado');
@@ -42,7 +42,7 @@ class OptionsGroups extends Sequelize.Model {
 	}
 }
 
-OptionsGroups.init({
+OptionGroup.init({
 	name: Sequelize.STRING,
 	type: {
 		type: Sequelize.STRING(50),
@@ -78,8 +78,7 @@ OptionsGroups.init({
 	},
 }, {
 	tableName: 'option_groups',
-	sequelize: conn,
-	name: { singular: 'OptionsGroup', plural: 'OptionsGroups' }
+	sequelize: conn
 });
 
-export default OptionsGroups;
+export default OptionGroup;

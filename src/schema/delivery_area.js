@@ -6,14 +6,14 @@ import { ZipcodeError }  from '../utilities/errors';
 
 export const typeDefs =  gql`
 	type DeliveryArea {
-		id:ID!
-		name:String!
-		type:String!
-		price:Float!
-		zipcode_a: Int!
-		zipcode_b: Int
-		createdAt:String!
-		updatedAt:String!
+		id: ID!
+		name: String!
+		type: String!
+		price: Float!
+		zipcodeA: Int!
+		zipcodeB: Int
+		createdAt: String!
+		updatedAt: String!
 	}
 
 	input DeliveryAreaInput {
@@ -21,8 +21,8 @@ export const typeDefs =  gql`
 		name: String
 		type: String
 		price: Float
-		zipcode_a: Int
-		zipcode_b: Int
+		zipcodeA: Int
+		zipcodeB: Int
 	}
 
 	extend type Query {
@@ -30,8 +30,8 @@ export const typeDefs =  gql`
 	}
 
 	extend type Mutation {
-		modifyDeliveryAreas(data:[DeliveryAreaInput]!):[DeliveryArea]!
-		removeDeliveryArea(id:ID!):DeliveryArea!
+		modifyDeliveryAreas(data: [DeliveryAreaInput]!): [DeliveryArea]!
+		removeDeliveryArea(id: ID!): DeliveryArea!
 	}
 `;
 
@@ -39,13 +39,13 @@ export const resolvers =  {
 	Query: {
 		calculateDeliveryPrice: (parent, { zipcode }, ctx) => {
 			return ctx.branch.getDeliveryAreas({
-				order:[['price', 'DESC']],
+				order: [['price', 'DESC']],
 				limit: 1,
 				where: {
-					[Op.or] : [
-						{ type: 'single', zipcode_a: zipcode },
-						{ type: 'set', zipcode_a: { [Op.lte]: zipcode }, zipcode_b: { [Op.gte]: zipcode } },
-						{ type: 'joker', zipcode_a: fn('substring', zipcode, 1, fn('char_length', col('zipcode_a'))) },
+					[Op.or]: [
+						{ type: 'single', zipcodeA: zipcode },
+						{ type: 'set', zipcodeA: { [Op.lte]: zipcode }, zipcodeB: { [Op.gte]: zipcode } },
+						{ type: 'joker', zipcodeA: fn('substring', zipcode, 1, fn('char_length', col('zipcodeA'))) },
 					]
 				}
 			})
@@ -56,7 +56,7 @@ export const resolvers =  {
 				})
 		},
 	},
-	Mutation : {
+	Mutation: {
 		modifyDeliveryAreas: (parent, { data }, ctx) => {
 			const update = data.filter(row=>row.id);
 			const create = data.filter(row=>!row.id);
@@ -68,11 +68,11 @@ export const resolvers =  {
 				}))
 				
 				const resultUpdate = await Promise.all(update.map(area=>{
-					return ctx.branch.getDeliveryAreas({ where:{ id:area.id } })
-						.then(([area_found])=>{
-							if (!area_found) throw new Error('Área de entrega não encontrada');
+					return ctx.branch.getDeliveryAreas({ where: { id: area.id } })
+						.then(([areaFound])=>{
+							if (!areaFound) throw new Error('Área de entrega não encontrada');
 						
-							return area_found.update(area, { field:['name', 'type', 'zipcode_a', 'zipcode_b', 'price'], transaction });
+							return areaFound.update(area, { field: ['name', 'type', 'zipcodeA', 'zipcodeB', 'price'], transaction });
 						})
 				}));
 
@@ -80,11 +80,11 @@ export const resolvers =  {
 			})
 		},
 		removeDeliveryArea: (parent, { id }, ctx) => {
-			return ctx.branch.getDeliveryAreas({ where:{ id } })
-				.then (([delivery_area]) => {
-					if (!delivery_area) throw new Error('Área de entrega não encontrada');
+			return ctx.branch.getDeliveryAreas({ where: { id } })
+				.then (([deliveryArea]) => {
+					if (!deliveryArea) throw new Error('Área de entrega não encontrada');
 
-					return delivery_area.destroy();
+					return deliveryArea.destroy();
 				});
 		},
 	}
