@@ -1,6 +1,6 @@
 import Sequelize  from 'sequelize';
 
-import sequelize  from '../services/connection';
+import conn  from '../services/connection';
 
 /*
  * Define modelo (tabela) de relação de empresas e usuários
@@ -17,6 +17,6 @@ BranchesUsers.init({
 		type: Sequelize.BOOLEAN,
 		defaultValue: 1,
 	},
-}, { modelName:'branch_relation', tableName:'branches_users', underscored:true, sequelize });
+}, { modelName:'branch_relation', tableName:'branches_users', underscored:true, sequelize: conn });
 
 export default BranchesUsers;

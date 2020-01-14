@@ -1,6 +1,6 @@
-import Sequelize  from 'sequelize';
+import Sequelize from 'sequelize';
 
-import sequelize  from '../services/connection';
+import conn from '../services/connection';
 
 /*
  * Define modelo (tabela) de usuários
@@ -60,6 +60,6 @@ UsersMeta.init({
 		type: Sequelize.BOOLEAN,
 		defaultValue: 0,
 	},
-}, { modelName:'users_meta', underscored:true, sequelize, name:{ singular:'meta', plural:'metas' } });
+}, { modelName:'users_meta', underscored:true, sequelize: conn, name:{ singular:'meta', plural:'metas' } });
 
 export default UsersMeta;

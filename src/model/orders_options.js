@@ -1,6 +1,6 @@
 import Sequelize  from 'sequelize';
 
-import sequelize  from '../services/connection';
+import conn from '../services/connection';
 
 /*
  * Define modelo (tabela) de opções de produtos de pedidos
@@ -38,6 +38,6 @@ OrdersOptions.init({
 			return parseFloat(this.getDataValue('price'));
 		}
 	},
-}, { modelName:'orders_options', underscored:true, sequelize });
+}, { modelName:'orders_options', underscored:true, sequelize: conn });
 
 export default OrdersOptions;

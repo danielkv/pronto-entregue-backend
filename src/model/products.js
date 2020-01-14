@@ -1,6 +1,6 @@
 import Sequelize  from 'sequelize';
 
-import conn  from '../services/connection';
+import conn from '../services/connection';
 
 /*
  * Define modelo (tabela) de produtos
@@ -51,6 +51,6 @@ Products.init({
 			return parseFloat(this.getDataValue('price'));
 		}
 	},
-}, { modelName:'products', underscored:true, conn });
+}, { modelName:'products', underscored:true, sequelize: conn });
 
 export default Products;

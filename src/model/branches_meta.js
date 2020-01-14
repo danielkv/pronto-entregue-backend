@@ -1,6 +1,6 @@
 import Sequelize  from 'sequelize';
 
-import sequelize  from '../services/connection';
+import conn  from '../services/connection';
 
 
 /*
@@ -55,6 +55,6 @@ BranchesMeta.init({
 		type: Sequelize.BOOLEAN,
 		defaultValue: 0,
 	},
-}, { modelName:'branches_meta', underscored:true, sequelize, name:{ singular:'meta', plural:'metas' } });
+}, { modelName:'branches_meta', underscored:true, sequelize: conn, name:{ singular:'meta', plural:'metas' } });
 
 export default BranchesMeta;

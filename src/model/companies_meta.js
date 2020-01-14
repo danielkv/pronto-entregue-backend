@@ -1,6 +1,6 @@
 import Sequelize  from 'sequelize';
 
-import sequelize  from '../services/connection';
+import conn from '../services/connection';
 
 /*
  * Define modelo (tabela) de relação entre produtos e filiais / empresas
@@ -59,6 +59,6 @@ CompaniesMeta.init({
 		type: Sequelize.BOOLEAN,
 		defaultValue: 0,
 	},
-}, { modelName:'companies_meta', underscored:true, sequelize, name:{ singular:'meta', plural:'metas' } });
+}, { modelName:'companies_meta', underscored:true, sequelize: conn, name:{ singular:'meta', plural:'metas' } });
 
 export default CompaniesMeta;

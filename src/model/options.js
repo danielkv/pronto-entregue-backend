@@ -1,6 +1,6 @@
 import Sequelize  from 'sequelize';
 
-import sequelize  from '../services/connection';
+import conn from '../services/connection';
 
 /*
  * Define modelo (tabela) de opções
@@ -54,6 +54,6 @@ Options.init({
 			return parseFloat(this.getDataValue('price'));
 		}
 	},
-}, { modelName:'options', underscored:true, sequelize, name:{ singular:'option', plural:'options' } });
+}, { modelName:'options', underscored:true, sequelize: conn, name:{ singular:'option', plural:'options' } });
 
 export default Options;

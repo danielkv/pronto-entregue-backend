@@ -1,6 +1,6 @@
 import Sequelize  from 'sequelize';
 
-import sequelize  from '../services/connection';
+import conn  from '../services/connection';
 
 /*
  * Define modelo (tabela) de pedidos
@@ -70,6 +70,6 @@ Orders.init({
 	district: Sequelize.STRING,
 	zipcode: Sequelize.STRING,
 	
-}, { modelName:'orders', underscored:true, sequelize });
+}, { modelName:'orders', underscored:true, sequelize: conn });
 
 export default Orders;

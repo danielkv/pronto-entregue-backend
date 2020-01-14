@@ -1,7 +1,7 @@
 import Sequelize  from 'sequelize';
 
 import Options  from '../model/options';
-import sequelize  from '../services/connection';
+import conn from '../services/connection';
 
 /*
  * Define modelo (tabela) de grupos de opções
@@ -76,6 +76,6 @@ OptionsGroups.init({
 		type: Sequelize.BOOLEAN,
 		defaultValue: 1,
 	},
-}, { modelName:'options_groups', underscored:true, sequelize, name:{ singular:'OptionsGroup', plural:'OptionsGroups' } });
+}, { modelName:'options_groups', underscored:true, sequelize: conn, name:{ singular:'OptionsGroup', plural:'OptionsGroups' } });
 
 export default OptionsGroups;

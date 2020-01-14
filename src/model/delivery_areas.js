@@ -1,6 +1,6 @@
 import Sequelize  from 'sequelize';
 
-import sequelize  from '../services/connection';
+import conn from '../services/connection';
 
 /*
  * Define modelo (tabela) de locais de entrega
@@ -47,6 +47,6 @@ DeliveryAreas.init({
 		type: Sequelize.DECIMAL(10,2),
 		defaultValue: 0
 	},
-}, { modelName:'delivery_areas', underscored:true, sequelize, name:{ singular:'DeliveryArea', plural:'DeliveryAreas' } });
+}, { modelName:'delivery_areas', underscored:true, sequelize: conn, name:{ singular:'DeliveryArea', plural:'DeliveryAreas' } });
 
 export default DeliveryAreas;

@@ -22,7 +22,7 @@ app.use(cors());
 //Configuração de schema e contexto
 const server = new ApolloServer({
 	schema,
-	context: createContext()
+	context: createContext
 });
 
 // configure router

@@ -1,6 +1,6 @@
-import Sequelize  from 'sequelize';
+import Sequelize from 'sequelize';
 
-import sequelize  from '../services/connection';
+import conn from '../services/connection';
 import { salt }  from '../utilities';
 
 /*
@@ -60,8 +60,8 @@ Users.init({
 	}
 },{
 	modelName : 'users', //nome da tabela
-	underscored:true,
-	sequelize,
+	underscored: true,
+	sequelize: conn,
 });
 
 export default Users;

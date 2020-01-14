@@ -1,6 +1,6 @@
 import Sequelize  from 'sequelize';
 
-import sequelize  from '../services/connection';
+import conn from '../services/connection';
 
 /*
  * Define modelo (tabela) de métodos de pagamentos das filiais
@@ -22,6 +22,6 @@ BranchesPaymentMethods.init({
 			return JSON.parse(this.getDataValue('settings'));
 		}
 	},
-}, { modelName:'association', tableName:'branches_payment_methods', underscored:true, sequelize, name:{ singular:'PaymentMethod', plural:'PaymentMethods' } });
+}, { modelName:'association', tableName:'branches_payment_methods', underscored:true, sequelize: conn, name:{ singular:'PaymentMethod', plural:'PaymentMethods' } });
 
 export default BranchesPaymentMethods;

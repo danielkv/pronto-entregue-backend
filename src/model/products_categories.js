@@ -1,6 +1,6 @@
-import Sequelize  from 'sequelize';
+import Sequelize from 'sequelize';
 
-import sequelize  from '../services/connection';
+import conn from '../services/connection';
 
 /*
  * Define modelo (tabela) de categorias de produtos
@@ -24,6 +24,6 @@ ProductsCategories.init({
 			notNull:{ msg:'Você deve definir uma ordem' },
 		}
 	},
-}, { modelName:'products_categories', underscored:true, sequelize, name:{ singular:'category', plural:'categories' } });
+}, { modelName:'products_categories', underscored:true, sequelize: conn, name:{ singular:'category', plural:'categories' } });
 
 export default ProductsCategories;

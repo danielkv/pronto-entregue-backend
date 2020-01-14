@@ -1,6 +1,6 @@
 import Sequelize  from 'sequelize';
 
-import sequelize  from '../services/connection';
+import conn from '../services/connection';
 
 /*
  * Define modelo (tabela) de empresas
@@ -14,6 +14,6 @@ Companies.init({
 		type: Sequelize.BOOLEAN,
 		defaultValue: 0,
 	},
-}, { modelName:'companies', underscored:true, sequelize });
+}, { modelName:'companies', underscored:true, sequelize: conn });
 
 export default Companies;

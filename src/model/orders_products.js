@@ -1,6 +1,6 @@
 import Sequelize  from 'sequelize';
 
-import sequelize  from '../services/connection';
+import conn from '../services/connection';
 import OrdersOptionsGroups  from './orders_options_groups';
 
 /*
@@ -52,6 +52,6 @@ OrdersProducts.init({
 	name: Sequelize.STRING,
 	price: Sequelize.DECIMAL(10,2),
 	message: Sequelize.STRING,
-}, { tableName:'orders_products', underscored:true, sequelize });
+}, { tableName:'orders_products', underscored:true, sequelize: conn });
 
 export default OrdersProducts;

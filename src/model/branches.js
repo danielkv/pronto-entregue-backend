@@ -1,6 +1,6 @@
 import Sequelize  from 'sequelize';
 
-import sequelize  from '../services/connection';
+import conn  from '../services/connection';
 
 /*
  * Define modelo (tabela) de filiais
@@ -31,6 +31,6 @@ Branches.init({
 		type: Sequelize.BOOLEAN,
 		defaultValue: 1,
 	},
-}, { modelName:'branches', underscored:true, sequelize });
+}, { modelName:'branches', underscored:true, sequelize: conn });
 
 export default Branches;

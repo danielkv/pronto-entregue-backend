@@ -1,8 +1,7 @@
 import { Router }  from 'express';
 
-import { importTable } from './controller/helper';
+import { importTable, exportDB } from './controller/helper';
 import { setupDataBase } from './controller/setupDB';
-import exportDB  from './services/export';
 
 const route = Router();
 

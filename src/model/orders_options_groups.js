@@ -1,6 +1,6 @@
 import Sequelize  from 'sequelize';
 
-import sequelize  from '../services/connection';
+import conn from '../services/connection';
 import OrdersOptions  from './orders_options';
 
 /*
@@ -42,6 +42,6 @@ class OrdersOptionsGroups extends Sequelize.Model {
 }
 OrdersOptionsGroups.init({
 	name: Sequelize.STRING,
-}, { modelName:'orders_options_groups', underscored:true, sequelize });
+}, { modelName:'orders_options_groups', underscored:true, sequelize: conn });
 
 export default OrdersOptionsGroups;
