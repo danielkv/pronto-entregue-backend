@@ -1,13 +1,14 @@
-// eslint-disable-next-line no-undef
 require('dotenv').config();
 import { ApolloServer }  from 'apollo-server-express';
 import cors  from 'cors';
 import express  from 'express';
 import http  from 'http';
 
-import mid  from './middlewares';
+import { createContext }  from './controller/apolloContext';
 import routes  from './router';
 import schema  from './schema/_index';
+
+import './model/_index'; // setup DB relations
 
 //express config
 const app = express();
@@ -21,29 +22,7 @@ app.use(cors());
 //Configuração de schema e contexto
 const server = new ApolloServer({
 	schema,
-	context : async ({ req, connection }) => {
-		let ctx = {};
-
-		if (connection) {
-			console.log(connection.context)
-		} else {
-			const { authorization, company_id, branch_id } = req.headers;
-			let user = null, company = null, branch = null;
-			
-			if (authorization) user = await mid.authenticate(authorization);
-			if (company_id) company = await mid.selectCompany(company_id, user);
-			if (branch_id) branch = await mid.selectBranch(company, user, branch_id);
-			
-			ctx = {
-				user,
-				company,
-				branch,
-				host: req.protocol + '://' + req.get('host')
-			}
-		}
-
-		return ctx;
-	},
+	context: createContext()
 });
 
 // configure router

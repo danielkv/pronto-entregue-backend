@@ -10,7 +10,7 @@ import Users from '../model/users';
  * @param {string} authorization Token de autenciação
  */
 
-function authenticate (authorization) {
+export function authenticate (authorization) {
 	if (authorization.split(' ')[0] !== 'Bearer') throw new AuthenticationError('Autorização desconhecida');
 	const { id, email } = jwt.verify(authorization.split(' ')[1], process.env.SECRET, { ignoreExpiration:true });
 
@@ -35,7 +35,7 @@ function authenticate (authorization) {
  * @param {Users} user ID da empresa
  */
 
-function selectCompany (company_id, user) {
+export function selectCompany (company_id, user) {
 
 	return Companies.findOne({ where:{ id:company_id } })
 		.then((company_found)=>{
@@ -66,7 +66,7 @@ function selectCompany (company_id, user) {
  * @param {integer} branch_id ID da filial
  */
 
-function selectBranch (company, user, branch_id) {
+export function selectBranch (company, user, branch_id) {
 
 	return company.getBranches({ where:{ id:branch_id } })
 		.then(([branch_found])=>{
@@ -88,29 +88,4 @@ function selectBranch (company, user, branch_id) {
 
 			return branch_found;
 		});
-}
-
-/*
- * Middleware para verificar permissão
- * 
- */
-
-function permit(perms, options) {
-	return (req, res, next) => {
-		if (!req.user) throw new Error('Usuário não autenticado');
-
-		const { user } = req;
-		if (options && typeof options.function == 'function' && options.function(req)){next(); return null;}
-		if (!user.can(perms, options)) throw new Error('Você não tem permissões para esta ação');
-
-		next();
-		return null;
-	}
-}
-
-export default {
-	authenticate,
-	selectCompany,
-	selectBranch,
-	permit,
 }

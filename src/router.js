@@ -1,21 +1,18 @@
 import { Router }  from 'express';
 
+import { importTable } from './controller/helper';
+import { setupDataBase } from './controller/setupDB';
 import exportDB  from './services/export';
-import importTable  from './services/import_table';
-import installDataBase  from './services/setup'; //Configura banco de dados e relações das tabelas
 
 const route = Router();
 
-// networt test
+// test server
 route.get('/networkTest', (req, res)=>{
 	res.send(`Connected at ${req.hostname}<br>Host: ${req.headers.host}<br>Secure connection: ${!!req.secure}<br>Protocol: ${req.protocol}`);
 });
 
-// configura rota estática
-// route.use('/uploads', static(path.resolve(__dirname, '..', 'uploads')));
-
 // porta de instalação
-route.get('/setup', installDataBase);
+route.get('/setup', setupDataBase);
 
 // export database
 route.get('/export', (req, res) => {
@@ -28,6 +25,7 @@ route.get('/export', (req, res) => {
 	
 })
 
+// import only one table
 route.get('/import/:table', (req, res) => {
 	if (!process.env.SETUP) return res.sendStatus(404);
 
@@ -38,7 +36,6 @@ route.get('/import/:table', (req, res) => {
 		.then((data)=>{
 			res.json(data)
 		});
-	
 })
 
 export default route;

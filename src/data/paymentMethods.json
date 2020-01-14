@@ -1,0 +1,10 @@
+[
+	{
+		"name": "CreditDebit",
+		"display_name": "Cartão de Crédito/Débito"
+	},
+	{
+		"name": "Money",
+		"display_name": "Dinheiro"
+	}
+]

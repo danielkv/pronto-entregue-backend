@@ -1,6 +1,5 @@
-import Email  from 'email-templates';
 import nodemailer  from 'nodemailer';
-import path  from 'path';
+
 let config;
 
 if (process.env.NODE_ENV == 'production') {
@@ -26,19 +25,4 @@ if (process.env.NODE_ENV == 'production') {
 	}
 }
 
-const transporter = nodemailer.createTransport(config, { from: `${process.env.EMAIL_NAME} ${process.env.EMAIL_ACCOUNT}` });
-
-function sendMail (template_name, context) {
-	const email = new Email();
-	return email.renderAll(path.resolve(__dirname, '..', 'templates', template_name), context)
-		.then((rendered) => {
-			return transporter.sendMail({
-				to: context.to || context.email,
-				subject : rendered.subject,
-				html : rendered.html
-			});
-		})
-		.then(()=>console.log('ok'));
-}
-
-export default { sendMail };
+export default nodemailer.createTransport(config, { from: `${process.env.EMAIL_NAME} ${process.env.EMAIL_ACCOUNT}` });

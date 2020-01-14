@@ -5,26 +5,26 @@
  * Esse arquivo roda a partir do setup.js
  */
 
-import Branches  from '../model/branches';
-import BranchesMeta  from '../model/branches_meta';
-import BranchesPaymentMethods  from '../model/branches_payment_methods';
-import BranchesUsers  from '../model/branches_users';
-import Companies  from '../model/companies';
-import CompaniesMeta  from '../model/companies_meta';
-import CompaniesUsers  from '../model/companies_users';
-import DeliveryAreas  from '../model/delivery_areas';
-import Options  from '../model/options';
-import OptionsGroups  from '../model/options_groups';
-import Orders  from '../model/orders';
-import OrdersOptions  from '../model/orders_options';
-import OrdersOptionsGroups  from '../model/orders_options_groups';
-import OrdersProducts  from '../model/orders_products';
-import PaymentMethods  from '../model/payment_methods';
-import Products  from '../model/products';
-import ProductsCategories  from '../model/products_categories';
-import Roles  from '../model/roles';
-import Users  from '../model/users';
-import UsersMeta  from '../model/users_meta';
+import Branches  from './branches';
+import BranchesMeta  from './branches_meta';
+import BranchesPaymentMethods  from './branches_payment_methods';
+import BranchesUsers  from './branches_users';
+import Companies  from './companies';
+import CompaniesMeta  from './companies_meta';
+import CompaniesUsers  from './companies_users';
+import DeliveryAreas  from './delivery_areas';
+import Options  from './options';
+import OptionsGroups  from './options_groups';
+import Orders  from './orders';
+import OrdersOptions  from './orders_options';
+import OrdersOptionsGroups  from './orders_options_groups';
+import OrdersProducts  from './orders_products';
+import PaymentMethods  from './payment_methods';
+import Products  from './products';
+import ProductsCategories  from './products_categories';
+import Roles  from './roles';
+import Users  from './users';
+import UsersMeta  from './users_meta';
 
 //Companies Relations
 Companies.hasMany(Branches, { foreignKey:'company_id' });
