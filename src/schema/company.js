@@ -7,12 +7,6 @@ import sequelize  from '../services/connection';
 import { getSQLPagination, sanitizeFilter }  from '../utilities';
 
 export const typeDefs =  gql`
-	type CompanyMeta {
-		id: ID!
-		key: String!
-		value: String!
-		createdAt: String! @dateTime
-	}
 
 	type Company {
 		id: ID!
@@ -21,7 +15,7 @@ export const typeDefs =  gql`
 		active: Boolean!
 		createdAt: String! @dateTime
 		updatedAt: String! @dateTime
-		metas: [CompanyMeta]!
+		metas: [Meta]!
 		lastMonthRevenue: Float!
 		userRelation: CompanyRelation!
 
@@ -34,18 +28,12 @@ export const typeDefs =  gql`
 		branches(filter: Filter, pagination: Pagination): [Branch]!
 	}
 	
-	input CompanyMetaInput {
-		id: ID
-		action: String! #create | update | delete
-		key: String
-		value: String
-	}
 
 	input CompanyInput {
 		name: String
 		displayName: String
 		active: Boolean
-		metas: [CompanyMetaInput]
+		metas: [MetaInput]
 	}
 
 	extend type Mutation {

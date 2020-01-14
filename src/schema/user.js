@@ -13,12 +13,6 @@ import { salt, getSQLPagination, sanitizeFilter }  from '../utilities';
 const Op = conn.Op;
 
 export const typeDefs = gql`
-	type UserMeta {
-		id: ID!
-		key: String!
-		value: String!
-		createdAt: String! @dateTime
-	}
 
 	type CompanyRelation {
 		active: Boolean!
@@ -41,7 +35,7 @@ export const typeDefs = gql`
 		createdAt: String! @dateTime
 		updatedAt: String! @dateTime
 
-		metas (type: String): [UserMeta]!
+		metas (type: String): [Meta]!
 		addresses: [Address]!
 		
 		orders: [Order]!
@@ -62,7 +56,7 @@ export const typeDefs = gql`
 
 		assignedBranches: [AssignedBranchInput]
 		assignedCompany: AssignedCompanyInput
-		metas: [UserMetaInput]
+		metas: [MetaInput]
 	}
 
 	input AssignedCompanyInput {
@@ -78,13 +72,6 @@ export const typeDefs = gql`
 	input BranchUserRelationInput {
 		active: Boolean!
 		roleId: ID!
-	}
-
-	input UserMetaInput {
-		id: ID
-		action: String! #create | update | delete
-		key: String
-		value: String
 	}
 
 	type Login {

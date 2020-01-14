@@ -12,13 +12,6 @@ import sequelize  from '../services/connection';
 import { sanitizeFilter, getSQLPagination }  from '../utilities';
 
 export const typeDefs =  gql`
-	type BranchMeta {
-		id: ID!
-		key: String!
-		value: String!
-		createdAt: String!
-	}
-
 	type BusinessTime {
 		from: String
 		to: String
@@ -57,7 +50,7 @@ export const typeDefs =  gql`
 		userRelation: BranchRelation!
 		lastMonthRevenue: Float!
 
-		metas: [BranchMeta]!
+		metas: [Meta]!
 		phones: [Phone]!
 		address: Address!
 		businessHours: [BusinessHour]!
@@ -81,17 +74,10 @@ export const typeDefs =  gql`
 		bestSellers (filter: Filter, pagination: Pagination): [ProductBestSeller]!
 	}
 
-	input BranchMetaInput {
-		id: ID
-		action: String! #create | update | delete
-		key: String
-		value: String
-	}
-	
 	input BranchInput {
 		name: String
 		active: Boolean
-		metas: [BranchMetaInput]
+		metas: [MetaInput]
 	}
 
 	extend type Query {
