@@ -30,7 +30,7 @@ route.get('/import/:table', (req, res) => {
 	if (!process.env.SETUP) return res.sendStatus(404);
 
 	const table = req.params.table;
-	const data = require('../items.json');
+	const data = require('../other.json');
 
 	importTable(table, data)
 		.then((data)=>{

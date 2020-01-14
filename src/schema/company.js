@@ -32,8 +32,6 @@ export const typeDefs =  gql`
 		
 		countBranches(filter:Filter): Int!
 		branches(filter:Filter, pagination: Pagination): [Branch]!
-		countItems(filter: Filter): Int!
-		items(filter:Filter, pagination: Pagination): [Item]!
 	}
 	
 	input CompanyMetaInput {
@@ -105,19 +103,6 @@ export const resolvers =  {
 		}
 	},
 	Company: {
-		countItems : (parent, { filter }) => {
-			const _filter = sanitizeFilter(filter);
-
-			return parent.countItems({ where: _filter })
-		},
-		items : (parent, { filter, pagination }) => {
-			const _filter = sanitizeFilter(filter);
-
-			return parent.getItems({
-				where: _filter,
-				...getSQLPagination(pagination),
-			});
-		},
 		user_relation : (parent) => {
 			if (!parent.company_relation) throw new Error('Nenhum usuário selecionado');
 

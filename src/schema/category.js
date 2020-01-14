@@ -1,6 +1,6 @@
 import { gql }  from 'apollo-server';
 
-import { upload }  from '../config/uploads';
+import { upload }  from '../controller/uploads';
 import ProductsCagetories  from '../model/products_categories';
 import sequelize  from '../services/connection';
 

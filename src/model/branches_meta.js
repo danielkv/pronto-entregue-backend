@@ -2,6 +2,7 @@ import Sequelize  from 'sequelize';
 
 import sequelize  from '../services/connection';
 
+
 /*
  * Define modelo (tabela) de metadata para as filiais
  */
@@ -27,7 +28,7 @@ class BranchesMeta extends Sequelize.Model {
 }
 BranchesMeta.init({
 	meta_type: {
-		type:Sequelize.STRING,
+		type: Sequelize.STRING,
 		comment: 'phone | email | document | business_hours | address | ...',
 		set(val) {
 			const unique_types = ['document', 'business_hours'];

@@ -10,14 +10,9 @@ export const typeDefs =  gql`
 		createdAt:String!
 		updatedAt:String!
 		max_select_restrain_other:Int
-		item:Item
 	}
 `;
 
 export const resolvers =  {
-	Option: {
-		item: (parent) => {
-			return parent.getItem();
-		},
-	}
+	
 }

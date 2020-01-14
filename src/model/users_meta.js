@@ -34,9 +34,9 @@ class UsersMeta extends Sequelize.Model {
 UsersMeta.init({
 	meta_type: {
 		type:Sequelize.STRING,
-		comment: 'phone | email | document | business_hours | address | ...',
+		comment: 'phone | email | document | address | ...',
 		set(val) {
-			const unique_types = ['document', 'business_hours'];
+			const unique_types = ['document'];
 			if (unique_types.includes(val))
 				this.setDataValue('unique', true);
 			

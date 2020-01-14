@@ -4,7 +4,7 @@ import { extname, basename }  from 'path';
 import { storage }  from '../services/gcloud';
 import { slugify }  from '../utilities';
 
-const upload = async (bucketName, file) => {
+export const upload = async (bucketName, file) => {
 	const bucket = await getFileBucket(bucketName);
 	const { url } = await startUpload(bucket, file);
 
@@ -55,8 +55,4 @@ const startUpload = async (bucket, file) => {
 				resolve({ file: newFile, url });
 			});
 	});
-}
-
-export default {
-	upload
 }

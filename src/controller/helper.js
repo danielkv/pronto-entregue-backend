@@ -6,7 +6,6 @@ import Companies  from '../model/companies';
 import CompaniesMeta  from '../model/companies_meta';
 import CompaniesUsers  from '../model/companies_users';
 import DeliveryAreas  from '../model/delivery_areas';
-import Items  from '../model/items';
 import Options  from '../model/options';
 import OptionsGroups  from '../model/options_groups';
 import Products  from '../model/products';
@@ -28,7 +27,6 @@ export const exportDB = async (exclude) => {
 		branches_users: await BranchesUsers.findAll({ attributes: { exclude } }),
 		branches_payment_methods: await BranchesPaymentMethods.findAll({ attributes: { exclude } }),
 		
-		items: await Items.findAll({ attributes: { exclude } }),
 		delivery_areas: await DeliveryAreas.findAll({ attributes: { exclude } }),
 		products_categories: await ProductsCategories.findAll({ attributes: { exclude } }),
 		products: await Products.findAll({ attributes: { exclude } }),
@@ -51,7 +49,6 @@ export const importDB = async (data) => {
 	await CompaniesUsers.bulkCreate(data.companies_users);
 	await BranchesUsers.bulkCreate(data.branches_users);
 	
-	await Items.bulkCreate(data.items);
 	await DeliveryAreas.bulkCreate(data.delivery_areas);
 
 	await ProductsCategories.bulkCreate(data.products_categories);

@@ -1,14 +1,13 @@
 import { makeExecutableSchema, gql }  from 'apollo-server';
 import { merge }  from 'lodash';
 
-import { upload }  from '../config/uploads';
+import { upload }  from '../controller/uploads';
 import { typeDefs as Address, resolvers as addressResolvers }  from './address';
 import { typeDefs as Branch, resolvers as branchResolvers }  from './branch';
 import { typeDefs as Category, resolvers as categoryResolvers }  from './category';
 import { typeDefs as Company, resolvers as companyResolvers }  from './company';
 import { typeDefs as DeliveryArea, resolvers as deliveryAreaResolvers }  from './delivery_area';
 import directives  from './directives';
-import { typeDefs as Item, resolvers as itemResolvers }  from './item';
 import { typeDefs as Option, resolvers as optionResolvers }  from './option';
 import { typeDefs as OptionsGroup, resolvers as optionsGroupResolvers }  from './options_group';
 import { typeDefs as Order, resolvers as orderResolvers }  from './order';
@@ -66,7 +65,7 @@ const resolvers = {
 }
 
 export default makeExecutableSchema({
-	typeDefs : [typeDefs, Branch, Category, Company, Item, Option, OptionsGroup, OrderOption, OrderOptionsGroup, OrderProduct, Order, PaymentMethod, Product, Role, DeliveryArea, User, Address, Phone],
-	resolvers : merge(resolvers, branchResolvers, categoryResolvers, companyResolvers, itemResolvers, optionResolvers, optionsGroupResolvers, orderOptionResolvers, orderOptionsGroupResolvers, orderProductResolvers, orderResolvers, paymentMethodResolvers, productResolvers, roleResolvers, deliveryAreaResolvers, userResolvers, addressResolvers, phoneResolvers),
+	typeDefs : [typeDefs, Branch, Category, Company, Option, OptionsGroup, OrderOption, OrderOptionsGroup, OrderProduct, Order, PaymentMethod, Product, Role, DeliveryArea, User, Address, Phone],
+	resolvers : merge(resolvers, branchResolvers, categoryResolvers, companyResolvers, optionResolvers, optionsGroupResolvers, orderOptionResolvers, orderOptionsGroupResolvers, orderProductResolvers, orderResolvers, paymentMethodResolvers, productResolvers, roleResolvers, deliveryAreaResolvers, userResolvers, addressResolvers, phoneResolvers),
 	directiveResolvers : directives,
 })

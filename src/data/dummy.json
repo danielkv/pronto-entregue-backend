@@ -929,8 +929,7 @@
 			"active":true,
 			"createdAt":"2019-11-27T14:45:24.000Z",
 			"updatedAt":"2019-12-02T22:42:18.000Z",
-			"option_group_id":1,
-			"item_id":null
+			"option_group_id":1
 		},
 		{ 
 			"price":1.5,
@@ -941,8 +940,7 @@
 			"active":true,
 			"createdAt":"2019-11-27T14:45:24.000Z",
 			"updatedAt":"2019-12-02T22:42:18.000Z",
-			"option_group_id":1,
-			"item_id":null
+			"option_group_id":1
 		},
 		{ 
 			"price":2.5,
@@ -953,8 +951,7 @@
 			"active":true,
 			"createdAt":"2019-11-27T14:45:24.000Z",
 			"updatedAt":"2019-12-02T22:43:03.000Z",
-			"option_group_id":1,
-			"item_id":null
+			"option_group_id":1
 		},
 		{ 
 			"price":0,
@@ -965,8 +962,7 @@
 			"active":true,
 			"createdAt":"2019-11-27T14:45:24.000Z",
 			"updatedAt":"2019-11-27T14:45:24.000Z",
-			"option_group_id":2,
-			"item_id":null
+			"option_group_id":2
 		},
 		{ 
 			"price":5,
@@ -977,8 +973,7 @@
 			"active":true,
 			"createdAt":"2019-11-27T14:45:24.000Z",
 			"updatedAt":"2019-11-27T14:45:24.000Z",
-			"option_group_id":2,
-			"item_id":null
+			"option_group_id":2
 		},
 		{ 
 			"price":0,
@@ -989,8 +984,7 @@
 			"active":true,
 			"createdAt":"2019-11-27T14:45:24.000Z",
 			"updatedAt":"2019-11-27T14:45:24.000Z",
-			"option_group_id":2,
-			"item_id":null
+			"option_group_id":2
 		},
 		{ 
 			"price":0,
@@ -1001,8 +995,7 @@
 			"active":true,
 			"createdAt":"2019-11-27T14:45:24.000Z",
 			"updatedAt":"2019-11-27T14:45:24.000Z",
-			"option_group_id":2,
-			"item_id":null
+			"option_group_id":2
 		},
 		{ 
 			"price":0,
@@ -1013,8 +1006,7 @@
 			"active":true,
 			"createdAt":"2019-11-27T14:45:24.000Z",
 			"updatedAt":"2019-11-27T14:45:24.000Z",
-			"option_group_id":2,
-			"item_id":null
+			"option_group_id":2
 		},
 		{ 
 			"price":5,
@@ -1025,8 +1017,7 @@
 			"active":true,
 			"createdAt":"2019-11-27T14:45:24.000Z",
 			"updatedAt":"2019-11-27T14:45:24.000Z",
-			"option_group_id":2,
-			"item_id":null
+			"option_group_id":2
 		},
 		{ 
 			"price":5,
@@ -1037,8 +1028,7 @@
 			"active":true,
 			"createdAt":"2019-11-27T14:45:24.000Z",
 			"updatedAt":"2019-11-27T14:45:24.000Z",
-			"option_group_id":2,
-			"item_id":null
+			"option_group_id":2
 		},
 		{ 
 			"price":5,
@@ -1049,8 +1039,7 @@
 			"active":true,
 			"createdAt":"2019-11-27T14:45:24.000Z",
 			"updatedAt":"2019-11-27T14:45:24.000Z",
-			"option_group_id":2,
-			"item_id":null
+			"option_group_id":2
 		},
 		{ 
 			"price":5,
@@ -1061,8 +1050,7 @@
 			"active":true,
 			"createdAt":"2019-11-27T14:45:24.000Z",
 			"updatedAt":"2019-11-27T14:45:24.000Z",
-			"option_group_id":2,
-			"item_id":null
+			"option_group_id":2
 		},
 		{ 
 			"price":5,
@@ -1073,8 +1061,7 @@
 			"active":true,
 			"createdAt":"2019-11-27T14:45:24.000Z",
 			"updatedAt":"2019-11-27T14:45:24.000Z",
-			"option_group_id":2,
-			"item_id":null
+			"option_group_id":2
 		},
 		{ 
 			"price":5,
@@ -1085,8 +1072,7 @@
 			"active":true,
 			"createdAt":"2019-11-27T14:45:24.000Z",
 			"updatedAt":"2019-11-27T14:45:24.000Z",
-			"option_group_id":2,
-			"item_id":null
+			"option_group_id":2
 		},
 		{ 
 			"price":5,
@@ -1097,8 +1083,7 @@
 			"active":true,
 			"createdAt":"2019-11-27T14:45:24.000Z",
 			"updatedAt":"2019-11-27T14:45:24.000Z",
-			"option_group_id":2,
-			"item_id":null
+			"option_group_id":2
 		},
 		{ 
 			"price":0,
@@ -1109,8 +1094,7 @@
 			"active":true,
 			"createdAt":"2019-11-27T14:45:24.000Z",
 			"updatedAt":"2019-11-27T14:45:24.000Z",
-			"option_group_id":4,
-			"item_id":null
+			"option_group_id":4
 		},
 		{ 
 			"price":1.5,
@@ -1121,8 +1105,7 @@
 			"active":true,
 			"createdAt":"2019-11-27T14:45:24.000Z",
 			"updatedAt":"2019-11-27T14:45:24.000Z",
-			"option_group_id":4,
-			"item_id":null
+			"option_group_id":4
 		},
 		{ 
 			"price":0,
@@ -1133,8 +1116,7 @@
 			"active":true,
 			"createdAt":"2019-11-27T14:45:24.000Z",
 			"updatedAt":"2019-11-27T14:45:24.000Z",
-			"option_group_id":4,
-			"item_id":null
+			"option_group_id":4
 		},
 		{ 
 			"price":0,
@@ -1145,8 +1127,7 @@
 			"active":true,
 			"createdAt":"2019-11-27T14:45:24.000Z",
 			"updatedAt":"2019-11-27T14:45:24.000Z",
-			"option_group_id":9,
-			"item_id":null
+			"option_group_id":9
 		},
 		{ 
 			"price":5,
@@ -1157,8 +1138,7 @@
 			"active":true,
 			"createdAt":"2019-11-27T14:45:24.000Z",
 			"updatedAt":"2019-11-27T14:45:24.000Z",
-			"option_group_id":9,
-			"item_id":null
+			"option_group_id":9
 		},
 		{ 
 			"price":0,
@@ -1169,8 +1149,7 @@
 			"active":true,
 			"createdAt":"2019-11-27T14:45:24.000Z",
 			"updatedAt":"2019-11-27T14:45:24.000Z",
-			"option_group_id":9,
-			"item_id":null
+			"option_group_id":9
 		},
 		{ 
 			"price":5,
@@ -1181,8 +1160,7 @@
 			"active":true,
 			"createdAt":"2019-11-27T14:45:24.000Z",
 			"updatedAt":"2019-11-27T14:45:24.000Z",
-			"option_group_id":9,
-			"item_id":null
+			"option_group_id":9
 		},
 		{ 
 			"price":5,
@@ -1193,8 +1171,7 @@
 			"active":true,
 			"createdAt":"2019-11-27T14:45:24.000Z",
 			"updatedAt":"2019-11-27T14:45:24.000Z",
-			"option_group_id":9,
-			"item_id":null
+			"option_group_id":9
 		},
 		{ 
 			"price":0,
@@ -1205,8 +1182,7 @@
 			"active":true,
 			"createdAt":"2019-11-27T14:45:24.000Z",
 			"updatedAt":"2019-11-27T14:45:24.000Z",
-			"option_group_id":5,
-			"item_id":null
+			"option_group_id":5
 		},
 		{ 
 			"price":1.5,
@@ -1217,8 +1193,7 @@
 			"active":true,
 			"createdAt":"2019-11-27T14:45:24.000Z",
 			"updatedAt":"2019-11-27T14:45:24.000Z",
-			"option_group_id":5,
-			"item_id":null
+			"option_group_id":5
 		},
 		{ 
 			"price":0,
@@ -1229,8 +1204,7 @@
 			"active":true,
 			"createdAt":"2019-11-27T14:45:24.000Z",
 			"updatedAt":"2019-11-27T14:45:24.000Z",
-			"option_group_id":5,
-			"item_id":null
+			"option_group_id":5
 		},
 		{ 
 			"price":0,
@@ -1241,8 +1215,7 @@
 			"active":true,
 			"createdAt":"2019-11-27T14:45:24.000Z",
 			"updatedAt":"2019-11-27T14:45:24.000Z",
-			"option_group_id":8,
-			"item_id":null
+			"option_group_id":8
 		},
 		{ 
 			"price":1.5,
@@ -1253,8 +1226,7 @@
 			"active":true,
 			"createdAt":"2019-11-27T14:45:24.000Z",
 			"updatedAt":"2019-11-27T14:45:24.000Z",
-			"option_group_id":8,
-			"item_id":null
+			"option_group_id":8
 		},
 		{ 
 			"price":3,
@@ -1265,8 +1237,7 @@
 			"active":true,
 			"createdAt":"2019-11-27T14:45:24.000Z",
 			"updatedAt":"2019-12-02T22:43:54.000Z",
-			"option_group_id":3,
-			"item_id":null
+			"option_group_id":3
 		},
 		{ 
 			"price":5,
@@ -1277,8 +1248,7 @@
 			"active":true,
 			"createdAt":"2019-11-27T14:45:24.000Z",
 			"updatedAt":"2019-12-02T22:43:54.000Z",
-			"option_group_id":3,
-			"item_id":null
+			"option_group_id":3
 		},
 		{ 
 			"price":7,
@@ -1289,8 +1259,7 @@
 			"active":true,
 			"createdAt":"2019-11-27T14:45:24.000Z",
 			"updatedAt":"2019-12-02T22:43:54.000Z",
-			"option_group_id":3,
-			"item_id":null
+			"option_group_id":3
 		},
 		{ 
 			"price":0,
@@ -1301,8 +1270,7 @@
 			"active":true,
 			"createdAt":"2019-11-27T14:45:24.000Z",
 			"updatedAt":"2019-11-27T14:45:24.000Z",
-			"option_group_id":7,
-			"item_id":null
+			"option_group_id":7
 		},
 		{ 
 			"price":1.5,
@@ -1313,8 +1281,7 @@
 			"active":true,
 			"createdAt":"2019-11-27T14:45:24.000Z",
 			"updatedAt":"2019-11-27T14:45:24.000Z",
-			"option_group_id":7,
-			"item_id":null
+			"option_group_id":7
 		},
 		{ 
 			"price":0,
@@ -1325,8 +1292,7 @@
 			"active":true,
 			"createdAt":"2019-11-27T14:45:24.000Z",
 			"updatedAt":"2019-11-27T14:45:24.000Z",
-			"option_group_id":7,
-			"item_id":null
+			"option_group_id":7
 		},
 		{ 
 			"price":0,
@@ -1337,8 +1303,7 @@
 			"active":true,
 			"createdAt":"2019-11-27T14:45:24.000Z",
 			"updatedAt":"2019-11-27T14:45:24.000Z",
-			"option_group_id":6,
-			"item_id":null
+			"option_group_id":6
 		},
 		{ 
 			"price":0,
@@ -1349,8 +1314,7 @@
 			"active":true,
 			"createdAt":"2019-11-27T14:45:24.000Z",
 			"updatedAt":"2019-11-27T14:45:24.000Z",
-			"option_group_id":9,
-			"item_id":null
+			"option_group_id":9
 		},
 		{ 
 			"price":0,
@@ -1361,8 +1325,7 @@
 			"active":true,
 			"createdAt":"2019-11-27T14:45:24.000Z",
 			"updatedAt":"2019-11-27T14:45:24.000Z",
-			"option_group_id":9,
-			"item_id":null
+			"option_group_id":9
 		},
 		{ 
 			"price":5,
@@ -1373,8 +1336,7 @@
 			"active":true,
 			"createdAt":"2019-11-27T14:45:24.000Z",
 			"updatedAt":"2019-11-27T14:45:24.000Z",
-			"option_group_id":9,
-			"item_id":null
+			"option_group_id":9
 		},
 		{ 
 			"price":5,
@@ -1385,8 +1347,7 @@
 			"active":true,
 			"createdAt":"2019-11-27T14:45:24.000Z",
 			"updatedAt":"2019-11-27T14:45:24.000Z",
-			"option_group_id":9,
-			"item_id":null
+			"option_group_id":9
 		},
 		{ 
 			"price":5,
@@ -1397,8 +1358,7 @@
 			"active":true,
 			"createdAt":"2019-11-27T14:45:24.000Z",
 			"updatedAt":"2019-11-27T14:45:24.000Z",
-			"option_group_id":9,
-			"item_id":null
+			"option_group_id":9
 		},
 		{ 
 			"price":5,
@@ -1409,8 +1369,7 @@
 			"active":true,
 			"createdAt":"2019-11-27T14:45:24.000Z",
 			"updatedAt":"2019-11-27T14:45:24.000Z",
-			"option_group_id":9,
-			"item_id":null
+			"option_group_id":9
 		},
 		{ 
 			"price":5,
@@ -1421,8 +1380,7 @@
 			"active":true,
 			"createdAt":"2019-11-27T14:45:24.000Z",
 			"updatedAt":"2019-11-27T14:45:24.000Z",
-			"option_group_id":9,
-			"item_id":null
+			"option_group_id":9
 		},
 		{ 
 			"price":0,
@@ -1433,8 +1391,7 @@
 			"active":true,
 			"createdAt":"2019-11-27T14:45:24.000Z",
 			"updatedAt":"2019-11-27T14:45:24.000Z",
-			"option_group_id":8,
-			"item_id":null
+			"option_group_id":8
 		},
 		{ 
 			"price":5,
@@ -1445,8 +1402,7 @@
 			"active":true,
 			"createdAt":"2019-11-27T14:45:24.000Z",
 			"updatedAt":"2019-11-27T14:45:24.000Z",
-			"option_group_id":6,
-			"item_id":null
+			"option_group_id":6
 		},
 		{ 
 			"price":5,
@@ -1457,8 +1413,7 @@
 			"active":true,
 			"createdAt":"2019-11-27T14:45:24.000Z",
 			"updatedAt":"2019-11-27T14:45:24.000Z",
-			"option_group_id":6,
-			"item_id":null
+			"option_group_id":6
 		},
 		{ 
 			"price":5,
@@ -1469,8 +1424,7 @@
 			"active":true,
 			"createdAt":"2019-11-27T14:45:24.000Z",
 			"updatedAt":"2019-11-27T14:45:24.000Z",
-			"option_group_id":6,
-			"item_id":null
+			"option_group_id":6
 		},
 		{ 
 			"price":5,
@@ -1481,8 +1435,7 @@
 			"active":true,
 			"createdAt":"2019-11-27T14:45:24.000Z",
 			"updatedAt":"2019-11-27T14:45:24.000Z",
-			"option_group_id":6,
-			"item_id":null
+			"option_group_id":6
 		},
 		{ 
 			"price":0,
@@ -1493,8 +1446,7 @@
 			"active":true,
 			"createdAt":"2019-11-27T14:45:24.000Z",
 			"updatedAt":"2019-11-27T14:45:24.000Z",
-			"option_group_id":6,
-			"item_id":null
+			"option_group_id":6
 		},
 		{ 
 			"price":0,
@@ -1505,8 +1457,7 @@
 			"active":true,
 			"createdAt":"2019-11-27T14:45:24.000Z",
 			"updatedAt":"2019-11-27T14:45:24.000Z",
-			"option_group_id":6,
-			"item_id":null
+			"option_group_id":6
 		},
 		{ 
 			"price":0,
@@ -1517,8 +1468,7 @@
 			"active":true,
 			"createdAt":"2019-11-27T14:45:24.000Z",
 			"updatedAt":"2019-11-27T14:45:24.000Z",
-			"option_group_id":6,
-			"item_id":null
+			"option_group_id":6
 		},
 		{ 
 			"price":5,
@@ -1529,8 +1479,7 @@
 			"active":true,
 			"createdAt":"2019-11-27T14:45:24.000Z",
 			"updatedAt":"2019-11-27T14:45:24.000Z",
-			"option_group_id":6,
-			"item_id":null
+			"option_group_id":6
 		},
 		{ 
 			"price":5,
@@ -1541,8 +1490,7 @@
 			"active":true,
 			"createdAt":"2019-11-27T14:45:24.000Z",
 			"updatedAt":"2019-11-27T14:45:24.000Z",
-			"option_group_id":6,
-			"item_id":null
+			"option_group_id":6
 		},
 		{ 
 			"price":5,
@@ -1553,8 +1501,7 @@
 			"active":true,
 			"createdAt":"2019-11-27T14:45:24.000Z",
 			"updatedAt":"2019-11-27T14:45:24.000Z",
-			"option_group_id":6,
-			"item_id":null
+			"option_group_id":6
 		},
 		{ 
 			"price":5,
@@ -1565,8 +1512,7 @@
 			"active":true,
 			"createdAt":"2019-11-27T14:45:24.000Z",
 			"updatedAt":"2019-11-27T14:45:24.000Z",
-			"option_group_id":6,
-			"item_id":null
+			"option_group_id":6
 		},
 		{ 
 			"price":30,
@@ -1577,8 +1523,7 @@
 			"active":true,
 			"createdAt":"2019-11-27T20:10:03.000Z",
 			"updatedAt":"2019-11-27T20:10:03.000Z",
-			"option_group_id":10,
-			"item_id":null
+			"option_group_id":10
 		},
 		{ 
 			"price":40,
@@ -1589,8 +1534,7 @@
 			"active":true,
 			"createdAt":"2019-11-27T20:10:03.000Z",
 			"updatedAt":"2019-11-27T20:10:03.000Z",
-			"option_group_id":10,
-			"item_id":null
+			"option_group_id":10
 		},
 		{ 
 			"price":50,
@@ -1601,8 +1545,7 @@
 			"active":true,
 			"createdAt":"2019-11-27T20:10:03.000Z",
 			"updatedAt":"2019-11-27T20:10:03.000Z",
-			"option_group_id":10,
-			"item_id":null
+			"option_group_id":10
 		},
 		{ 
 			"price":60,
@@ -1613,8 +1556,7 @@
 			"active":true,
 			"createdAt":"2019-11-27T20:10:03.000Z",
 			"updatedAt":"2019-11-27T20:10:03.000Z",
-			"option_group_id":10,
-			"item_id":null
+			"option_group_id":10
 		},
 		{ 
 			"price":0,
@@ -1625,8 +1567,7 @@
 			"active":true,
 			"createdAt":"2019-12-02T22:42:18.000Z",
 			"updatedAt":"2019-12-02T22:42:18.000Z",
-			"option_group_id":1,
-			"item_id":null
+			"option_group_id":1
 		},
 		{ 
 			"price":0,
@@ -1637,8 +1578,7 @@
 			"active":true,
 			"createdAt":"2019-12-02T22:50:18.000Z",
 			"updatedAt":"2019-12-02T22:50:18.000Z",
-			"option_group_id":11,
-			"item_id":null
+			"option_group_id":11
 		},
 		{ 
 			"price":0,
@@ -1649,8 +1589,7 @@
 			"active":true,
 			"createdAt":"2019-12-02T22:50:18.000Z",
 			"updatedAt":"2019-12-02T22:50:18.000Z",
-			"option_group_id":11,
-			"item_id":null
+			"option_group_id":11
 		},
 		{ 
 			"price":1.5,
@@ -1661,8 +1600,7 @@
 			"active":true,
 			"createdAt":"2019-12-02T22:50:18.000Z",
 			"updatedAt":"2019-12-02T22:50:18.000Z",
-			"option_group_id":11,
-			"item_id":null
+			"option_group_id":11
 		},
 		{ 
 			"price":2.5,
@@ -1673,8 +1611,7 @@
 			"active":true,
 			"createdAt":"2019-12-02T22:50:18.000Z",
 			"updatedAt":"2019-12-02T22:50:18.000Z",
-			"option_group_id":11,
-			"item_id":null
+			"option_group_id":11
 		}
 	]
 }

@@ -79,7 +79,6 @@ export const typeDefs =  gql`
 		id:ID
 		name:String!
 		price:Float!
-		item_id:ID
 		option_id:ID!
 	}
 

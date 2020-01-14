@@ -1,7 +1,7 @@
 import { gql }  from 'apollo-server';
 import conn from 'sequelize';
 
-import { upload }  from '../config/uploads';
+import { upload }  from '../controller/uploads';
 import Options  from '../model/options';
 import OptionsGroups  from '../model/options_groups';
 import Products  from '../model/products';
@@ -63,7 +63,6 @@ export const typeDefs =  gql`
 		active:Boolean
 		price:Float
 		max_select_restrain_other:Int
-		item_id:ID
 	}
 
 	extend type Query {
