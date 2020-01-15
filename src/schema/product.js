@@ -1,14 +1,11 @@
 import { gql }  from 'apollo-server';
-import conn from 'sequelize';
 
 import { upload }  from '../controller/uploads';
 import Category from '../model/category';
 import Option  from '../model/option';
 import OptionGroup  from '../model/optionGroup';
 import Product  from '../model/product';
-import sequelize  from '../services/connection';
-
-const { Op } = conn;
+import conn  from '../services/connection';
 
 export const typeDefs =  gql`
 	type Product {
@@ -82,7 +79,7 @@ export const resolvers =  {
 				data.image = await upload(company.name, await data.file);
 			}
 
-			return sequelize.transaction(async (transaction) => {
+			return conn.transaction(async (transaction) => {
 				// check if selected category exists
 				const category = await Category.findByPk(data.categoryId)
 				if (!category) throw new Error('Categoria não encontrada');
@@ -101,7 +98,7 @@ export const resolvers =  {
 				data.image = await upload(company.name, await data.file);
 			}
 
-			return sequelize.transaction(async (transaction) => {
+			return conn.transaction(async (transaction) => {
 				// check if product exists
 				const product = await Product.findByPk(id);
 				if (!product) throw new Error('Produto não encontrado');

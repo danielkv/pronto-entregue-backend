@@ -1,9 +1,8 @@
 import { gql }  from 'apollo-server';
-import conn from 'sequelize';
 
-import Category  from '../model/category';
 import OptionGroup  from '../model/optionGroup';
 import Products  from '../model/product';
+import conn from '../services/connection';
 
 const { Op } = conn;
 
