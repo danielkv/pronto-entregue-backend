@@ -6,6 +6,6 @@ export default new Sequelize(process.env.MYSQL_DB, process.env.MYSQL_USER, proce
 	pool: {
 		max: 30,
 		min: 0,
-		idle: 10000,
+		idle: 10000
 	},
 });
