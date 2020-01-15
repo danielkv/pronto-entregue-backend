@@ -2,7 +2,7 @@ class ZipcodeError extends Error {
 	constructor (message) {
 		super (message);
 		this.name = "ZipcodeError";
-		this.code = "ZIPCODE_ERROR";
+		this.code = "ZIPCODE_ERROR"
 	}
 }
 
