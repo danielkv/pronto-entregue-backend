@@ -88,7 +88,7 @@ export const resolvers = {
 		me: (_, __, { user }) => {
 			return user;
 		},
-		User: () => {
+		users: () => {
 			return User.findAll();
 		},
 		user: (_, { id }, ctx) => {
