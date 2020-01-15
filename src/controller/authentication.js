@@ -56,36 +56,3 @@ export function selectCompany (companyId, user) {
 			return companyFound;
 		});
 }
-
-/**
- * Faz a seleção da filial e insere no contexto]
- * Retorna um erro se filial for filho de empresa ou não estiver ativa
- * 
- * @param {Companies} company Empresa
- * @param {Users} user Usuário
- * @param {integer} branchId ID da filial
- */
-
-export function selectBranch (company, user, branchId) {
-
-	return company.getBranches({ where: { id: branchId } })
-		.then(([branchFound])=>{
-			if (!branchFound) throw new Error('Filial selecionada não foi encontrada');
-			//if (!branchFound.active) throw new Error('Essa filial não está ativa');
-
-			return branchFound;
-		})
-		.then (async (branchFound) => {
-			if (user) {
-				const [assignedUser] = await branchFound.getUsers({ where: { id: user.get('id') } });
-				if (assignedUser && assignedUser.branchRelation.active) {
-					branchFound.userRelation = assignedUser.branchRelation;
-
-					const role = await assignedUser.branchRelation.getRole();
-					user.permissions = [...user.permissions, role.permissions];
-				}
-			}
-
-			return branchFound;
-		});
-}

@@ -1,7 +1,6 @@
 import { gql }  from 'apollo-server';
 import conn from 'sequelize';
 
-import Branch from '../model/branch';
 import Category  from '../model/category';
 import OptionGroup  from '../model/optionGroup';
 import Products  from '../model/product';
@@ -37,15 +36,11 @@ export const typeDefs =  gql`
 
 export const resolvers =  {
 	Query: {
-		searchOptionGroup: (parent, { search }, ctx) => {
+		searchOptionGroup: (_, { search }, { company }) => {
 			return OptionGroup.findAll({
-				where: { name: { [Op.like]: `%${search}%` }, [`$product->category->branch.companyId$`]: ctx.company.get('id') },
+				where: { name: { [Op.like]: `%${search}%` }, [`$product->companyId$`]: company.get('id') },
 				include: [{
 					model: Products,
-					include: [{
-						model: Category,
-						include: [Branch]
-					}]
 				}]
 			});
 		},

@@ -67,7 +67,6 @@ export const typeDefs =  gql`
 
 	extend type Query {
 		product(id: ID!): Product!
-		searchBranchProducts(search: String!, filter: Filter): [Product]!
 	}
 
 	extend type Mutation {
@@ -78,69 +77,72 @@ export const typeDefs =  gql`
 
 export const resolvers =  {
 	Mutation: {
-		createProduct: async (_, { data }, ctx) => {
+		createProduct: async (_, { data }, { company }) => {
 			if (data.file) {
-				data.image = await upload(ctx.company.name, await data.file);
+				data.image = await upload(company.name, await data.file);
 			}
 
-			return sequelize.transaction(transaction => {
-				return ctx.branch.getCategories({ where: { id: data.categoryId } })
-					.then(async ([category]) => {
-						if (!category) throw new Error('Categoria não encontrada');
+			return sequelize.transaction(async (transaction) => {
+				// check if selected category exists
+				const category = await Category.findByPk(data.categoryId)
+				if (!category) throw new Error('Categoria não encontrada');
 
-						const product = await category.createProduct(data, { transaction });
+				// create product
+				const product = await category.createProduct(data, { transaction });
 
-						if (data.optionGroups)
-							await OptionGroup.updateAll(data.optionGroups, product, transaction);
+				// create options groups
+				if (data.optionGroups) await OptionGroup.updateAll(data.optionGroups, product, transaction);
 					
-						return product;
-					})
-				
+				return product;
 			})
 		},
-		updateProduct: async (_, { id, data }, ctx) => {
+		updateProduct: async (_, { id, data }, { company }) => {
 			if (data.file) {
-				data.image = await upload(ctx.company.name, await data.file);
+				data.image = await upload(company.name, await data.file);
 			}
 
-			return sequelize.transaction(transaction => {
-				return Product.findByPk(id)
-					.then(async (product) => {
-						if (!product) throw new Error('Produto não encontrado');
-						const productUpdated = await product.update(data, { fields: ['name', 'description', 'price', 'order', 'featured', 'active', 'image', 'type'], transaction });
-					
-						if (data.categoryId) {
-							const [category] = await ctx.branch.getCategories({ where: { id: data.categoryId } })
-							if (!category) throw new Error('Categoria não encontrada');
+			return sequelize.transaction(async (transaction) => {
+				// check if product exists
+				const product = await Product.findByPk(id);
+				if (!product) throw new Error('Produto não encontrado');
 
-							await productUpdated.setCategory(category, { transaction });
-						}
-
-						if (data.optionGroups)
-							await OptionGroup.updateAll(data.optionGroups, product, transaction);
+				// update product
+				const productUpdated = await product.update(data, { fields: ['name', 'description', 'price', 'order', 'featured', 'active', 'image', 'type'], transaction });
 					
-						return productUpdated;
-					})
-				
+				// check if needs to update category
+				if (data.categoryId) {
+					// check if selected category exists
+					const category = await Category.findByPk(data.categoryId)
+					if (!category) throw new Error('Categoria não encontrada');
+
+					// update category
+					await productUpdated.setCategory(category, { transaction });
+				}
+
+				// create, update, remove options groups
+				if (data.optionGroups) await OptionGroup.updateAll(data.optionGroups, product, transaction);
+			
+				return productUpdated;
 			})
 		},
 	},
 	Query: {
-		product: (_, { id }) => {
-			return Product.findByPk(id)
-				.then(product => {
-					if (!product) throw new Error('Produto não encontrada');
-					return product;
-				})
+		product: async (_, { id }) => {
+			// check if product exists
+			const product = await Product.findByPk(id);
+			if (!product) throw new Error('Produto não encontrada');
+
+			return product;
 		},
-		searchBranchProducts: (_, { search, filter }, ctx) => {
+		/* searchBranchProducts: (_, { search, filter }, ctx) => {
 			let where = { active: true };
 			if (filter && filter.showInactive) delete where.active;
+
 			return Product.findAll({
 				where: { ...where, name: { [Op.like]: `%${search}%` }, ['$category.branchId$']: ctx.branch.get('id') },
 				include: [{ model: Category				}]
 			})
-		},
+		}, */
 	},
 	Product: {
 		optionsQty: (parent, { filter }) => {

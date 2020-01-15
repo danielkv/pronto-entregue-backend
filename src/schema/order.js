@@ -83,7 +83,7 @@ export const typeDefs =  gql`
 	}
 
 	type Subscription {
-		orderCreated(branchId: ID!): Order
+		orderCreated(companyId: ID!): Order
 	}
 
 	extend type Query {
@@ -104,7 +104,7 @@ export const resolvers =  {
 			subscribe: withFilter (
 				()=> pubsub.asyncIterator([ORDER_CREATED]),
 				(payload, variables) => {
-					return payload.orderCreated.get('branchId') == variables.branchId;
+					return payload.orderCreated.get('companyId') == variables.companyId;
 				}
 			)
 		}
@@ -145,8 +145,8 @@ export const resolvers =  {
 		},
 	},
 	Query: {
-		order: (_, { id }, ctx) => {
-			return ctx.branch.getOrders({ where: { id } })
+		order: (_, { id }, { company }) => {
+			return company.getOrders({ where: { id } })
 				.then(([order])=>{
 					if (!order) throw new Error('Pedido não encontrado');
 					return order;
@@ -154,31 +154,33 @@ export const resolvers =  {
 		}
 	},
 	Mutation: {
-		createOrder: (_, { data }, ctx) => {
-			return sequelize.transaction(transaction => {
-				return ctx.branch.createOrder(data, { transaction })
-					.then(async (order)=> {
-						await OrderProduct.updateAll(data.products, order, transaction);
+		createOrder: (_, { data }, { company }) => {
+			return sequelize.transaction(async (transaction) => {
+				// create order
+				const order = await company.createOrder(data, { transaction });
+				
+				// create order products
+				await OrderProduct.updateAll(data.products, order, transaction);
 
-						pubsub.publish(ORDER_CREATED, { orderCreated: order });
+				// emit event for subscriptions
+				pubsub.publish(ORDER_CREATED, { orderCreated: order });
 
-						return order;
-					})
+				return order;
 			});
 		},
-		updateOrder: (_, { id, data }, ctx) => {
-			return sequelize.transaction(transaction => {
-				//return OrderOptionsGroups.create({name: teste'}, {transaction});
+		updateOrder: (_, { id, data }, { company }) => {
+			return sequelize.transaction(async (transaction) => {
+				// check if order exists
+				const [order] = await company.getOrders({ where: { id } });
+				if (!order) throw new Error('Pedido não encontrado');
 
-				return ctx.branch.getOrders({ where: { id } })
-					.then(async ([order])=> {
-						if (!order) throw new Error('Pedido não encontrado');
-						const updatedOrder = await order.update(data, { transaction });
+				// update order
+				const updatedOrder = await order.update(data, { transaction });
 
-						if (data.products) await OrderProduct.updateAll(data.products, updatedOrder, transaction);
+				// update, create, remove order products
+				if (data.products) await OrderProduct.updateAll(data.products, updatedOrder, transaction);
 
-						return updatedOrder;
-					})
+				return updatedOrder;
 			});
 		}
 	}

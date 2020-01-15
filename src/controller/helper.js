@@ -1,10 +1,7 @@
-import Branch  from '../model/branch';
-import BranchMeta  from '../model/branchMeta';
-import BranchPaymentMethod  from '../model/branchPaymentMethod';
-import BranchUser  from '../model/branchUser';
 import Category  from '../model/category';
 import Company  from '../model/company';
 import CompanyMeta  from '../model/companyMeta';
+import CompanyPaymentMethod  from '../model/companyPaymentMethod';
 import CompanyUser  from '../model/companyUser';
 import DeliveryArea  from '../model/deliveryArea';
 import Option  from '../model/option';
@@ -21,11 +18,7 @@ export const exportDB = async (exclude) => {
 		company: await Company.findAll({ attributes: { exclude }, include: [{ model: CompanyMeta, attributes: { exclude } }] }),
 		companyMeta: await CompanyMeta.findAll({ attributes: { exclude } }),
 		companyUser: await CompanyUser.findAll({ attributes: { exclude } }),
-
-		branch: await Branch.findAll({ attributes: { exclude }, include: [{ model: BranchMeta, attributes: { exclude } }] }),
-		branchMeta: await BranchMeta.findAll({ attributes: { exclude } }),
-		branchUser: await BranchUser.findAll({ attributes: { exclude } }),
-		branchPaymentMethod: await BranchPaymentMethod.findAll({ attributes: { exclude } }),
+		companyPaymentMethod: await CompanyPaymentMethod.findAll({ attributes: { exclude } }),
 		
 		deliveryArea: await DeliveryArea.findAll({ attributes: { exclude } }),
 		category: await Category.findAll({ attributes: { exclude } }),
@@ -38,15 +31,12 @@ export const exportDB = async (exclude) => {
 export const importDB = async (data) => {
 	await Company.bulkCreate(data.companies);
 
-	await Branch.bulkCreate(data.branches);
-	await BranchMeta.bulkCreate(data.branch_metas);
-	await BranchPaymentMethod.bulkCreate(data.branch_payment_methods);
+	await CompanyPaymentMethod.bulkCreate(data.company_payment_methods);
 
 	await User.bulkCreate(data.users);
 	await UserMeta.bulkCreate(data.user_metas);
 
 	await CompanyUser.bulkCreate(data.company_users);
-	await BranchUser.bulkCreate(data.branch_users);
 	
 	await DeliveryArea.bulkCreate(data.delivery_areas);
 
@@ -61,10 +51,7 @@ export const importTable = async (table, data) => {
 		company: Company,
 		companyMeta: CompanyMeta,
 		companyUser: CompanyUser,
-		branch: Branch,
-		branchPaymentMethod: BranchPaymentMethod,
-		branchMeta: BranchMeta,
-		branchUser: BranchUser,
+		companyPaymentMethod: CompanyPaymentMethod,
 		deliveryArea: DeliveryArea,
 		users: User,
 		userMeta: UserMeta,

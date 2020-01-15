@@ -1,7 +1,6 @@
 import { gql }  from 'apollo-server';
 import jwt  from 'jsonwebtoken';
 
-import Branch  from '../model/branch';
 import Company  from '../model/company';
 import Role  from '../model/role';
 import User  from '../model/user';
@@ -15,12 +14,6 @@ export const typeDefs = gql`
 
 	type CompanyRelation {
 		active: Boolean!
-	}
-
-	type BranchRelation {
-		active: Boolean!
-		role: Role!
-		roleId: Int!
 	}
 
 	type User {
@@ -38,7 +31,6 @@ export const typeDefs = gql`
 		addresses: [Address]!
 		
 		orders: [Order]!
-		branchRelation: BranchRelation!
 		company(companyId: ID!): Company!
 
 		countCompanies(filter: Filter): Int! @hasRole(permission: "companies_read", scope: "adm")
@@ -53,24 +45,12 @@ export const typeDefs = gql`
 		email: String
 		active: Boolean
 
-		assignedBranches: [AssignedBranchInput]
 		assignedCompany: AssignedCompanyInput
 		metas: [MetaInput]
 	}
 
 	input AssignedCompanyInput {
 		active: Boolean!
-	}
-
-	input AssignedBranchInput {
-		id: ID!
-		action: String!
-		userRelation: BranchUserRelationInput!
-	}
-
-	input BranchUserRelationInput {
-		active: Boolean!
-		roleId: ID!
 	}
 
 	type Login {
@@ -105,8 +85,8 @@ export const typeDefs = gql`
 
 export const resolvers = {
 	Query: {
-		me: (_, __, ctx) => {
-			return ctx.user;
+		me: (_, __, { user }) => {
+			return user;
 		},
 		User: () => {
 			return User.findAll();
@@ -160,7 +140,7 @@ export const resolvers = {
 			// create new user
 			return User.create(data, { include: [UserMeta] })
 		},
-		updateUser: (_, { id, data }, { user, company }) => {
+		updateUser: (_, { id, data }, { user }) => {
 			if (data.role === 'default' || data.role === 'adm') {
 				if (id !== user.get('id') && !user.can('adm')) throw new Error(`Você não tem premissões para cadastrar um usuário com permissão ${data.role}`);
 			}
@@ -169,30 +149,18 @@ export const resolvers = {
 				if (!user.can('master')) throw new Error(`Você não tem premissões para cadastrar um usuário com permissão ${data.role}`);
 			}
 
-			return conn.transaction(transaction => {
-				return User.findByPk(id)
-					.then(user=>{
-						if (!user) throw new Error('Usuário não encontrada');
+			return conn.transaction(async (transaction) => {
+				// check if user exists
+				const user = await User.findByPk(id);
+				if (!user) throw new Error('Usuário não encontrada');
 
-						return user.update(data, { fields: ['firstName', 'lastName', 'password', 'role', 'active'], transaction })
-					})
-					.then(async (userUpdated) => {
-						if (data.metas) {
-							await UserMeta.updateAll(data.metas, userUpdated, transaction);
-						}
-						return userUpdated;
-					})
-					.then(async (userUpdated)=> {
-						await company.addUser(userUpdated, { through: { ...data.assignedCompany }, transaction });
+				// update user
+				const updatedUser = await user.update(data, { fields: ['firstName', 'lastName', 'password', 'role', 'active'], transaction })
+				
+				// case needs to update metas
+				if (data.metas) await UserMeta.updateAll(data.metas, updatedUser, transaction);
 
-						return userUpdated;
-					})
-					.then(async (userUpdated)=> {
-						if (data.assignedBranches) {
-							await Branch.assignAll(data.assignedBranches, userUpdated, transaction);
-						}
-						return userUpdated;
-					})
+				return updatedUser;
 			})
 		},
 		setUserScopeRole: (_, { id, role }, ctx) => {
@@ -205,17 +173,19 @@ export const resolvers = {
 					return userUpdated;
 				});
 		},
-		setUserRole: (_, { id, roleId }, ctx) => {
-			return ctx.branch.getUsers({ where: { id } })
-				.then(async ([user])=>{
-					if (!user || !user.branchRelation) throw new Error('Usuário não encontrada');
-					const role = await Role.findByPk(roleId);
-					if (!role) throw new Error('Função não encontrada');
+		setUserRole: async (_, { id, roleId }, { company }) => {
+			// check if user exists
+			const [user] = await company.getUsers({ where: { id } })
+			if (!user || !user.companyRelation) throw new Error('Usuário não encontrada');
 
-					await user.branchRelation.setRole(role);
-					
-					return user;
-				});
+			// check if role exists
+			const role = await Role.findByPk(roleId);
+			if (!role) throw new Error('Função não encontrada');
+
+			// update role
+			await user.companyRelation.setRole(role);
+
+			return user;
 		},
 		/*
 		* Autoriza usuário retornando o token com dados,
@@ -349,17 +319,6 @@ export const resolvers = {
 					if (!company) throw new Error('Empresa não encontrada');
 
 					return company;
-				})
-		},
-		branchRelation: (parent) => {
-			if (!parent.branchUsers) throw new Error('Nenhum usuário selecionado');
-			
-			return parent.branchUsers.getRole()
-				.then(role => {
-					return {
-						role,
-						active: parent.branchUsers.active
-					}
 				})
 		},
 		orders: (parent) => {

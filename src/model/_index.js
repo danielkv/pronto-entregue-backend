@@ -5,13 +5,10 @@
  * Esse arquivo roda a partir do setup.js
  */
 
-import Branch  from './branch';
-import BranchMeta  from './branchMeta';
-import BranchPaymentMethod  from './branchPaymentMethod';
-import BranchUsers  from './branchUser';
 import Category  from './category';
 import Company  from './company';
 import CompanyMeta  from './companyMeta';
+import CompanyPaymentMethod  from './companyPaymentMethod';
 import CompanyUser  from './companyUser';
 import DeliveryArea  from './deliveryArea';
 import Options  from './option';
@@ -26,44 +23,36 @@ import Role  from './role';
 import User  from './user';
 import UserMeta  from './userMeta';
 
-//Company Relations
-Company.hasMany(Branch);
+// Company Relations
 Company.hasMany(CompanyMeta);
 Company.belongsToMany(User, { through: CompanyUser });
+Company.hasMany(Order);
+Company.hasMany(Product);
+Company.hasMany(DeliveryArea);
+Company.belongsToMany(PaymentMethod, { through: CompanyPaymentMethod });
+Company.belongsToMany(User, { through: CompanyUser });
 
-//Role relations
-Role.hasMany(BranchUsers);
+// Role relations
+Role.hasMany(CompanyUser);
+CompanyUser.belongsTo(Role);
 
-//Branch Relations
-Branch.hasMany(BranchMeta);
-Branch.hasMany(Order);
-Branch.hasMany(DeliveryArea);
-Branch.hasMany(Category);
-Branch.belongsToMany(PaymentMethod, { through: BranchPaymentMethod });
-Branch.belongsToMany(User, { through: BranchUsers });
+// PaymentMethod
+PaymentMethod.belongsToMany(Company, { through: CompanyPaymentMethod });
 
-//BranchUsers relations
-BranchUsers.belongsTo(Role);
-
-//PaymentMethod
-PaymentMethod.belongsToMany(Branch, { through: BranchPaymentMethod });
-
-//User relations
+// User relations
 User.hasMany(UserMeta);
 User.hasMany(Order);
 User.belongsToMany(Company, { through: CompanyUser });
-User.belongsToMany(Branch, { through: BranchUsers });
 
 //UserMeta
 UserMeta.belongsTo(User);
 
 //Category relations
-Category.belongsTo(Branch);
-Category.hasMany(Product,);
+Category.hasMany(Product);
 
 //Product relations
 Product.belongsTo(Category);
-//Product.belongsTo(Branch, {foreignKey: companyId'});
+Product.belongsTo(Company);
 Product.hasOne(OrderProduct);
 Product.hasMany(OptionsGroups);
 
@@ -78,7 +67,7 @@ Options.belongsTo(OptionsGroups);
 
 //Order relations
 Order.belongsTo(User);
-Order.belongsTo(Branch);
+Order.belongsTo(Company);
 Order.hasMany(OrderProduct, { as: 'products' });
 OrderProduct.hasMany(OrderOptionGroup, { as: 'optionGroups', onDelete: 'cascade' });
 OrderOptionGroup.hasMany(OrderOption, { as: 'options', onDelete: 'cascade' });

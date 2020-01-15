@@ -6,9 +6,9 @@ import conn from '../services/connection';
  * Define modelo (tabela) de métodos de pagamentos das filiais
  */
 
-class BranchPaymentMethod extends Sequelize.Model {}
+class CompanyPaymentMethod extends Sequelize.Model {}
 
-BranchPaymentMethod.init({
+CompanyPaymentMethod.init({
 	id: {
 		type: Sequelize.INTEGER.UNSIGNED,
 		primaryKey: true,
@@ -24,10 +24,10 @@ BranchPaymentMethod.init({
 		}
 	},
 }, {
-	modelName: 'BranchPaymentMethod',
-	tableName: 'branch_payment_methods',
+	modelName: 'companyPaymentMethod',
+	tableName: 'company_payment_methods',
 	sequelize: conn,
 	name: { singular: 'PaymentMethod', plural: 'PaymentMethods' }
 });
 
-export default BranchPaymentMethod;
+export default CompanyPaymentMethod;

@@ -2,7 +2,6 @@ import { gql }  from 'apollo-server';
 
 import Companies  from '../model/company';
 import CompaniesMeta  from '../model/companyMeta';
-import Users  from '../model/user';
 import sequelize  from '../services/connection';
 import { getSQLPagination, sanitizeFilter }  from '../utilities';
 
@@ -19,13 +18,8 @@ export const typeDefs =  gql`
 		lastMonthRevenue: Float!
 		userRelation: CompanyRelation!
 
-		assignedBranches: [Branch]! @hasRole(permission: "users_edit", scope: "adm")
-
 		countUsers(filter: Filter): Int! @hasRole(permission: "users_read", scope: "adm")
 		users(filter: Filter, pagination: Pagination): [User]! @hasRole(permission: "users_read", scope: "adm")
-		
-		countBranches(filter: Filter): Int!
-		branches(filter: Filter, pagination: Pagination): [Branch]!
 	}
 	
 
@@ -95,50 +89,6 @@ export const resolvers =  {
 			if (!parent.companyRelation) throw new Error('Nenhum usuário selecionado');
 
 			return parent.companyRelation.get();
-		},
-		assignedBranches: (parent) => {
-			if (!parent.companyRelation) throw new Error('Nenhum usuário selecionado');
-			
-			return parent.getUsers({ where: { id: parent.companyRelation.userId } })
-				.then(([user])=>{
-					if (!user) throw new Error('Usuário não encontrado');
-
-					return user.getBranches({ where: { companyId: parent.get('id') } });
-				})
-		},
-		branches: (parent, { filter, pagination }) => {
-			const _filter = sanitizeFilter(filter, { search: ['name'] });
-
-			if (!parent.companyRelation) return parent.getBranches({
-				where: _filter,
-				...getSQLPagination(pagination),
-			});
-			
-			return Users.findByPk(parent.companyRelation.get('userId'))
-				.then(user=>{
-				//se Usuário for master pode buscar todas as filiais mesmo desativadas
-					if (user.get('role') === 'master') return parent.getBranches({
-						where: { ..._filter, companyId: parent.get('id') },
-						...getSQLPagination(pagination),
-					});
-				
-					//se Usuário for adm pode buscar todas as filiais ativas
-					if (user.get('role') === 'adm') return parent.getBranches({
-						where: { ..._filter, companyId: parent.get('id') },
-						...getSQLPagination(pagination),
-					});
-
-					//caso chegue aqui usuário verá a lista de filiais que estão ativas e estão vinculadas a ele
-					return user.getBranches({
-						where: {
-							..._filter,
-							companyId: parent.get('id')
-						},
-						...getSQLPagination(pagination),
-
-						through: { where: { active: true } }
-					})
-				});
 		},
 		countUsers: (parent, { filter }) => {
 			const _filter = sanitizeFilter(filter, { search: ['firstName', 'lastName', 'email'] });

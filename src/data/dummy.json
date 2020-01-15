@@ -322,184 +322,13 @@
 			"userId": 3
 		}
 	],
-	"branches": [ 
-		{ 
-			"id": 1,
-			"name": "Copeiro Sombrio",
-			"active": true,
-			"createdAt": "2019-11-27T14:45:24.000Z",
-			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"companyId": 1,
-			"metas": [ 
-				{ 
-					"id": 1,
-					"key": "document",
-					"value": "00.000.000/0000-00",
-					"unique": true,
-					"createdAt": "2019-11-27T14:45:24.000Z",
-					"updatedAt": "2019-11-27T14:45:24.000Z",
-					"branchId": 1
-				},
-				{ 
-					"id": 3,
-					"key": "address",
-					"value": "{\"street\":\"Arrowood\",\"number\":\"9\",\"city\":\"San Bernardino\",\"state\": \"California\",\"district\":\"Esch\",\"zipcode\":\"92415\"}",
-					"unique": false,
-					"createdAt": "2019-11-27T14:45:24.000Z",
-					"updatedAt": "2019-11-27T14:45:24.000Z",
-					"branchId": 1
-				},
-				{ 
-					"id": 6,
-					"key": "businessHours",
-					"value": "[{\"dayOfWeek\":\"Domingo\",\"hours\":[{\"from\":\"18:00\",\"to\":\"23:59\"}]},{\"dayOfWeek\":\"Segunda-Feira\",\"hours\":[{\"from\":\"\",\"to\":\"\"}]},{\"dayOfWeek\":\"Terça-Feira\",\"hours\":[{\"from\":\"19:00\",\"to\":\"23:59\"}]},{\"dayOfWeek\":\"Quarta-Feira\",\"hours\":[{\"from\":\"19:00\",\"to\":\"23:59\"}]},{\"dayOfWeek\":\"Quinta-Feira\",\"hours\":[{\"from\":\"19:00\",\"to\":\"23:59\"}]},{\"dayOfWeek\":\"Sexta-Feira\",\"hours\":[{\"from\":\"19:00\",\"to\":\"23:59\"}]},{\"dayOfWeek\":\"Sábado\",\"hours\":[{\"from\":\"19:00\",\"to\":\"01:00\"}]}]",
-					"unique": true,
-					"createdAt": "2019-12-03T00:08:54.000Z",
-					"updatedAt": "2019-12-03T00:10:59.000Z",
-					"branchId": 1
-				}
-			]
-		},
-		{ 
-			"id": 2,
-			"name": "Temperoma Sombrio",
-			"active": true,
-			"createdAt": "2019-11-27T14:45:24.000Z",
-			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"companyId": 2,
-			"metas": [ 
-				{ 
-					"id": 5,
-					"key": "document",
-					"value": "00.000.000/0000-00",
-					"unique": true,
-					"createdAt": "2019-11-27T14:45:24.000Z",
-					"updatedAt": "2019-11-27T14:45:24.000Z",
-					"branchId": 2
-				}
-			]
-		},
-		{ 
-			"id": 3,
-			"name": "Copeiro Gaivota",
-			"active": true,
-			"createdAt": "2019-11-27T14:45:24.000Z",
-			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"companyId": 1,
-			"metas": [ 
-				{ 
-					"id": 2,
-					"key": "document",
-					"value": "00.000.000/0000-00",
-					"unique": true,
-					"createdAt": "2019-11-27T14:45:24.000Z",
-					"updatedAt": "2019-11-27T14:45:24.000Z",
-					"branchId": 3
-				},
-				{ 
-					"id": 4,
-					"key": "address",
-					"value": "{\"street\":\"Reindahl\",\"number\":\"10022\",\"city\":\"Baton Rouge\",\"state\": \"Louisiana\",\"district\":\"Lerdahl\",\"zipcode\":\"70815\"}",
-					"unique": false,
-					"createdAt": "2019-11-27T14:45:24.000Z",
-					"updatedAt": "2019-11-27T14:45:24.000Z",
-					"branchId": 3
-				}
-			]
-		}
-	],
-	"branch_metas": [ 
-		{ 
-			"id": 1,
-			"key": "document",
-			"value": "00.000.000/0000-00",
-			"unique": true,
-			"createdAt": "2019-11-27T14:45:24.000Z",
-			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"branchId": 1
-		},
-		{ 
-			"id": 2,
-			"key": "document",
-			"value": "00.000.000/0000-00",
-			"unique": true,
-			"createdAt": "2019-11-27T14:45:24.000Z",
-			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"branchId": 3
-		},
-		{ 
-			"id": 3,
-			"key": "address",
-			"value": "{\"street\":\"Arrowood\",\"number\":\"9\",\"city\":\"San Bernardino\",\"state\": \"California\",\"district\":\"Esch\",\"zipcode\":\"92415\"}",
-			"unique": false,
-			"createdAt": "2019-11-27T14:45:24.000Z",
-			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"branchId": 1
-		},
-		{ 
-			"id": 4,
-			"key": "address",
-			"value": "{\"street\":\"Reindahl\",\"number\":\"10022\",\"city\":\"Baton Rouge\",\"state\": \"Louisiana\",\"district\":\"Lerdahl\",\"zipcode\":\"70815\"}",
-			"unique": false,
-			"createdAt": "2019-11-27T14:45:24.000Z",
-			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"branchId": 3
-		},
-		{ 
-			"id": 5,
-			"key": "document",
-			"value": "00.000.000/0000-00",
-			"unique": true,
-			"createdAt": "2019-11-27T14:45:24.000Z",
-			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"branchId": 2
-		},
-		{ 
-			"id": 6,
-			"key": "businessHours",
-			"value": "[{\"dayOfWeek\":\"Domingo\",\"hours\":[{\"from\":\"18:00\",\"to\":\"23:59\"}]},{\"dayOfWeek\":\"Segunda-Feira\",\"hours\":[{\"from\":\"\",\"to\":\"\"}]},{\"dayOfWeek\":\"Terça-Feira\",\"hours\":[{\"from\":\"19:00\",\"to\":\"23:59\"}]},{\"dayOfWeek\":\"Quarta-Feira\",\"hours\":[{\"from\":\"19:00\",\"to\":\"23:59\"}]},{\"dayOfWeek\":\"Quinta-Feira\",\"hours\":[{\"from\":\"19:00\",\"to\":\"23:59\"}]},{\"dayOfWeek\":\"Sexta-Feira\",\"hours\":[{\"from\":\"19:00\",\"to\":\"23:59\"}]},{\"dayOfWeek\":\"Sábado\",\"hours\":[{\"from\":\"19:00\",\"to\":\"01:00\"}]}]",
-			"unique": true,
-			"createdAt": "2019-12-03T00:08:54.000Z",
-			"updatedAt": "2019-12-03T00:10:59.000Z",
-			"branchId": 1
-		}
-	],
-	"branch_users": [ 
-		{ 
-			"id": 1,
-			"active": true,
-			"createdAt": "2019-11-27T14:45:24.000Z",
-			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"roleId": 1,
-			"branchId": 1,
-			"userId": 1
-		},
-		{ 
-			"id": 2,
-			"active": true,
-			"createdAt": "2019-11-27T14:45:24.000Z",
-			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"roleId": 3,
-			"branchId": 3,
-			"userId": 1
-		},
-		{ 
-			"id": 3,
-			"active": true,
-			"createdAt": "2019-11-27T14:45:24.000Z",
-			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"roleId": 2,
-			"branchId": 2,
-			"userId": 2
-		}
-	],
-	"branch_payment_methods": [ 
+	"company_payment_methods": [ 
 		{ 
 			"settings": null,
 			"id": 1,
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"branchId": 1,
+			"companyId": 1,
 			"paymentMethodId": 1
 		},
 		{ 
@@ -507,7 +336,7 @@
 			"id": 3,
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"branchId": 3,
+			"companyId": 3,
 			"paymentMethodId": 2
 		},
 		{ 
@@ -515,7 +344,7 @@
 			"id": 4,
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"branchId": 2,
+			"companyId": 2,
 			"paymentMethodId": 1
 		},
 		{ 
@@ -523,7 +352,7 @@
 			"id": 6,
 			"createdAt": "2019-12-09T14:57:05.000Z",
 			"updatedAt": "2019-12-09T14:57:05.000Z",
-			"branchId": 1,
+			"companyId": 1,
 			"paymentMethodId": 2
 		}
 	],
@@ -537,7 +366,7 @@
 			"price": "3.00",
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-12-03T00:09:09.000Z",
-			"branchId": 1
+			"companyId": 1
 		},
 		{ 
 			"id": 2,
@@ -548,7 +377,7 @@
 			"price": "5.00",
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-12-03T00:09:09.000Z",
-			"branchId": 1
+			"companyId": 1
 		},
 		{ 
 			"id": 3,
@@ -559,7 +388,7 @@
 			"price": "10.00",
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-12-03T00:09:09.000Z",
-			"branchId": 1
+			"companyId": 1
 		},
 		{ 
 			"id": 4,
@@ -570,7 +399,7 @@
 			"price": "5.00",
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"branchId": 3
+			"companyId": 3
 		},
 		{ 
 			"id": 5,
@@ -581,7 +410,7 @@
 			"price": "5.00",
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"branchId": 2
+			"companyId": 2
 		}
 	],
 	"categories": [ 
@@ -593,8 +422,7 @@
 			"active": true,
 			"order": 0,
 			"createdAt": "2019-11-27T14:45:24.000Z",
-			"updatedAt": "2019-12-22T22:31:50.000Z",
-			"branchId": 1
+			"updatedAt": "2019-12-22T22:31:50.000Z"
 		},
 		{ 
 			"id": 2,
@@ -604,8 +432,7 @@
 			"active": true,
 			"order": 2,
 			"createdAt": "2019-11-27T14:45:24.000Z",
-			"updatedAt": "2019-12-22T22:31:50.000Z",
-			"branchId": 1
+			"updatedAt": "2019-12-22T22:31:50.000Z"
 		},
 		{ 
 			"id": 3,
@@ -615,8 +442,7 @@
 			"active": true,
 			"order": 1,
 			"createdAt": "2019-11-27T14:45:24.000Z",
-			"updatedAt": "2019-12-22T22:31:50.000Z",
-			"branchId": 1
+			"updatedAt": "2019-12-22T22:31:50.000Z"
 		},
 		{ 
 			"id": 4,
@@ -626,8 +452,7 @@
 			"active": true,
 			"order": 0,
 			"createdAt": "2019-11-27T14:45:24.000Z",
-			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"branchId": 3
+			"updatedAt": "2019-11-27T14:45:24.000Z"
 		},
 		{ 
 			"id": 5,
@@ -637,8 +462,7 @@
 			"active": true,
 			"order": 0,
 			"createdAt": "2019-11-27T14:45:24.000Z",
-			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"branchId": 3
+			"updatedAt": "2019-11-27T14:45:24.000Z"
 		},
 		{ 
 			"id": 6,
@@ -648,8 +472,7 @@
 			"active": true,
 			"order": 0,
 			"createdAt": "2019-11-27T14:45:24.000Z",
-			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"branchId": 3
+			"updatedAt": "2019-11-27T14:45:24.000Z"
 		},
 		{ 
 			"id": 7,
@@ -659,8 +482,7 @@
 			"active": true,
 			"order": 0,
 			"createdAt": "2019-11-27T14:45:24.000Z",
-			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"branchId": 2
+			"updatedAt": "2019-11-27T14:45:24.000Z"
 		},
 		{ 
 			"id": 8,
@@ -670,8 +492,7 @@
 			"active": true,
 			"order": 0,
 			"createdAt": "2019-11-27T14:45:24.000Z",
-			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"branchId": 2
+			"updatedAt": "2019-11-27T14:45:24.000Z"
 		},
 		{ 
 			"id": 9,
@@ -681,8 +502,7 @@
 			"active": true,
 			"order": 0,
 			"createdAt": "2019-11-27T14:45:24.000Z",
-			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"branchId": 2
+			"updatedAt": "2019-11-27T14:45:24.000Z"
 		}
 	],
 	"products": [ 

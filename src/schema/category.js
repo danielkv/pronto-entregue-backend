@@ -11,7 +11,6 @@ export const typeDefs =  gql`
 		name: String!
 		description: String
 		active: Boolean!
-		branch: Branch!
 		image: String!
 		order: Int!
 		createdAt: DateTime!
@@ -43,24 +42,23 @@ export const typeDefs =  gql`
 
 export const resolvers =  {
 	Mutation: {
-		createCategory: async (_, { data }, ctx) => {
+		createCategory: async (_, { data }) => {
 			if (data.file) {
-				data.image = await upload(ctx.company.name, await data.file);
+				data.image = await upload('categories', await data.file);
 			}
 
-			return ctx.branch.createCategory(data);
+			return Category.create(data);
 		},
-		updateCategory: async (_, { id, data }, ctx) => {
+		updateCategory: async (_, { id, data }) => {
 			if (data.file) {
-				data.image = await upload(ctx.company.name, await data.file);
+				data.image = await upload('categories', await data.file);
 			}
 
-			return ctx.branch.getCategories({ where: { id } })
-				.then (([category])=>{
-					if (!category) throw new Error('Categoria não encontrada');
+			// check id category exists
+			const category = await Category.findByPk(id);
+			if (!category) throw new Error('Categoria não encontrada');
 
-					return category.update(data, { fields: ['name', 'description', 'image', 'active'] });
-				})
+			return category.update(data, { fields: ['name', 'description', 'image', 'active'] });
 		},
 		updateCategoriesOrder: (_, { data }) => {
 			return sequelize.transaction(transaction=>{
@@ -89,9 +87,6 @@ export const resolvers =  {
 			if (filter && filter.showInactive) delete where.active;
 
 			return parent.getProducts({ where });
-		},
-		branch: (parent) => {
-			return parent.getBranch();
 		},
 		productsQty: (parent, { filter }) => {
 			let where = { active: true };

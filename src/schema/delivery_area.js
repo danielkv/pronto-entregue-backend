@@ -37,8 +37,8 @@ export const typeDefs =  gql`
 
 export const resolvers =  {
 	Query: {
-		calculateDeliveryPrice: (parent, { zipcode }, ctx) => {
-			return ctx.branch.getDeliveryAreas({
+		calculateDeliveryPrice: async (_, { zipcode }, { company }) => {
+			const deliveryArea = await company.getDeliveryAreas({
 				order: [['price', 'DESC']],
 				limit: 1,
 				where: {
@@ -49,26 +49,26 @@ export const resolvers =  {
 					]
 				}
 			})
-				.then(([area])=>{
-					if (!area) throw new ZipcodeError('Não há entregas para esse local');
+			
+			// check if delivery area exists
+			if (!deliveryArea) throw new ZipcodeError('Não há entregas para esse local');
 
-					return area;
-				})
+			return deliveryArea;
 		},
 	},
 	Mutation: {
-		modifyDeliveryAreas: (parent, { data }, ctx) => {
+		modifyDeliveryAreas: (_, { data }, { company }) => {
 			const update = data.filter(row=>row.id);
 			const create = data.filter(row=>!row.id);
 
 			return sequelize.transaction(async (transaction) => {
 
 				const resultCreate = await Promise.all(create.map(area=>{
-					return ctx.branch.createDeliveryArea(area, { transaction });
+					return company.createDeliveryArea(area, { transaction });
 				}))
 				
 				const resultUpdate = await Promise.all(update.map(area=>{
-					return ctx.branch.getDeliveryAreas({ where: { id: area.id } })
+					return company.getDeliveryAreas({ where: { id: area.id } })
 						.then(([areaFound])=>{
 							if (!areaFound) throw new Error('Área de entrega não encontrada');
 						
@@ -79,13 +79,13 @@ export const resolvers =  {
 				return [...resultCreate, ...resultUpdate];
 			})
 		},
-		removeDeliveryArea: (parent, { id }, ctx) => {
-			return ctx.branch.getDeliveryAreas({ where: { id } })
-				.then (([deliveryArea]) => {
-					if (!deliveryArea) throw new Error('Área de entrega não encontrada');
+		removeDeliveryArea: async (_, { id }, { company }) => {
+			// check if delivery area exists
+			const [deliveryArea] = await company.getDeliveryAreas({ where: { id } })
+			if (!deliveryArea) throw new Error('Área de entrega não encontrada');
 
-					return deliveryArea.destroy();
-				});
+			// remove it
+			return deliveryArea.destroy();
 		},
 	}
 }
