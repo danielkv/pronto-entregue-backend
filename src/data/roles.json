@@ -8,10 +8,5 @@
 		"name": "seller",
 		"displayName": "Vendedor",
 		"permissions": "[products_read','options_read','options_edit','orders_read','orders_edit','delivery_areas_read','users_read','payment_methods_read','customer']"
-	},
-	{
-		"name": "customer",
-		"displayName": "Cliente",
-		"permissions": "['customer']"
 	}
 ]

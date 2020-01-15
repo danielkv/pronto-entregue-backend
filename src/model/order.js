@@ -68,7 +68,7 @@ Order.init({
 	
 }, {
 	modelName: 'order',
-	tableName: 'Order',
+	tableName: 'orders',
 	sequelize: conn
 });
 

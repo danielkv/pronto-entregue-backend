@@ -287,7 +287,8 @@
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-11-27T14:45:24.000Z",
 			"companyId": 1,
-			"userId": 1
+			"userId": 1,
+			"roleId": 1
 		},
 		{ 
 			"id": 2,
@@ -295,7 +296,8 @@
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-11-27T14:45:24.000Z",
 			"companyId": 2,
-			"userId": 2
+			"userId": 2,
+			"roleId": 1
 		},
 		{ 
 			"id": 3,
@@ -303,7 +305,8 @@
 			"createdAt": "2019-12-02T19:29:05.000Z",
 			"updatedAt": "2019-12-02T19:29:05.000Z",
 			"companyId": 1,
-			"userId": 4
+			"userId": 4,
+			"roleId": 2
 		},
 		{ 
 			"id": 4,
@@ -311,7 +314,8 @@
 			"createdAt": "2019-12-10T02:43:14.000Z",
 			"updatedAt": "2019-12-10T02:43:14.000Z",
 			"companyId": 1,
-			"userId": 5
+			"userId": 5,
+			"roleId": 2
 		},
 		{ 
 			"id": 5,
@@ -319,7 +323,8 @@
 			"createdAt": "2019-12-12T00:46:03.000Z",
 			"updatedAt": "2019-12-12T00:46:03.000Z",
 			"companyId": 1,
-			"userId": 3
+			"userId": 3,
+			"roleId": 2
 		}
 	],
 	"company_payment_methods": [ 
