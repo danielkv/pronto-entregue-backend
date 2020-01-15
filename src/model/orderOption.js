@@ -39,7 +39,8 @@ OrderOption.init({
 		}
 	},
 }, {
-	modelName: 'order_options',
+	modelName: 'orderOption',
+	tableName: 'order_options',
 	sequelize: conn
 });
 

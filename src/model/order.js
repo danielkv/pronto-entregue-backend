@@ -6,8 +6,8 @@ import conn  from '../services/connection';
  * Define modelo (tabela) de pedidos
  */
 
-class Orders extends Sequelize.Model {}
-Orders.init({
+class Order extends Sequelize.Model {}
+Order.init({
 	//Dados principais
 	paymentFee: Sequelize.DECIMAL(10,2),
 	deliveryPrice: Sequelize.STRING,
@@ -66,6 +66,10 @@ Orders.init({
 	district: Sequelize.STRING,
 	zipcode: Sequelize.STRING,
 	
-}, { modelName: 'orders',  sequelize: conn });
+}, {
+	modelName: 'order',
+	tableName: 'Order',
+	sequelize: conn
+});
 
-export default Orders;
+export default Order;

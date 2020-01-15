@@ -25,6 +25,7 @@ Category.init({
 		}
 	},
 }, {
+	modelName: 'category',
 	tableName: 'categories',
 	sequelize: conn,
 	name: { singular: 'category', plural: 'categories' }

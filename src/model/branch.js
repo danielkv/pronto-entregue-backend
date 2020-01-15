@@ -25,6 +25,7 @@ class Branch extends Sequelize.Model {
 		};
 	}
 }
+
 Branch.init({
 	name: Sequelize.STRING,
 	active: {
@@ -32,7 +33,8 @@ Branch.init({
 		defaultValue: 1,
 	},
 }, {
-	tableName: 'branch',
+	modelName: 'branch',
+	tableName: 'branches',
 	sequelize: conn
 });
 

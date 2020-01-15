@@ -5,8 +5,7 @@
 			"firstName": "Diego",
 			"lastName": "Alves",
 			"email": "diego@gmail.com",
-			"password": "a8144b26f05f038c21ff42610bf6075a1b4bb18b6dd827a735266244b28e0494e2ba9c0a4156813205fd6cb99cb718743b4b85a42be8190e6cc6502b6fc5ad29",
-			"salt": "2dfd3527333f3f51bd005737b6e34922",
+			"password": "123456",
 			"active": true,
 			"role": "adm",
 			"createdAt": "2019-11-27T14:45:24.000Z",
@@ -17,8 +16,7 @@
 			"firstName": "Natalia",
 			"lastName": "Regina",
 			"email": "nrolegario@gmail.com",
-			"password": "ed3c72dc79cd8e42e54f5795e0817bbe29d753801275382f0f03804debb5a7860570713bd238dfdd108b54965ab617f3022bdb086ee004cf8ec97b20fdb6ee7f",
-			"salt": "b33dc3179374dd248a8d3d5521317fdc",
+			"password": "123456",
 			"active": true,
 			"role": "customer",
 			"createdAt": "2019-11-27T14:45:24.000Z",
@@ -29,8 +27,7 @@
 			"firstName": "Daniel",
 			"lastName": "Guolo",
 			"email": "daniel_kv@hotmail.com",
-			"password": "8a6dc523737c3d1a5ee5b5189686735428f77ebea6896f5f9f9690ea8e2537dee7debc9095b35ef3c3e9912aaf0ee7fb4ab5457fcbacd6888bc8563dc980b2d0",
-			"salt": "c6a431ccd850f10d2946467dbb595922",
+			"password": "123456",
 			"active": true,
 			"role": "master",
 			"createdAt": "2019-11-27T14:45:24.000Z",
@@ -41,8 +38,7 @@
 			"firstName": "Daniel",
 			"lastName": "Guoolo",
 			"email": "danielkv@hotmail.com",
-			"password": "2a6853781a54bb0b32be57cd815b9f792091a80f168003d06b2e45a43569cb4ad08c16eac781a78eafbb4fb4795bd5360660f879ecfb548d42a772c64f3a1c8e",
-			"salt": "f594256801f5152d26a083ee41928962",
+			"password": "123456",
 			"active": true,
 			"role": "customer",
 			"createdAt": "2019-12-02T19:29:05.000Z",
@@ -53,8 +49,7 @@
 			"firstName": "Pedro",
 			"lastName": "Chiamenti",
 			"email": "pedro@google.com",
-			"password": "338c1978ef6770f40ee1e97b40519ad387eda545ffe4ae9c60ca458d35590b7a792f5cdbc023106bc32d4b446320a57beae74f4322e64291128fabfa772680c6",
-			"salt": "2391c080378d1829adf3166bb5b035ea",
+			"password": "123456",
 			"active": true,
 			"role": "customer",
 			"createdAt": "2019-12-10T02:43:13.000Z",
@@ -247,7 +242,7 @@
 			]
 		}
 	],
-	"companies_meta": [ 
+	"company_meta": [ 
 		{ 
 			"id": 1,
 			"key": "phone",
@@ -285,7 +280,7 @@
 			"companyId": 2
 		}
 	],
-	"companies_users": [ 
+	"company_users": [ 
 		{ 
 			"id": 1,
 			"active": true,

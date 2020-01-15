@@ -18,7 +18,7 @@ CompanyUser.init({
 		defaultValue: 1,
 	},
 }, {
-	modelName: 'company_relation',
+	modelName: 'companyRelation',
 	tableName: 'company_users',
 	sequelize: conn
 });

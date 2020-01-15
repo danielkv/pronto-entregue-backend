@@ -44,7 +44,7 @@ OrderOptionGroup.init({
 	name: Sequelize.STRING,
 }, {
 	tableName: 'order_option_groups',
-	sequelize: conn
+	sequelize: conn,
 });
 
 export default OrderOptionGroup;

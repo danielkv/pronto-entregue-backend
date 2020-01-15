@@ -61,6 +61,7 @@ UserMeta.init({
 		defaultValue: 0,
 	},
 }, {
+	modelName: 'userMeta',
 	tableName: 'user_metas',
 	sequelize: conn,
 	name: { singular: 'meta', plural: 'metas' }

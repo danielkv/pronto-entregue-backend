@@ -7,14 +7,14 @@ import conn  from '../services/connection';
  * Define modelo (tabela) de metadata para as filiais
  */
 
-class BranchesMeta extends Sequelize.Model {
+class BranchMeta extends Sequelize.Model {
 	static async updateAll(metas, modelInstance, transaction=null) {
 		const metasCreate = metas.filter(row=>!row.id && row.action==='create');
 		const metasUpdate = metas.filter(row=>row.id && row.action==='update');
 		const metasRemove = metas.filter(row=>row.id && row.action==='delete');
 		
 		const [removed, created, updated] = await Promise.all([
-			BranchesMeta.destroy({ where: { id: metasRemove.map(r => r.id) }, transaction }).then(() => metasRemove),
+			BranchMeta.destroy({ where: { id: metasRemove.map(r => r.id) }, transaction }).then(() => metasRemove),
 			Promise.all(metasCreate.map(row => modelInstance.createMeta(row, { transaction }))),
 			Promise.all(metasUpdate.map(row => modelInstance.getMetas({ where: { id: row.id } }).then(([meta]) => {if (!meta) throw new Error('Esse metadado não pertence a essa filial'); return meta.update(row, { fields: ['value'], transaction })})))
 		]);
@@ -26,7 +26,7 @@ class BranchesMeta extends Sequelize.Model {
 		};
 	}
 }
-BranchesMeta.init({
+BranchMeta.init({
 	key: {
 		type: Sequelize.STRING,
 		comment: 'phone | email | document | businessHours | address | ...',
@@ -39,7 +39,7 @@ BranchesMeta.init({
 		},
 		validate: {
 			async isUnique (value, done) {
-				const meta = await BranchesMeta.findOne({ where: { branchId: this.getDataValue('branchId'), key: value } });
+				const meta = await BranchMeta.findOne({ where: { branchId: this.getDataValue('branchId'), key: value } });
 				const unique = this.getDataValue('unique');
 				if (meta) {
 					if (meta.unique === true) return done(new Error('Esse metadado já existe, você pode apenas altera-lo'));
@@ -61,4 +61,4 @@ BranchesMeta.init({
 	name: { singular: 'meta', plural: 'metas' }
 });
 
-export default BranchesMeta;
+export default BranchMeta;

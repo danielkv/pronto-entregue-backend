@@ -53,6 +53,7 @@ OrderProduct.init({
 	price: Sequelize.DECIMAL(10,2),
 	message: Sequelize.STRING,
 }, {
+	modelName: 'orderProduct',
 	tableName: 'order_products',
 	sequelize: conn
 });

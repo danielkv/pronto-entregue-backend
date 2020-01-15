@@ -11,7 +11,8 @@ PaymentMethod.init({
 	name: Sequelize.STRING,
 	displayName: Sequelize.STRING,
 }, {
-	modelName: 'payment_methods',
+	modelName: 'paymentMethod',
+	tableName: 'payment_methods',
 	sequelize: conn,
 });
 

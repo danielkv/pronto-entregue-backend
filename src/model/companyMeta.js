@@ -6,7 +6,7 @@ import conn from '../services/connection';
  * Define modelo (tabela) de relação entre produtos e filiais / empresas
  */
 
-class CompaniesMeta extends Sequelize.Model {
+class CompanyMeta extends Sequelize.Model {
 	/**
 	 * Atualiza, Remove e Cria todas metas
 	 * 
@@ -18,7 +18,7 @@ class CompaniesMeta extends Sequelize.Model {
 		const metasRemove = metas.filter(row=>row.id && row.action==='delete');
 		
 		const [removed, created, updated] = await Promise.all([
-			CompaniesMeta.destroy({ where: { id: metasRemove.map(r => r.id) }, transaction }).then(() => metasRemove),
+			CompanyMeta.destroy({ where: { id: metasRemove.map(r => r.id) }, transaction }).then(() => metasRemove),
 			Promise.all(metasCreate.map(row => modelInstance.createMeta(row, { transaction }))),
 			Promise.all(metasUpdate.map(row => modelInstance.getMetas({ where: { id: row.id } }).then(([meta]) => {if (!meta) throw new Error('Esse metadado não pertence a essa empresa'); return meta.update(row, { fields: ['value'], transaction })})))
 		]);
@@ -30,7 +30,7 @@ class CompaniesMeta extends Sequelize.Model {
 		};
 	}
 }
-CompaniesMeta.init({
+CompanyMeta.init({
 	key: {
 		type: Sequelize.STRING,
 		comment: 'phone | email | document | businessHours | address | ...',
@@ -43,7 +43,7 @@ CompaniesMeta.init({
 		},
 		validate: {
 			async isUnique (value, done) {
-				const meta = await CompaniesMeta.findOne({ where: { companyId: this.getDataValue('companyId'), key: value } });
+				const meta = await CompanyMeta.findOne({ where: { companyId: this.getDataValue('companyId'), key: value } });
 				const unique = this.getDataValue('unique');
 				if (meta) {
 					if (meta.unique === true) return done(new Error('Esse metadado já existe, você pode apenas altera-lo'));
@@ -60,9 +60,10 @@ CompaniesMeta.init({
 		defaultValue: 0,
 	},
 }, {
+	modelName: 'companyMeta',
 	tableName: 'company_metas',
 	sequelize: conn,
 	name: { singular: 'meta', plural: 'metas' }
 });
 
-export default CompaniesMeta;
+export default CompanyMeta;

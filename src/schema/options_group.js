@@ -1,7 +1,7 @@
 import { gql }  from 'apollo-server';
 import conn from 'sequelize';
 
-import Branches  from '../model/branches';
+import Branch from '../model/branch';
 import Category  from '../model/category';
 import OptionGroup  from '../model/optionGroup';
 import Products  from '../model/product';
@@ -44,7 +44,7 @@ export const resolvers =  {
 					model: Products,
 					include: [{
 						model: Category,
-						include: [Branches]
+						include: [Branch]
 					}]
 				}]
 			});

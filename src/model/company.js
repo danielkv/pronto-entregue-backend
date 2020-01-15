@@ -15,7 +15,8 @@ Company.init({
 		defaultValue: 0,
 	},
 }, {
-	modelName: 'companies',
+	modelName: 'company',
+	tableName: 'companies',
 	sequelize: conn
 });
 

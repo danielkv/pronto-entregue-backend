@@ -16,10 +16,10 @@ import CompanyUser  from './companyUser';
 import DeliveryArea  from './deliveryArea';
 import Options  from './option';
 import OptionsGroups  from './optionGroup';
+import Order  from './order';
 import OrderOption  from './orderOption';
 import OrderOptionGroup  from './orderOptionGroup';
 import OrderProduct  from './orderProduct';
-import Orders  from './orders';
 import PaymentMethod  from './paymentMethod';
 import Product  from './product';
 import Role  from './role';
@@ -36,7 +36,7 @@ Role.hasMany(BranchUsers);
 
 //Branch Relations
 Branch.hasMany(BranchMeta);
-Branch.hasMany(Orders);
+Branch.hasMany(Order);
 Branch.hasMany(DeliveryArea);
 Branch.hasMany(Category);
 Branch.belongsToMany(PaymentMethod, { through: BranchPaymentMethod });
@@ -50,7 +50,7 @@ PaymentMethod.belongsToMany(Branch, { through: BranchPaymentMethod });
 
 //User relations
 User.hasMany(UserMeta);
-User.hasMany(Orders);
+User.hasMany(Order);
 User.belongsToMany(Company, { through: CompanyUser });
 User.belongsToMany(Branch, { through: BranchUsers });
 
@@ -76,13 +76,13 @@ OptionsGroups.belongsTo(Product);
 //Options relations
 Options.belongsTo(OptionsGroups);
 
-//Orders relations
-Orders.belongsTo(User);
-Orders.belongsTo(Branch);
-Orders.hasMany(OrderProduct, { as: 'products' });
+//Order relations
+Order.belongsTo(User);
+Order.belongsTo(Branch);
+Order.hasMany(OrderProduct, { as: 'products' });
 OrderProduct.hasMany(OrderOptionGroup, { as: 'optionGroups', onDelete: 'cascade' });
 OrderOptionGroup.hasMany(OrderOption, { as: 'options', onDelete: 'cascade' });
-Orders.belongsTo(PaymentMethod);
+Order.belongsTo(PaymentMethod);
 
 OrderProduct.belongsTo(Product, { as: 'productRelated' });
 OrderOptionGroup.belongsTo(OptionsGroups, { as: 'optionGroupRelated' });

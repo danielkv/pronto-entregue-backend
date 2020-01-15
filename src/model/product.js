@@ -51,6 +51,10 @@ Product.init({
 			return parseFloat(this.getDataValue('price'));
 		}
 	},
-}, { modelName: 'products',  sequelize: conn });
+}, {
+	modelName: 'product',
+	tableName: 'products',
+	sequelize: conn
+});
 
 export default Product;

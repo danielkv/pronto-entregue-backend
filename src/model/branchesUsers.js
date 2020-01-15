@@ -17,6 +17,10 @@ BranchesUsers.init({
 		type: Sequelize.BOOLEAN,
 		defaultValue: 1,
 	},
-}, { modelName: 'branch_relation', tableName: 'branches_users',  sequelize: conn });
+}, {
+	modelName: 'branchRelation',
+	tableName: 'branches_users',
+	sequelize: conn,
+});
 
 export default BranchesUsers;

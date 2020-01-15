@@ -1,7 +1,7 @@
 import crypto  from 'crypto';
 import Sequelize  from 'sequelize';
 
-function sanitizeFilter(_filter = {}, _options = {}) {
+export function sanitizeFilter(_filter = {}, _options = {}) {
 	let options = {
 		search: ['name', 'description'],
 		excludeFilters: [],
@@ -57,7 +57,7 @@ function sanitizeFilter(_filter = {}, _options = {}) {
 	return filter;
 }
 
-function getSQLPagination({ page=null, rowsPerPage=null } = {}) {
+export function getSQLPagination({ page=null, rowsPerPage=null } = {}) {
 	return {
 		offset: page && rowsPerPage ? page * rowsPerPage : null,
 		limit: rowsPerPage || null,
@@ -80,7 +80,7 @@ Object.filter = (obj, predicate) =>
  *
  */
 
-function salt(password, salt=null) {
+export function salt(password, salt=null) {
 	const _salt = salt || crypto.randomBytes(16).toString('hex');
 	var hash = crypto.createHmac('sha512', _salt);
 	hash.update(password);
@@ -97,7 +97,7 @@ function salt(password, salt=null) {
  * 
  */
 
-function slugify(text) {
+export function slugify(text) {
 	let newText = text.trim().toLowerCase();
 
 	newText = newText.replace(new RegExp('[ÁÀÂÃ][áàâã]','gi'), 'a');
@@ -111,11 +111,4 @@ function slugify(text) {
 	
 	newText = newText.replace(new RegExp(' - | ', 'g'), '-');
 	return newText;
-}
-
-export default {
-	salt,
-	slugify,
-	getSQLPagination,
-	sanitizeFilter
 }

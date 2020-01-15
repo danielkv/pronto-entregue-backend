@@ -106,7 +106,7 @@ export const resolvers =  {
 		}
 	},
 	Mutation: {
-		updateBusinessHours: (parent, { data }, ctx) => {
+		updateBusinessHours: (_, { data }, ctx) => {
 			return ctx.branch.getMetas({ where: { key: 'businessHours' } })
 				.then(async ([businessHours])=>{
 					const value = JSON.stringify(data);
@@ -121,7 +121,7 @@ export const resolvers =  {
 					return data;
 				})
 		},
-		createBranch: (parent, { data }, ctx) => {
+		createBranch: (_, { data }, ctx) => {
 			return sequelize.transaction(transaction => {
 				return Branch.create(data, { include: [BranchMeta], transaction })
 					.then(branch => {
@@ -155,7 +155,7 @@ export const resolvers =  {
 					return ctx.branch;
 				})
 		},
-		disablePaymentMethod: (parent, { id }, ctx) => {
+		disablePaymentMethod: (_, { id }, ctx) => {
 			return PaymentMethods.findByPk(id)
 				.then (async (paymentMethod) => {
 					if (!paymentMethod) throw new Error('Método de pagamento não encontrado');

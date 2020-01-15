@@ -6,8 +6,8 @@ import conn  from '../services/connection';
  * Define modelo (tabela) de relação de empresas e usuários
  */
 
-class BranchesUsers extends Sequelize.Model {}
-BranchesUsers.init({
+class BranchUser extends Sequelize.Model {}
+BranchUser.init({
 	id: {
 		type: Sequelize.INTEGER.UNSIGNED,
 		primaryKey: true,
@@ -17,6 +17,10 @@ BranchesUsers.init({
 		type: Sequelize.BOOLEAN,
 		defaultValue: 1,
 	},
-}, { modelName: 'branch_relation', tableName: 'branches_users',  sequelize: conn });
+}, {
+	modelName: 'branchUser',
+	tableName: 'branches_users',
+	sequelize: conn
+});
 
-export default BranchesUsers;
+export default BranchUser;

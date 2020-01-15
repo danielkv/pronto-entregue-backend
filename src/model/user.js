@@ -50,7 +50,7 @@ User.init({
 	salt: Sequelize.STRING,
 	active: {
 		type: Sequelize.BOOLEAN,
-		defaultValue: 1,
+		defaultValue: true,
 	},
 	role: {
 		type: Sequelize.STRING,
@@ -59,8 +59,8 @@ User.init({
 		comment: 'master | adm | customer | default'
 	}
 },{
-	tableName: 'users', //nome da tabela
-	underscored: true,
+	modelName: 'user',
+	tableName: 'users',
 	sequelize: conn,
 });
 

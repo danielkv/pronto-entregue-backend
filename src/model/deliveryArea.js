@@ -7,6 +7,7 @@ import conn from '../services/connection';
  */
 
 class DeliveryArea extends Sequelize.Model {}
+
 DeliveryArea.init({
 	name: {
 		type: Sequelize.STRING,
@@ -48,6 +49,7 @@ DeliveryArea.init({
 		defaultValue: 0
 	},
 }, {
+	modelName: 'deliveryArea',
 	tableName: 'delivery_areas',
 	sequelize: conn,
 });

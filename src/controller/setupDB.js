@@ -1,4 +1,4 @@
-import PaymentMethods  from '../model/payment_methods';
+import PaymentMethod  from '../model/paymentMethod';
 import Role  from '../model/role';
 import conn from '../services/connection';
 import { importDB } from './helper.js';
@@ -11,7 +11,7 @@ import role from '../data/roles.json';
 export function setupDefaultData () {
 	return Role.bulkCreate(role)
 		.then(()=>{
-			return PaymentMethods.bulkCreate(paymentMethods)
+			return PaymentMethod.bulkCreate(paymentMethods)
 		})
 }
 

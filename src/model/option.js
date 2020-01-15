@@ -54,6 +54,11 @@ Option.init({
 			return parseFloat(this.getDataValue('price'));
 		}
 	},
-}, { modelName: 'options',  sequelize: conn, name: { singular: 'option', plural: 'options' } });
+}, {
+	modelName: 'option',
+	tableName: 'options',
+	sequelize: conn,
+	name: { singular: 'option', plural: 'options' }
+});
 
 export default Option;

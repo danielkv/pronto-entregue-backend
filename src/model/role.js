@@ -17,7 +17,8 @@ Role.init({
 		}
 	},
 }, {
-	modelName: 'roles',
+	modelName: 'role',
+	tableName: 'roles',
 	sequelize: conn
 });
 

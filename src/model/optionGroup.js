@@ -77,6 +77,7 @@ OptionGroup.init({
 		defaultValue: 1,
 	},
 }, {
+	modelName: 'optionGroup',
 	tableName: 'option_groups',
 	sequelize: conn
 });
