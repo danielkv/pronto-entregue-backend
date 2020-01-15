@@ -1,13 +1,12 @@
 import { gql }  from 'apollo-server';
 import jwt  from 'jsonwebtoken';
-import conn  from 'sequelize';
 
-import Branches  from '../model/branch';
-import Companies  from '../model/company';
-import Roles  from '../model/role';
-import Users  from '../model/user';
-import UsersMeta  from '../model/userMeta';
-import sequelize  from '../services/connection';
+import Branch  from '../model/branch';
+import Company  from '../model/company';
+import Role  from '../model/role';
+import User  from '../model/user';
+import UserMeta  from '../model/userMeta';
+import conn  from '../services/connection';
 import { salt, getSQLPagination, sanitizeFilter }  from '../utilities';
 
 const Op = conn.Op;
@@ -109,8 +108,8 @@ export const resolvers = {
 		me: (_, __, ctx) => {
 			return ctx.user;
 		},
-		users: () => {
-			return Users.findAll();
+		User: () => {
+			return User.findAll();
 		},
 		user: (_, { id }, ctx) => {
 
@@ -119,7 +118,7 @@ export const resolvers = {
 				!ctx.user.id === id
 			) throw new Error('Você não tem autorização')
 
-			return Users.findByPk(id)
+			return User.findByPk(id)
 				.then(user => {
 					if (!user) throw new Error('Usuário não encontrada');
 					return user;
@@ -145,7 +144,7 @@ export const resolvers = {
 		},
 	},
 	Mutation: {
-		createUser: (parent, { data }, ctx) => {
+		createUser: async (_, { data }, ctx) => {
 			if (data.role === 'default' || data.role === 'adm') {
 				if (!ctx.user.can('adm')) throw new Error(`Você não tem premissões para cadastrar um usuário com permissão ${data.role}`);
 			}
@@ -154,37 +153,24 @@ export const resolvers = {
 				if (!ctx.user.can('master')) throw new Error(`Você não tem premissões para cadastrar um usuário com permissão ${data.role}`);
 			}
 
-			return sequelize.transaction(async transaction => {
-				await ctx.company.getUsers({ where: { email: data.email } })
-					.then((users)=>{
-						if (users.length) throw new Error('Já existe um usuário com esse email')
-					})
+			// check if email exists in database
+			const userExists = await User.findOne({ where: { email: data.email } });
+			if (userExists) throw new Error('Esse email já está cadastrado');
 
-				return Users.create(data, { include: [UsersMeta], transaction })
-					.then(async (userCreated)=> {
-						await ctx.company.addUser(userCreated, { through: { ...data.assignedCompany }, transaction });
-
-						return userCreated;
-					})
-					.then(async (userCreated)=> {
-						if (data.assignedBranches) {
-							await Branches.assignAll(data.assignedBranches, userCreated, transaction);
-						}
-						return userCreated;
-					})
-			});
+			// create new user
+			return User.create(data, { include: [UserMeta] })
 		},
-		updateUser: (parent, { id, data }, ctx) => {
+		updateUser: (_, { id, data }, { user, company }) => {
 			if (data.role === 'default' || data.role === 'adm') {
-				if (!ctx.user.can('adm')) throw new Error(`Você não tem premissões para cadastrar um usuário com permissão ${data.role}`);
+				if (id !== user.get('id') && !user.can('adm')) throw new Error(`Você não tem premissões para cadastrar um usuário com permissão ${data.role}`);
 			}
 			
 			if (data.role === 'master') {
-				if (!ctx.user.can('master')) throw new Error(`Você não tem premissões para cadastrar um usuário com permissão ${data.role}`);
+				if (!user.can('master')) throw new Error(`Você não tem premissões para cadastrar um usuário com permissão ${data.role}`);
 			}
 
-			return sequelize.transaction(transaction => {
-				return Users.findByPk(id)
+			return conn.transaction(transaction => {
+				return User.findByPk(id)
 					.then(user=>{
 						if (!user) throw new Error('Usuário não encontrada');
 
@@ -192,18 +178,18 @@ export const resolvers = {
 					})
 					.then(async (userUpdated) => {
 						if (data.metas) {
-							await UsersMeta.updateAll(data.metas, userUpdated, transaction);
+							await UserMeta.updateAll(data.metas, userUpdated, transaction);
 						}
 						return userUpdated;
 					})
 					.then(async (userUpdated)=> {
-						await ctx.company.addUser(userUpdated, { through: { ...data.assignedCompany }, transaction });
+						await company.addUser(userUpdated, { through: { ...data.assignedCompany }, transaction });
 
 						return userUpdated;
 					})
 					.then(async (userUpdated)=> {
 						if (data.assignedBranches) {
-							await Branches.assignAll(data.assignedBranches, userUpdated, transaction);
+							await Branch.assignAll(data.assignedBranches, userUpdated, transaction);
 						}
 						return userUpdated;
 					})
@@ -223,7 +209,7 @@ export const resolvers = {
 			return ctx.branch.getUsers({ where: { id } })
 				.then(async ([user])=>{
 					if (!user || !user.branchRelation) throw new Error('Usuário não encontrada');
-					const role = await Roles.findByPk(roleId);
+					const role = await Role.findByPk(roleId);
 					if (!role) throw new Error('Função não encontrada');
 
 					await user.branchRelation.setRole(role);
@@ -236,8 +222,8 @@ export const resolvers = {
 		* caso autenticação falhe, 'arremessa' um erro
 		* 
 		*/
-		login: (parent, { email, password }) => {
-			return Users.findOne({
+		login: (_, { email, password }) => {
+			return User.findOne({
 				where: { email },
 			})
 				.then ((userFound)=>{
@@ -263,18 +249,18 @@ export const resolvers = {
 					};
 				});
 		},
-		authenticate: (_, { token }) => {
+		authenticate: async (_, { token }) => {
+			// break the token
 			const { id, email } = jwt.verify(token, process.env.SECRET);
 
-			return Users.findAll({ where: { id, email } })
-				.then(([userFound])=>{
-					if (!userFound) throw new Error('Usuário não encotrado');
+			// check if user exists
+			const userFound = await User.findOne({ where: { id, email } });
+			if (!userFound) throw new Error('Usuário não encotrado');
 
-					return userFound;
-				})
+			return userFound;
 		},
-		removeUserAddress: (parent, { id }) => {
-			return UsersMeta.findByPk(id)
+		removeUserAddress: (_, { id }) => {
+			return UserMeta.findByPk(id)
 				.then(async (addressFound)=>{
 					if (!addressFound) throw new Error('Endereço não encontrado');
 
@@ -332,7 +318,7 @@ export const resolvers = {
 			const _filter = sanitizeFilter(filter, { search: ['name', 'displayName'] });
 
 			if (parent.role == 'master')
-				return Companies.count({
+				return Company.count({
 					where: _filter
 				});
 
@@ -346,7 +332,7 @@ export const resolvers = {
 			const _filter = sanitizeFilter(filter, { search: ['name', 'displayName'] });
 
 			if (parent.role == 'master')
-				return Companies.findAll({
+				return Company.findAll({
 					where: _filter,
 					...getSQLPagination(pagination)
 				});
