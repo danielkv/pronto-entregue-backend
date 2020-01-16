@@ -8,13 +8,18 @@ import conn from '../services/connection';
 
 class Product extends Sequelize.Model {}
 Product.init({
-	active: {
-		type: Sequelize.BOOLEAN,
-		defaultValue: 1,
-	},
 	name: Sequelize.STRING,
 	description: Sequelize.STRING,
 	image: Sequelize.TEXT,
+	active: {
+		type: Sequelize.BOOLEAN,
+		defaultValue: true,
+	},
+	listed: {
+		type: Sequelize.BOOLEAN,
+		defaultValue: true,
+		comment: 'Show the product in product list and search',
+	},
 	featured: {
 		type: Sequelize.BOOLEAN,
 		defaultValue: false,
