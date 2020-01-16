@@ -16,6 +16,9 @@ export const typeDefs =  gql`
 		expiresAt: DateTime!
 		createdAt: DateTime!
 		updatedAt: DateTime!
+
+		relatedProducts: [Product]!
+		relatedCompanies: [Company]!
 	}
 
 	input CouponInput {
@@ -71,6 +74,11 @@ export const resolvers = {
 		}
 	},
 	Coupon: {
-		
+		relatedCompanies(parent) {
+			return parent.getCompanies({ where: { active: true } });
+		},
+		relatedProducts(parent) {
+			return parent.getProducts({ where: { active: true } });
+		}
 	}
 }

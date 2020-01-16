@@ -18,6 +18,8 @@ export const typeDefs =  gql`
 		expiresAt: DateTime!
 		createdAt: DateTime!
 		updatedAt: DateTime!
+
+		product: Product!
 	}
 
 	input CampaignInput {
@@ -78,6 +80,11 @@ export const resolvers = {
 				order: [['expiresAt', 'DESC'], ['createdAt', 'Desc']],
 				...getSQLPagination(pagination),
 			})
+		}
+	},
+	Campaign: {
+		product(parent) {
+			return parent.getProduct();
 		}
 	}
 }
