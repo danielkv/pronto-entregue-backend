@@ -6,25 +6,25 @@
  */
 
 import Campaign from './campaign';
-import Category  from './category';
-import Company  from './company';
-import CompanyMeta  from './companyMeta';
-import CompanyPaymentMethod  from './companyPaymentMethod';
-import CompanyUser  from './companyUser';
+import Category from './category';
+import Company from './company';
+import CompanyMeta from './companyMeta';
+import CompanyPaymentMethod from './companyPaymentMethod';
+import CompanyUser from './companyUser';
 import Coupon from './coupon';
-import DeliveryArea  from './deliveryArea';
-import Options  from './option';
-import OptionsGroup  from './OptionsGroup';
-import Order  from './order';
-import OrderOption  from './orderOption';
+import DeliveryArea from './deliveryArea';
+import Options from './option';
+import OptionsGroup from './OptionsGroup';
+import Order from './order';
+import OrderOption from './orderOption';
 import orderOptionsGroup  from './orderOptionsGroup';
-import OrderProduct  from './orderProduct';
-import PaymentMethod  from './paymentMethod';
-import Product  from './product';
+import OrderProduct from './orderProduct';
+import PaymentMethod from './paymentMethod';
+import Product from './product';
 import Rating from './rating';
-import Role  from './role';
-import User  from './user';
-import UserMeta  from './userMeta';
+import Role from './role';
+import User from './user';
+import UserMeta from './userMeta';
 
 // Company Relations
 Company.hasMany(CompanyMeta);
