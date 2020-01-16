@@ -1,7 +1,7 @@
 import Sequelize  from 'sequelize';
 
 import conn from '../services/connection';
-import OrdersOptionsGroups  from './orderOptionGroup';
+import OrdersOptionsGroups  from './orderOptionsGroup';
 
 /*
  * Define modelo (tabela) de pedidos

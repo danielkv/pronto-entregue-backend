@@ -5,7 +5,7 @@ import CompanyPaymentMethod  from '../model/companyPaymentMethod';
 import CompanyUser  from '../model/companyUser';
 import DeliveryArea  from '../model/deliveryArea';
 import Option  from '../model/option';
-import OptionGroup  from '../model/optionGroup';
+import OptionsGroup  from '../model/OptionsGroup';
 import Product  from '../model/product';
 import User  from '../model/user';
 import UserMeta  from '../model/userMeta';
@@ -23,7 +23,7 @@ export const exportDB = async (exclude) => {
 		deliveryArea: await DeliveryArea.findAll({ attributes: { exclude } }),
 		category: await Category.findAll({ attributes: { exclude } }),
 		product: await Product.findAll({ attributes: { exclude } }),
-		optionGroup: await OptionGroup.findAll({ attributes: { exclude } }),
+		OptionsGroup: await OptionsGroup.findAll({ attributes: { exclude } }),
 		option: await Option.findAll({ attributes: { exclude } }),
 	}
 }
@@ -42,7 +42,7 @@ export const importDB = async (data) => {
 
 	await Category.bulkCreate(data.categories);
 	await Product.bulkCreate(data.products);
-	await OptionGroup.bulkCreate(data.option_groups);
+	await OptionsGroup.bulkCreate(data.option_groups);
 	await Option.bulkCreate(data.options);
 }
 
@@ -57,7 +57,7 @@ export const importTable = async (table, data) => {
 		userMeta: UserMeta,
 		Category: Category,
 		product: Product,
-		optionGroup: OptionGroup,
+		OptionsGroup: OptionsGroup,
 		option: Option,
 	}
 

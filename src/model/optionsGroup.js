@@ -7,7 +7,7 @@ import Option  from './option';
  * Define modelo (tabela) de grupos de opções
  */
 
-class OptionGroup extends Sequelize.Model {
+class OptionsGroup extends Sequelize.Model {
 	static updateAll (groups, product, transaction=null) {
 		return Promise.all(
 			groups.map((group) => {
@@ -42,7 +42,7 @@ class OptionGroup extends Sequelize.Model {
 	}
 }
 
-OptionGroup.init({
+OptionsGroup.init({
 	name: Sequelize.STRING,
 	type: {
 		type: Sequelize.STRING(50),
@@ -77,9 +77,9 @@ OptionGroup.init({
 		defaultValue: 1,
 	},
 }, {
-	modelName: 'optionGroup',
+	modelName: 'OptionsGroup',
 	tableName: 'option_groups',
 	sequelize: conn
 });
 
-export default OptionGroup;
+export default OptionsGroup;

@@ -1,5 +1,6 @@
 import { gql }  from 'apollo-server';
 
+
 export const typeDefs =  gql`
 	type Option {
 		id: ID!
@@ -11,6 +12,17 @@ export const typeDefs =  gql`
 		updatedAt: DateTime!
 		maxSelectRestrainOther: Int
 	}
+
+	input OptionInput {
+		id: ID
+		action: String! #create | update | delete
+		name: String
+		order: Int
+		active: Boolean
+		price: Float
+		maxSelectRestrainOther: Int
+	}
+	
 `;
 
 export const resolvers =  {

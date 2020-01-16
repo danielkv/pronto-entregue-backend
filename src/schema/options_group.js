@@ -1,6 +1,6 @@
 import { gql }  from 'apollo-server';
 
-import OptionGroup  from '../model/optionGroup';
+import OptionsGroup  from '../model/OptionsGroup';
 import Products  from '../model/product';
 import conn from '../services/connection';
 
@@ -8,6 +8,7 @@ const { Op } = conn;
 
 
 export const typeDefs =  gql`
+
 	type OptionsGroup {
 		id: ID!
 		name: String!
@@ -27,16 +28,30 @@ export const typeDefs =  gql`
 		options(filter: Filter): [Option]!
 	}
 
+	input OptionsGroupInput {
+		id: ID
+		action: String! #create | update | delete
+		name: String
+		type: String
+		order: Int
+		minSelect: Int
+		maxSelect: Int
+		active: Boolean
+		options: [OptionInput] 
+		maxSelectRestrain: ID
+	}
+
 	extend type Query {
 		searchOptionGroup(search: String!): [OptionsGroup]! @hasRole(permission: "products_edit", scope: "adm")
 		optionsGroup(id: ID!): OptionsGroup!
 	}
+
 `;
 
 export const resolvers =  {
 	Query: {
 		searchOptionGroup: (_, { search }, { company }) => {
-			return OptionGroup.findAll({
+			return OptionsGroup.findAll({
 				where: { name: { [Op.like]: `%${search}%` }, [`$product->companyId$`]: company.get('id') },
 				include: [{
 					model: Products,
@@ -44,7 +59,7 @@ export const resolvers =  {
 			});
 		},
 		optionsGroup: (_, { id }) => {
-			return OptionGroup.findByPk(id);
+			return OptionsGroup.findByPk(id);
 		},
 	},
 	OptionsGroup: {

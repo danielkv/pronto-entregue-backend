@@ -3,7 +3,7 @@ import { gql }  from 'apollo-server';
 import { upload }  from '../controller/uploads';
 import Category from '../model/category';
 import Option  from '../model/option';
-import OptionGroup  from '../model/optionGroup';
+import OptionsGroup  from '../model/OptionsGroup';
 import Product  from '../model/product';
 import conn  from '../services/connection';
 
@@ -15,6 +15,7 @@ export const typeDefs =  gql`
 		image: String!
 		order: Int!
 		type: String!
+		listed: Boolean!
 		price: Float!
 		featured: Boolean!
 
@@ -37,29 +38,6 @@ export const typeDefs =  gql`
 		active: Boolean
 		categoryId: ID
 		optionGroups: [OptionsGroupInput]
-	}
-
-	input OptionsGroupInput {
-		id: ID
-		action: String! #create | update | delete
-		name: String
-		type: String
-		order: Int
-		minSelect: Int
-		maxSelect: Int
-		active: Boolean
-		options: [OptionInput] 
-		maxSelectRestrain: ID
-	}
-
-	input OptionInput {
-		id: ID
-		action: String! #create | update | delete
-		name: String
-		order: Int
-		active: Boolean
-		price: Float
-		maxSelectRestrainOther: Int
 	}
 
 	extend type Query {
@@ -88,7 +66,7 @@ export const resolvers =  {
 				const product = await category.createProduct(data, { transaction });
 
 				// create options groups
-				if (data.optionGroups) await OptionGroup.updateAll(data.optionGroups, product, transaction);
+				if (data.optionGroups) await OptionsGroup.updateAll(data.optionGroups, product, transaction);
 					
 				return product;
 			})
@@ -117,7 +95,7 @@ export const resolvers =  {
 				}
 
 				// create, update, remove options groups
-				if (data.optionGroups) await OptionGroup.updateAll(data.optionGroups, product, transaction);
+				if (data.optionGroups) await OptionsGroup.updateAll(data.optionGroups, product, transaction);
 			
 				return productUpdated;
 			})
@@ -146,7 +124,7 @@ export const resolvers =  {
 			let where = { active: true };
 			if (filter && filter.showInactive) delete where.active;
 
-			return Option.count({ where, include: [{ model: OptionGroup, where: { productId: parent.get('id') } }] });
+			return Option.count({ where, include: [{ model: OptionsGroup, where: { productId: parent.get('id') } }] });
 		},
 		optionGroups: (parent, { filter }) => {
 			let where = { active: true };

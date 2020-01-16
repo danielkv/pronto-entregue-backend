@@ -14,10 +14,10 @@ import CompanyUser  from './companyUser';
 import Coupon from './coupon';
 import DeliveryArea  from './deliveryArea';
 import Options  from './option';
-import OptionGroup  from './optionGroup';
+import OptionsGroup  from './OptionsGroup';
 import Order  from './order';
 import OrderOption  from './orderOption';
-import OrderOptionGroup  from './orderOptionGroup';
+import orderOptionsGroup  from './orderOptionsGroup';
 import OrderProduct  from './orderProduct';
 import PaymentMethod  from './paymentMethod';
 import Product  from './product';
@@ -56,27 +56,27 @@ Category.hasMany(Product);
 Product.belongsTo(Category);
 Product.belongsTo(Company);
 Product.hasOne(OrderProduct);
-Product.hasMany(OptionGroup);
+Product.hasMany(OptionsGroup);
 
-//OptionGroup relations
-OptionGroup.hasMany(Options);
-OptionGroup.belongsTo(OptionGroup, { foreignKey: 'maxSelectRestrain', as: 'groupRestrained' });
-OptionGroup.hasOne(OptionGroup, { foreignKey: 'maxSelectRestrain', as: 'restrainedBy' });
-OptionGroup.belongsTo(Product);
+//OptionsGroup relations
+OptionsGroup.hasMany(Options);
+OptionsGroup.belongsTo(OptionsGroup, { foreignKey: 'maxSelectRestrain', as: 'groupRestrained' });
+OptionsGroup.hasOne(OptionsGroup, { foreignKey: 'maxSelectRestrain', as: 'restrainedBy' });
+OptionsGroup.belongsTo(Product);
 
 //Options relations
-Options.belongsTo(OptionGroup);
+Options.belongsTo(OptionsGroup);
 
 //Order relations
 Order.belongsTo(User);
 Order.belongsTo(Company);
 Order.hasMany(OrderProduct, { as: 'products' });
-OrderProduct.hasMany(OrderOptionGroup, { as: 'optionGroups', onDelete: 'cascade' });
-OrderOptionGroup.hasMany(OrderOption, { as: 'options', onDelete: 'cascade' });
+OrderProduct.hasMany(orderOptionsGroup, { as: 'optionGroups', onDelete: 'cascade' });
+orderOptionsGroup.hasMany(OrderOption, { as: 'options', onDelete: 'cascade' });
 Order.belongsTo(PaymentMethod);
 
 OrderProduct.belongsTo(Product, { as: 'productRelated' });
-OrderOptionGroup.belongsTo(OptionGroup, { as: 'optionGroupRelated' });
+orderOptionsGroup.belongsTo(OptionsGroup, { as: 'optionGroupRelated' });
 OrderOption.belongsTo(Options, { as: 'optionRelated' });
 
 // coupon relations
