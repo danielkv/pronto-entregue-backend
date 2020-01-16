@@ -5,14 +5,16 @@
  * Esse arquivo roda a partir do setup.js
  */
 
+import Campaign from './campaign';
 import Category  from './category';
 import Company  from './company';
 import CompanyMeta  from './companyMeta';
 import CompanyPaymentMethod  from './companyPaymentMethod';
 import CompanyUser  from './companyUser';
+import Coupon from './coupon';
 import DeliveryArea  from './deliveryArea';
 import Options  from './option';
-import OptionsGroups  from './optionGroup';
+import OptionGroup  from './optionGroup';
 import Order  from './order';
 import OrderOption  from './orderOption';
 import OrderOptionGroup  from './orderOptionGroup';
@@ -54,16 +56,16 @@ Category.hasMany(Product);
 Product.belongsTo(Category);
 Product.belongsTo(Company);
 Product.hasOne(OrderProduct);
-Product.hasMany(OptionsGroups);
+Product.hasMany(OptionGroup);
 
-//OptionsGroups relations
-OptionsGroups.hasMany(Options);
-OptionsGroups.belongsTo(OptionsGroups, { foreignKey: 'maxSelectRestrain', as: 'groupRestrained' });
-OptionsGroups.hasOne(OptionsGroups, { foreignKey: 'maxSelectRestrain', as: 'restrainedBy' });
-OptionsGroups.belongsTo(Product);
+//OptionGroup relations
+OptionGroup.hasMany(Options);
+OptionGroup.belongsTo(OptionGroup, { foreignKey: 'maxSelectRestrain', as: 'groupRestrained' });
+OptionGroup.hasOne(OptionGroup, { foreignKey: 'maxSelectRestrain', as: 'restrainedBy' });
+OptionGroup.belongsTo(Product);
 
 //Options relations
-Options.belongsTo(OptionsGroups);
+Options.belongsTo(OptionGroup);
 
 //Order relations
 Order.belongsTo(User);
@@ -74,5 +76,17 @@ OrderOptionGroup.hasMany(OrderOption, { as: 'options', onDelete: 'cascade' });
 Order.belongsTo(PaymentMethod);
 
 OrderProduct.belongsTo(Product, { as: 'productRelated' });
-OrderOptionGroup.belongsTo(OptionsGroups, { as: 'optionGroupRelated' });
+OrderOptionGroup.belongsTo(OptionGroup, { as: 'optionGroupRelated' });
 OrderOption.belongsTo(Options, { as: 'optionRelated' });
+
+// coupon relations
+Order.belongsTo(Coupon);
+Coupon.hasMany(Order);
+Coupon.belongsToMany(Product, { through: 'product_coupons' });
+Product.belongsToMany(Coupon, { through: 'product_coupons' });
+Coupon.belongsToMany(Company, { through: 'company_coupons' });
+Company.belongsToMany(Coupon, { through: 'company_coupons' });
+
+// campaign relations
+Campaign.belongsTo(Product);
+Product.hasOne(Campaign);

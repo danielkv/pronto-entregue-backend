@@ -5,8 +5,10 @@ import { merge }  from 'lodash';
 
 import { upload }  from '../controller/uploads';
 import { typeDefs as Address, resolvers as addressResolvers }  from './address';
+import { typeDefs as Campaign, resolvers as campaignResolvers }  from './campaign';
 import { typeDefs as Category, resolvers as categoryResolvers }  from './category';
 import { typeDefs as Company, resolvers as companyResolvers }  from './company';
+import { typeDefs as Coupon, resolvers as couponResolvers }  from './coupon';
 import { typeDefs as DeliveryArea, resolvers as deliveryAreaResolvers }  from './delivery_area';
 import directives  from './directives';
 import { typeDefs as Meta, resolvers as metaResolvers }  from './meta';
@@ -23,39 +25,44 @@ import { typeDefs as Role, resolvers as roleResolvers }  from './role';
 import { typeDefs as User, resolvers as userResolvers }  from './user';
 
 const typeDefs = gql`
-directive @isAuthenticated on FIELD | FIELD_DEFINITION
-directive @hasRole(permission: String!, scope: String = "master") on FIELD | FIELD_DEFINITION
+	directive @isAuthenticated on FIELD | FIELD_DEFINITION
+	directive @hasRole(permission: String!, scope: String = "master") on FIELD | FIELD_DEFINITION
 
-scalar Upload
-scalar DateTime
+	scalar Upload
+	scalar DateTime
 
-input Filter {
-	showInactive: Boolean
-	status: String
-	createdAt: DateTime!
-	search: String
-}
+	input Filter {
+		showInactive: Boolean
+		status: String
+		createdAt: DateTime!
+		search: String
+	}
 
-input Pagination {
-	page: Int!
-	rowsPerPage: Int!
-}
+	input Pagination {
+		page: Int!
+		rowsPerPage: Int!
+	}
 
-type File {
-	filename: String!
-	mimetype: String!
-	encoding: String!
-}
+	enum Type {
+		discount
+		cashback
+		value
+	}
 
-type Query {
-	companies: [Company]!
-	roles: [Role]! @hasRole(permission: "roles_edit", scope: "adm")
-	users: [User]! @hasRole(permission: "master")
-}
+	enum ValueType {
+		value
+		percentage
+	}
 
-type Mutation {
-	uploadFile(file: Upload!): String! @hasRole(permission: "master")
-}
+	type Query {
+		companies: [Company]!
+		roles: [Role]! @hasRole(permission: "roles_edit", scope: "adm")
+		users: [User]! @hasRole(permission: "master")
+	}
+
+	type Mutation {
+		uploadFile(file: Upload!): String! @hasRole(permission: "master")
+	}
 `
 
 const resolvers = {
@@ -83,7 +90,7 @@ const resolvers = {
 }
 
 export default makeExecutableSchema({
-	typeDefs: [typeDefs, Category, Company, Option, OptionsGroup, OrderOption, OrderOptionsGroup, OrderProduct, Order, PaymentMethod, Product, Role, DeliveryArea, User, Address, Phone, Meta],
-	resolvers: merge(resolvers, categoryResolvers, companyResolvers, optionResolvers, optionsGroupResolvers, orderOptionResolvers, orderOptionsGroupResolvers, orderProductResolvers, orderResolvers, paymentMethodResolvers, productResolvers, roleResolvers, deliveryAreaResolvers, userResolvers, addressResolvers, phoneResolvers, metaResolvers),
+	typeDefs: [typeDefs, Coupon, Campaign, Category, Company, Option, OptionsGroup, OrderOption, OrderOptionsGroup, OrderProduct, Order, PaymentMethod, Product, Role, DeliveryArea, User, Address, Phone, Meta],
+	resolvers: merge(resolvers, couponResolvers, campaignResolvers, categoryResolvers, companyResolvers, optionResolvers, optionsGroupResolvers, orderOptionResolvers, orderOptionsGroupResolvers, orderProductResolvers, orderResolvers, paymentMethodResolvers, productResolvers, roleResolvers, deliveryAreaResolvers, userResolvers, addressResolvers, phoneResolvers, metaResolvers),
 	directiveResolvers: directives,
 })
