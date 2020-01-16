@@ -21,6 +21,7 @@ import { typeDefs as OrderProduct, resolvers as orderProductResolvers }  from '.
 import { typeDefs as PaymentMethod, resolvers as paymentMethodResolvers }  from './payment_method';
 import { typeDefs as Phone, resolvers as phoneResolvers }  from './phone';
 import { typeDefs as Product, resolvers as productResolvers }  from './product';
+import { typeDefs as Rating, resolvers as ratingResolvers }  from './rating';
 import { typeDefs as Role, resolvers as roleResolvers }  from './role';
 import { typeDefs as User, resolvers as userResolvers }  from './user';
 
@@ -90,7 +91,7 @@ const resolvers = {
 }
 
 export default makeExecutableSchema({
-	typeDefs: [typeDefs, Coupon, Campaign, Category, Company, Option, OptionsGroup, OrderOption, OrderOptionsGroup, OrderProduct, Order, PaymentMethod, Product, Role, DeliveryArea, User, Address, Phone, Meta],
-	resolvers: merge(resolvers, couponResolvers, campaignResolvers, categoryResolvers, companyResolvers, optionResolvers, optionsGroupResolvers, orderOptionResolvers, orderOptionsGroupResolvers, orderProductResolvers, orderResolvers, paymentMethodResolvers, productResolvers, roleResolvers, deliveryAreaResolvers, userResolvers, addressResolvers, phoneResolvers, metaResolvers),
+	typeDefs: [typeDefs, Rating, Coupon, Campaign, Category, Company, Option, OptionsGroup, OrderOption, OrderOptionsGroup, OrderProduct, Order, PaymentMethod, Product, Role, DeliveryArea, User, Address, Phone, Meta],
+	resolvers: merge(resolvers, ratingResolvers, couponResolvers, campaignResolvers, categoryResolvers, companyResolvers, optionResolvers, optionsGroupResolvers, orderOptionResolvers, orderOptionsGroupResolvers, orderProductResolvers, orderResolvers, paymentMethodResolvers, productResolvers, roleResolvers, deliveryAreaResolvers, userResolvers, addressResolvers, phoneResolvers, metaResolvers),
 	directiveResolvers: directives,
 })

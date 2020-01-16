@@ -21,6 +21,7 @@ import orderOptionsGroup  from './orderOptionsGroup';
 import OrderProduct  from './orderProduct';
 import PaymentMethod  from './paymentMethod';
 import Product  from './product';
+import Rating from './rating';
 import Role  from './role';
 import User  from './user';
 import UserMeta  from './userMeta';
@@ -90,3 +91,9 @@ Company.belongsToMany(Coupon, { through: 'company_coupons' });
 // campaign relations
 Campaign.belongsTo(Product);
 Product.hasOne(Campaign);
+
+// campaign relations
+Rating.belongsTo(Product);
+Product.hasMany(Rating);
+Rating.belongsTo(User);
+User.hasMany(Rating);

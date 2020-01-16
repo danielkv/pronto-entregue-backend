@@ -56,7 +56,7 @@ export const resolvers = {
 		async updateCampaign(_, { id, data }) {
 			// check if campaign exists
 			const campaignFound = await Campaign.findByPk(id);
-			if (!campaignFound) throw new Error('Cupom não encontrado');
+			if (!campaignFound) throw new Error('Campanha não encontrado');
 
 			// if needs to upload a file
 			if (data.file) data.image = await upload('campaigns', await data.file);
@@ -68,7 +68,7 @@ export const resolvers = {
 		async campaign(_, { id }) {
 			// check if campaign exists
 			const campaignFound = await Campaign.findByPk(id);
-			if (!campaignFound) throw new Error('Cupom não encontrado');
+			if (!campaignFound) throw new Error('Campanha não encontrado');
 
 			return campaignFound;
 		},
