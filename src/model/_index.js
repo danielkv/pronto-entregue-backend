@@ -97,3 +97,7 @@ Rating.belongsTo(Product);
 Product.hasMany(Rating);
 Rating.belongsTo(User);
 User.hasMany(Rating);
+
+// favorites
+User.belongsToMany(Product, { through: 'favorite_products', as: 'favoriteProducts' });
+Product.belongsToMany(User, { through: 'favorite_products', as: 'favoritedBy' });

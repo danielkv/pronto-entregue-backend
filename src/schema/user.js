@@ -35,6 +35,8 @@ export const typeDefs = gql`
 
 		countCompanies(filter: Filter): Int! @hasRole(permission: "companies_read", scope: "adm")
 		companies(filter: Filter, pagination: Pagination): [Company]! @hasRole(permission: "companies_read", scope: "adm")
+
+		favoriteProducts(pagination: Pagination): [Product]!
 	}
 
 	input UserInput {
@@ -324,5 +326,10 @@ export const resolvers = {
 		orders: (parent) => {
 			return parent.getOrders();
 		},
+		favoriteProducts(parent, { pagination }) {
+			return parent.getFavoriteProducts({
+				...getSQLPagination(pagination)
+			});
+		}
 	}
 }

@@ -6,6 +6,8 @@ import Option  from '../model/option';
 import OptionsGroup  from '../model/OptionsGroup';
 import Product  from '../model/product';
 import conn  from '../services/connection';
+import { getSQLPagination } from '../utilities';
+import User from '../model/user';
 
 export const typeDefs =  gql`
 	type Product {
@@ -23,9 +25,11 @@ export const typeDefs =  gql`
 		createdAt: DateTime!
 		updatedAt: DateTime!
 
-		optionsQty(filter:Filter): Int!
-		optionGroups(filter:Filter): [OptionsGroup]!
-		category:Category!
+		optionsQty(filter: Filter): Int!
+		optionGroups(filter: Filter): [OptionsGroup]!
+		category: Category!
+
+		favoritedBy(pagination: Pagination): [User]!
 	}
 
 	input ProductInput {
@@ -45,14 +49,17 @@ export const typeDefs =  gql`
 	}
 
 	extend type Mutation {
-		createProduct(data:ProductInput!):Product! @hasRole(permission:"users_edit", scope:"adm")
-		updateProduct(id:ID!, data:ProductInput!):Product! @hasRole(permission:"users_edit", scope:"adm")
+		createProduct(data: ProductInput!): Product! @hasRole(permission: "users_edit", scope: "adm")
+		updateProduct(id: ID!, data: ProductInput!): Product! @hasRole(permission: "users_edit", scope: "adm")
+
+		addFavoriteProduct(productId: ID!, userId: ID!): Product!
+		removeFavoriteProduct(productId: ID!, userId: ID!): Product!
 	}
 `;
 
 export const resolvers =  {
 	Mutation: {
-		createProduct: async (_, { data }, { company }) => {
+		async createProduct(_, { data }, { company }) {
 			if (data.file) {
 				data.image = await upload(company.name, await data.file);
 			}
@@ -71,7 +78,7 @@ export const resolvers =  {
 				return product;
 			})
 		},
-		updateProduct: async (_, { id, data }, { company }) => {
+		async updateProduct(_, { id, data }, { company }) {
 			if (data.file) {
 				data.image = await upload(company.name, await data.file);
 			}
@@ -100,39 +107,63 @@ export const resolvers =  {
 				return productUpdated;
 			})
 		},
+		async addFavoriteProduct(_, { productId, userId }) {
+			// check if product exists
+			const product = await Product.findByPk(productId);
+			if (!product) throw new Error('Produto não encontrado');
+			
+			// check if user exists
+			const user = await User.findByPk(userId);
+			if (!user) throw new Error('Usuário não encontrado');
+
+			//add favorite product
+			user.addFavoriteProduct(product);
+
+			return product;
+		},
+		async removeFavoriteProduct(_, { productId, userId }) {
+			// check if product exists
+			const product = await Product.findByPk(productId);
+			if (!product) throw new Error('Produto não encontrado');
+			
+			// check if user exists
+			const user = await User.findByPk(userId);
+			if (!user) throw new Error('Usuário não encontrado');
+
+			//add favorite product
+			user.removeFavoriteProduct(product);
+
+			return product;
+		},
 	},
 	Query: {
-		product: async (_, { id }) => {
+		async product(_, { id }) {
 			// check if product exists
 			const product = await Product.findByPk(id);
 			if (!product) throw new Error('Produto não encontrada');
 
 			return product;
 		},
-		/* searchBranchProducts: (_, { search, filter }, ctx) => {
-			let where = { active: true };
-			if (filter && filter.showInactive) delete where.active;
-
-			return Product.findAll({
-				where: { ...where, name: { [Op.like]: `%${search}%` }, ['$category.branchId$']: ctx.branch.get('id') },
-				include: [{ model: Category				}]
-			})
-		}, */
 	},
 	Product: {
-		optionsQty: (parent, { filter }) => {
+		optionsQty(parent, { filter }) {
 			let where = { active: true };
 			if (filter && filter.showInactive) delete where.active;
 
 			return Option.count({ where, include: [{ model: OptionsGroup, where: { productId: parent.get('id') } }] });
 		},
-		optionGroups: (parent, { filter }) => {
+		optionGroups(parent, { filter }) {
 			let where = { active: true };
 			if (filter && filter.showInactive) delete where.active;
 			return parent.getOptionGroup({ where, order: [['order', 'ASC']] });
 		},
-		category: (parent) => {
+		category(parent) {
 			return parent.getCategory();
 		},
+		favoritedBy(parent, { pagination }) {
+			return parent.getFavoritedBy({
+				...getSQLPagination(pagination)
+			});
+		}
 	}
 }
