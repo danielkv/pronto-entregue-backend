@@ -1,0 +1,13 @@
+extends ../index.pug
+
+block content
+	div	
+		p #{user.firstName}, obrigado pela sua sugestão. Entraremos em contato com o estabelecimento o mais rápido possível.
+	br
+	div Estabelecimento sugerido:
+	div
+		ul
+			li Nome: #{store.name}
+			li Endereço: #{store.address.street}, n #{store.address.number} - #{store.address.city} #{store.address.state}
+			li Email: #{store.email}
+			li telefone: #{store.phone}

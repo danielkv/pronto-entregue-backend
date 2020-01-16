@@ -13,5 +13,5 @@ export function sendMail (template, context) {
 				html: rendered.html
 			});
 		})
-		.then(()=>console.log('ok'));
+		.then(()=>true);
 }

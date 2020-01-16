@@ -3,7 +3,6 @@ import { GraphQLScalarType } from 'graphql';
 import { Kind } from 'graphql/language';
 import { merge }  from 'lodash';
 
-import { upload }  from '../controller/uploads';
 import { typeDefs as Address, resolvers as addressResolvers }  from './address';
 import { typeDefs as Campaign, resolvers as campaignResolvers }  from './campaign';
 import { typeDefs as Category, resolvers as categoryResolvers }  from './category';
@@ -11,6 +10,7 @@ import { typeDefs as Company, resolvers as companyResolvers }  from './company';
 import { typeDefs as Coupon, resolvers as couponResolvers }  from './coupon';
 import { typeDefs as DeliveryArea, resolvers as deliveryAreaResolvers }  from './delivery_area';
 import directives  from './directives';
+import { typeDefs as Emails, resolvers as emailsResolvers }  from './emails';
 import { typeDefs as Meta, resolvers as metaResolvers }  from './meta';
 import { typeDefs as Option, resolvers as optionResolvers }  from './option';
 import { typeDefs as OptionsGroup, resolvers as optionsGroupResolvers }  from './options_group';
@@ -68,9 +68,7 @@ const typeDefs = gql`
 
 const resolvers = {
 	Mutation: {
-		uploadFile: async (_, { file }) => {
-			return await upload('testea', await file);
-		}
+		
 	},
 	DateTime: new GraphQLScalarType({
 		name: 'Date',
@@ -91,7 +89,7 @@ const resolvers = {
 }
 
 export default makeExecutableSchema({
-	typeDefs: [typeDefs, Rating, Coupon, Campaign, Category, Company, Option, OptionsGroup, OrderOption, OrderOptionsGroup, OrderProduct, Order, PaymentMethod, Product, Role, DeliveryArea, User, Address, Phone, Meta],
-	resolvers: merge(resolvers, ratingResolvers, couponResolvers, campaignResolvers, categoryResolvers, companyResolvers, optionResolvers, optionsGroupResolvers, orderOptionResolvers, orderOptionsGroupResolvers, orderProductResolvers, orderResolvers, paymentMethodResolvers, productResolvers, roleResolvers, deliveryAreaResolvers, userResolvers, addressResolvers, phoneResolvers, metaResolvers),
+	typeDefs: [typeDefs, Rating, Emails, Coupon, Campaign, Category, Company, Option, OptionsGroup, OrderOption, OrderOptionsGroup, OrderProduct, Order, PaymentMethod, Product, Role, DeliveryArea, User, Address, Phone, Meta],
+	resolvers: merge(resolvers, ratingResolvers, emailsResolvers, couponResolvers, campaignResolvers, categoryResolvers, companyResolvers, optionResolvers, optionsGroupResolvers, orderOptionResolvers, orderOptionsGroupResolvers, orderProductResolvers, orderResolvers, paymentMethodResolvers, productResolvers, roleResolvers, deliveryAreaResolvers, userResolvers, addressResolvers, phoneResolvers, metaResolvers),
 	directiveResolvers: directives,
 })

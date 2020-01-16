@@ -1,0 +1,11 @@
+extends ../index.pug
+
+block content
+	div Usuário #{user.firstName} #{user.id} indicou um estabelecimento
+	br
+	div
+		ul
+			li Nome: #{store.name}
+			li Endereço: #{store.address.street}, n #{store.address.number} - #{store.address.city} #{store.address.state}
+			li Email: #{store.email}
+			li telefone: #{store.phone}

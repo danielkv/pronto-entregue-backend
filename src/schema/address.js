@@ -25,8 +25,6 @@ export const typeDefs = gql`
 		state: String!
 	}
 
-	
-
 `;
 
 export const resolvers =  {
