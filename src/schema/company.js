@@ -22,6 +22,7 @@ export const typeDefs =  gql`
 		users(filter: Filter, pagination: Pagination): [User]! @hasRole(permission: "users_read", scope: "adm")
 
 		deliveryTime: Int! #minutes
+		customization: CompanyCustomization!
 	}
 	
 
@@ -30,6 +31,12 @@ export const typeDefs =  gql`
 		displayName: String
 		active: Boolean
 		metas: [MetaInput]
+	}
+
+	type CompanyCustomization {
+		color: String!
+		background: String!
+		logo: String!
 	}
 
 	extend type Mutation {
@@ -65,7 +72,7 @@ export const resolvers =  {
 						return companyUpdated;
 					})
 			})
-		}
+		},
 	},
 	Query: {
 		companies: () => {
@@ -118,6 +125,15 @@ export const resolvers =  {
 			if (!meta) return 0;
 
 			return parseInt(meta.value);
+		},
+		async customization(parent) {
+			const metas = await parent.getMetas({ where: { key: ['color', 'background', 'logo'] } });
+
+			return {
+				color: metas['color'] ? metas['color'].value : '',
+				background: metas['background'] ? metas['background'].value : '',
+				logo: metas['logo'] ? metas['logo'].value : '',
+			}
 		}
 	}
 }
