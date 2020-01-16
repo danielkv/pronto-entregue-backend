@@ -20,6 +20,8 @@ export const typeDefs =  gql`
 
 		countUsers(filter: Filter): Int! @hasRole(permission: "users_read", scope: "adm")
 		users(filter: Filter, pagination: Pagination): [User]! @hasRole(permission: "users_read", scope: "adm")
+
+		deliveryTime: Int! #minutes
 	}
 	
 
@@ -110,5 +112,12 @@ export const resolvers =  {
 		lastMonthRevenue: () => {
 			return 0;
 		},
+		async deliveryTime(parent) {
+			// check if metadata exists
+			const [meta] = await parent.getMetas({ where: { key: 'deliveryTime' } });
+			if (!meta) return 0;
+
+			return parseInt(meta.value);
+		}
 	}
 }
