@@ -35,7 +35,7 @@ Campaign.init({
 	value: Sequelize.FLOAT,
 }, {
 	modelName: 'campaign',
-	tableName: 'Campaigns',
+	tableName: 'campaigns',
 	sequelize: conn,
 });
 

@@ -13,7 +13,7 @@ Rating.init({
 	},
 }, {
 	modelName: 'rating',
-	tableName: 'Ratings',
+	tableName: 'ratings',
 	sequelize: conn,
 });
 
