@@ -25,8 +25,8 @@ export const typeDefs =  gql`
 		updatedAt: DateTime!
 
 		products: [Product]!
-		companies: [company]!
-		users: [Users]!
+		companies: [Company]!
+		users: [User]!
 	}
 
 	input CampaignInput {
@@ -90,8 +90,14 @@ export const resolvers = {
 		}
 	},
 	Campaign: {
-		product(parent) {
-			return parent.getProduct();
-		}
+		products(parent) {
+			return parent.getProducts();
+		},
+		companies(parent) {
+			return parent.getCompanies();
+		},
+		users(parent) {
+			return parent.getUsers();
+		},
 	}
 }
