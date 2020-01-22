@@ -58,7 +58,6 @@ const typeDefs = gql`
 	type Query {
 		companies: [Company]!
 		roles: [Role]! @hasRole(permission: "roles_edit", scope: "adm")
-		users: [User]! @hasRole(permission: "master")
 	}
 
 	type Mutation {

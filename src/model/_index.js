@@ -2,7 +2,6 @@
  * Essa é a configuração todas relações e chaves 
  * estrangeiras entre todas as tabelas.
  * 
- * Esse arquivo roda a partir do setup.js
  */
 
 import Campaign from './campaign';
@@ -10,6 +9,7 @@ import Category from './category';
 import Company from './company';
 import CompanyMeta from './companyMeta';
 import CompanyPaymentMethod from './companyPaymentMethod';
+import CompanyType from './companyType';
 import CompanyUser from './companyUser';
 import DeliveryArea from './deliveryArea';
 import Options from './option';
@@ -28,11 +28,19 @@ import UserMeta from './userMeta';
 // Company Relations
 Company.hasMany(CompanyMeta);
 Company.belongsToMany(User, { through: CompanyUser });
-Company.hasMany(Order);
-Company.hasMany(Product);
 Company.hasMany(DeliveryArea);
 Company.belongsToMany(PaymentMethod, { through: CompanyPaymentMethod });
 Company.belongsToMany(User, { through: CompanyUser });
+Company.belongsTo(CompanyType);
+CompanyType.hasMany(Company)
+
+// rating relations
+Rating.belongsTo(Company);
+Company.hasMany(Rating);
+Rating.belongsTo(Order);
+Order.hasOne(Rating);
+Rating.belongsTo(User);
+User.hasMany(Rating);
 
 // Role relations
 Role.hasMany(CompanyUser);
@@ -50,11 +58,12 @@ User.belongsToMany(Company, { through: CompanyUser });
 UserMeta.belongsTo(User);
 
 //Category relations
+Product.belongsTo(Category);
 Category.hasMany(Product);
 
 //Product relations
-Product.belongsTo(Category);
 Product.belongsTo(Company);
+Company.hasMany(Product);
 Product.hasOne(OrderProduct);
 Product.hasMany(OptionsGroup);
 
@@ -67,19 +76,21 @@ OptionsGroup.belongsTo(Product);
 //Options relations
 Options.belongsTo(OptionsGroup);
 
-//Order relations
+// Order relations
 Order.belongsTo(User);
+Company.hasMany(Order);
 Order.belongsTo(Company);
 Order.hasMany(OrderProduct, { as: 'products' });
 OrderProduct.hasMany(orderOptionsGroup, { as: 'optionsGroups', onDelete: 'cascade' });
 orderOptionsGroup.hasMany(OrderOptions, { as: 'options', onDelete: 'cascade' });
 Order.belongsTo(PaymentMethod);
 
+//  Order Product relations
 OrderProduct.belongsTo(Product, { as: 'productRelated' });
 orderOptionsGroup.belongsTo(OptionsGroup, { as: 'optionsGroupRelated' });
 OrderOptions.belongsTo(Options, { as: 'optionRelated' });
 
-// campaign relations
+// Campaign relations
 Campaign.belongsToMany(Product, { through: 'campaign_products' });
 Product.belongsToMany(Campaign, { through: 'campaign_products' });
 Campaign.belongsToMany(Company, { through: 'campaign_companies' });

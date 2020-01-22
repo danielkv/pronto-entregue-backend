@@ -14,7 +14,7 @@ export const typeDefs =  gql`
 		createdAt: DateTime!
 		updatedAt: DateTime!
 
-		product: Product!
+		company: Company!
 		user: User!
 	}
 
@@ -71,8 +71,8 @@ export const resolvers = {
 		}
 	},
 	Rating: {
-		product(parent) {
-			return parent.getProduct();
+		company(parent) {
+			return parent.getCompanies();
 		},
 		user(parent) {
 			return parent.getUser();

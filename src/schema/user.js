@@ -71,6 +71,7 @@ export const typeDefs = gql`
 	}
 
 	extend type Query {
+		users(filter: Filter, pagination: Pagination): [User]! @hasRole(permission: "master")
 		user(id: ID!): User!
 		searchCompanyUsers(search: String!): [User]!
 		me: User! @isAuthenticated
@@ -85,8 +86,15 @@ export const resolvers = {
 		me: (_, __, { user }) => {
 			return user;
 		},
-		users: () => {
-			return User.findAll();
+		users: (_, { filter, pagination }) => {
+			const search = ['firstName', 'lastName', 'email'];
+			const where = sanitizeFilter(filter, { search, table: 'order' });
+
+			return User.findAll({
+				where,
+				order: [['firstName', 'ASC'], ['lastName', 'ASC']],
+				...getSQLPagination(pagination),
+			});
 		},
 		user: (_, { id }, ctx) => {
 
