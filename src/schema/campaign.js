@@ -10,16 +10,23 @@ export const typeDefs =  gql`
 		id: ID!
 		name: String!
 		image: String!
+		counpon: String!
 		description: String
+
+		createdByMaster: Boolean!
+		acceptOtherCompaign: Boolean!
 		active: Boolean!
 		type: Type!
 		valueType: ValueType!
 		value: Float!
+
 		expiresAt: DateTime!
 		createdAt: DateTime!
 		updatedAt: DateTime!
 
-		product: Product!
+		products: [Product]!
+		companies: [company]!
+		users: [Users]!
 	}
 
 	input CampaignInput {

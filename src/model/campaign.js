@@ -6,8 +6,17 @@ class Campaign extends Sequelize.Model {}
 Campaign.init({
 	name: Sequelize.STRING,
 	image: Sequelize.TEXT,
+	coupon: Sequelize.STRING,
 	expiresAt: Sequelize.DATEONLY,
 	description: Sequelize.STRING,
+	createdByMaster: {
+		type: Sequelize.BOOLEAN,
+		defaultValue: false,
+	},
+	acceptOtherCompaign: {
+		type: Sequelize.BOOLEAN,
+		defaultValue: false,
+	},
 	active: {
 		type: Sequelize.BOOLEAN,
 		defaultValue: true,
