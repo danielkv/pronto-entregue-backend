@@ -17,7 +17,6 @@ export const typeDefs =  gql`
 		status: String!
 		message: String!
 		updatedAt: String!
-		products: [OrderProduct]!
 		paymentMethod: PaymentMethod!
 		
 		street: String
@@ -28,7 +27,9 @@ export const typeDefs =  gql`
 		district: String
 		zipcode: String
 
-		productsQty: Int!
+		countProducts: Int!
+		products: [OrderProduct]!
+
 		createdDate: String!
 		createdTime: String!
 	}	
@@ -63,14 +64,14 @@ export const typeDefs =  gql`
 		name: String!
 		price: Float!
 		message: String!
-		productId: ID
-		optionGroups: [OrderOptionGroupInput!]
+		productRelatedId: ID
+		optionsGroups: [OrderOptionsGroupInput!]
 	}
 
-	input OrderOptionGroupInput {
+	input OrderOptionsGroupInput {
 		id: ID
 		name: String!
-		optionGroupId: ID!
+		optionsGroupRelatedId: ID!
 		
 		options: [OrderOptionInput!]
 	}
@@ -79,7 +80,7 @@ export const typeDefs =  gql`
 		id: ID
 		name: String!
 		price: Float!
-		optionId: ID!
+		optionRelatedId: ID!
 	}
 
 	type Subscription {
@@ -116,7 +117,7 @@ export const resolvers =  {
 		products: (parent) => {
 			return parent.getProducts();
 		},
-		productsQty: (parent) => {
+		countProducts: (parent) => {
 			return parent.getProducts()
 				.then(products=>products.length);
 		},
@@ -141,7 +142,7 @@ export const resolvers =  {
 			if (hours < 10) hours = `0${hours}`;
 			if (minutes < 10) minutes = `0${minutes}`;
 
-			return `${hours}: {minutes}`;
+			return `${hours}:${minutes}`;
 		},
 	},
 	Query: {
@@ -154,7 +155,7 @@ export const resolvers =  {
 		}
 	},
 	Mutation: {
-		createOrder: (_, { data }, { company }) => {
+		createOrder(_, { data }, { company }) {
 			return sequelize.transaction(async (transaction) => {
 				// create order
 				const order = await company.createOrder(data, { transaction });

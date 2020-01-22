@@ -5,9 +5,9 @@ import Category from '../model/category';
 import Option  from '../model/option';
 import OptionsGroup  from '../model/OptionsGroup';
 import Product  from '../model/product';
+import User from '../model/user';
 import conn  from '../services/connection';
 import { getSQLPagination } from '../utilities';
-import User from '../model/user';
 
 export const typeDefs =  gql`
 	type Product {
@@ -25,11 +25,13 @@ export const typeDefs =  gql`
 		createdAt: DateTime!
 		updatedAt: DateTime!
 
-		optionsQty(filter: Filter): Int!
-		optionGroups(filter: Filter): [OptionsGroup]!
-		category: Category!
+		optionsGroups(filter: Filter): [OptionsGroup]!
+		
+		countOptions(filter: Filter): Int!
 
 		favoritedBy(pagination: Pagination): [User]!
+		
+		category: Category!
 	}
 
 	input ProductInput {
@@ -41,7 +43,7 @@ export const typeDefs =  gql`
 		price: Float
 		active: Boolean
 		categoryId: ID
-		optionGroups: [OptionsGroupInput]
+		optionsGroups: [OptionsGroupInput]
 	}
 
 	extend type Query {
@@ -73,7 +75,7 @@ export const resolvers =  {
 				const product = await category.createProduct(data, { transaction });
 
 				// create options groups
-				if (data.optionGroups) await OptionsGroup.updateAll(data.optionGroups, product, transaction);
+				if (data.optionsGroups) await OptionsGroup.updateAll(data.optionsGroups, product, transaction);
 					
 				return product;
 			})
@@ -102,7 +104,7 @@ export const resolvers =  {
 				}
 
 				// create, update, remove options groups
-				if (data.optionGroups) await OptionsGroup.updateAll(data.optionGroups, product, transaction);
+				if (data.optionsGroups) await OptionsGroup.updateAll(data.optionsGroups, product, transaction);
 			
 				return productUpdated;
 			})
@@ -146,16 +148,16 @@ export const resolvers =  {
 		},
 	},
 	Product: {
-		optionsQty(parent, { filter }) {
+		countOptions(parent, { filter }) {
 			let where = { active: true };
 			if (filter && filter.showInactive) delete where.active;
 
 			return Option.count({ where, include: [{ model: OptionsGroup, where: { productId: parent.get('id') } }] });
 		},
-		optionGroups(parent, { filter }) {
+		optionsGroups(parent, { filter }) {
 			let where = { active: true };
 			if (filter && filter.showInactive) delete where.active;
-			return parent.getOptionGroup({ where, order: [['order', 'ASC']] });
+			return parent.getOptionsGroups({ where, order: [['order', 'ASC']] });
 		},
 		category(parent) {
 			return parent.getCategory();

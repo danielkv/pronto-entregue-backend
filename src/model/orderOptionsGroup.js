@@ -1,7 +1,7 @@
 import Sequelize  from 'sequelize';
 
 import conn from '../services/connection';
-import OrdersOptions  from './orderOption';
+import OrdersOptions  from './orderOptions';
 
 /*
  * Define modelo (tabela) de grupos de opções de produtos de pedidos
@@ -43,6 +43,7 @@ class orderOptionsGroup extends Sequelize.Model {
 orderOptionsGroup.init({
 	name: Sequelize.STRING,
 }, {
+	modelName: 'orderOptionsGroup',
 	tableName: 'order_option_groups',
 	sequelize: conn,
 });

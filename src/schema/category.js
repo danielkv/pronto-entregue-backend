@@ -3,7 +3,7 @@ import { gql }  from 'apollo-server';
 import { upload }  from '../controller/uploads';
 import Category  from '../model/category';
 import sequelize  from '../services/connection';
-
+import { getSQLPagination, sanitizeFilter } from '../utilities'
 
 export const typeDefs =  gql`
 	type Category {
@@ -15,8 +15,8 @@ export const typeDefs =  gql`
 		order: Int!
 		createdAt: DateTime!
 		updatedAt: DateTime!
-		productsQty(filter: Filter): Int!
 
+		countProducts(filter: Filter): Int!
 		products(filter: Filter): [Product]!
 	}
 
@@ -30,6 +30,8 @@ export const typeDefs =  gql`
 	}
 
 	extend type Query {
+		countCategories(filter: Filter): Int!
+		categories(filter: Filter, pagination: Pagination): [Category]!
 		category(id: ID!): Category!
 	}
 
@@ -73,27 +75,39 @@ export const resolvers =  {
 		}
 	},
 	Query: {
-		category: (_, { id }) => {
-			return Category.findByPk(id)
-				.then(category => {
-					if (!category) throw new Error('Categoria não encontrada');
-					return category;
-				})
+		countCategories(_, { filter }) {
+			const search = ['name', 'description'];
+			const where = sanitizeFilter(filter, { search, table: 'order' });
+
+			return Category.count({ where });
+		},
+		categories(_, { filter, pagination }) {
+			const search = ['name', 'description'];
+			const where = sanitizeFilter(filter, { search, table: 'order' });
+
+			return Category.findAll({
+				where,
+				...getSQLPagination(pagination),
+			});
+		},
+		async category(_, { id }) {
+			// check if category exists
+			const category = await Category.findByPk(id);
+			if (!category) throw new Error('Categoria não encontrada');
+			
+			return category;
 		},
 	},
 	Category: {
-		products: (parent, { filter }) => {
-			let where = { active: true };
-			if (filter && filter.showInactive) delete where.active;
+		products(parent, { filter }) {
+			const where = sanitizeFilter(filter);
 
 			return parent.getProducts({ where });
 		},
-		productsQty: (parent, { filter }) => {
-			let where = { active: true };
-			if (filter && filter.showInactive) delete where.active;
+		countProducts(parent, { filter }) {
+			const where = sanitizeFilter(filter);
 
-			return parent.getProducts({ where })
-				.then (products=>products.length);
+			return parent.countProducts({ where });
 		}
 	}
 }

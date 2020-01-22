@@ -1,9 +1,13 @@
 import { gql }  from 'apollo-server';
 
-import Companies  from '../model/company';
-import CompaniesMeta  from '../model/companyMeta';
-import sequelize  from '../services/connection';
+import Company  from '../model/company';
+import CompanyMeta  from '../model/companyMeta';
+import OrderProduct from '../model/orderProduct';
+import Product from '../model/product';
+import User from '../model/user';
+import conn  from '../services/connection';
 import { getSQLPagination, sanitizeFilter }  from '../utilities';
+import { defaultBusinessHours } from '../utilities/company';
 
 export const typeDefs =  gql`
 
@@ -23,8 +27,27 @@ export const typeDefs =  gql`
 
 		deliveryTime: Int! #minutes
 		customization: CompanyCustomization!
+
+		deliveryAreas: [DeliveryArea]!
+		paymentMethods: [PaymentMethod]!
+
+		bestSellers(filter:Filter, pagination: Pagination): [ProductBestSeller]!
+
+		businessHours: [BusinessHour]!
+
+		countOrders(filter:Filter): Int!
+		orders(filter:Filter, pagination: Pagination): [Order]!
+
+		countProducts(filter:Filter): Int!
+		products(filter:Filter, pagination: Pagination): [Product]!
 	}
-	
+
+	type ProductBestSeller {
+		id: ID!
+		name: String!
+		image: String!
+		qty: Int!
+	}	
 
 	input CompanyInput {
 		name: String
@@ -40,26 +63,26 @@ export const typeDefs =  gql`
 	}
 
 	extend type Mutation {
-		createCompany(data: CompanyInput!): Company! @hasRole(permission: "companies_edit", scope: "adm")
-		updateCompany(id: ID!, data: CompanyInput!): Company! @hasRole(permission: "companies_edit", scope: "adm")
+		createCompany(data: CompanyInput!): Company! @hasRole(permission: "company_edit", scope: "adm")
+		updateCompany(id: ID!, data: CompanyInput!): Company! @hasRole(permission: "company_edit", scope: "adm")
 	}
 
 	extend type Query {
 		company(id: ID!): Company!
-		userCompanies: [Company!] @hasRole(permission: "companies_read", scope: "adm")
+		userCompany: [Company!] @hasRole(permission: "company_read", scope: "adm")
 	}
 `;
 
 export const resolvers =  {
 	Mutation: {
 		createCompany: (_, { data }) => {
-			return sequelize.transaction(transaction => {
-				return Companies.create(data, { include: [CompaniesMeta], transaction })
+			return conn.transaction(transaction => {
+				return Company.create(data, { include: [CompanyMeta], transaction })
 			})
 		},
 		updateCompany: (_, { id, data }) => {
-			return sequelize.transaction(transaction => {
-				return Companies.findByPk(id)
+			return conn.transaction(transaction => {
+				return Company.findByPk(id)
 					.then(company=>{
 						if (!company) throw new Error('Empresa não encontrada');
 
@@ -67,31 +90,30 @@ export const resolvers =  {
 					})
 					.then(async (companyUpdated) => {
 						if (data.metas) {
-							await CompaniesMeta.updateAll(data.metas, companyUpdated, transaction);
+							await CompanyMeta.updateAll(data.metas, companyUpdated, transaction);
 						}
 						return companyUpdated;
 					})
 			})
-		},
+		}
 	},
 	Query: {
 		companies: () => {
-			return Companies.findAll();
+			return Company.findAll();
 		},
-		userCompanies: (_, __, ctx) => {
-			if (ctx.user.can('master'))
-				return Companies.findAll();
+		userCompany: (_, __, { user }) => {
+			if (user.can('master'))
+				return Company.findAll();
 
-			return ctx.user.getCompanies({ through: { where: { active: true } } });
+			return user.getCompany({ through: { where: { active: true } } });
 		},
-		company: (_, { id }) => {
-			return Companies.findByPk(id)
-				.then(company => {
-					if (!company) throw new Error('Empresa não encontrada');
+		async company(_, { id }) {
+			// check if company exists
+			const company = await Company.findByPk(id);
+			if (!company) throw new Error('Empresa não encontrada');
 
-					return company;
-				});
-		}
+			return company;
+		},
 	},
 	Company: {
 		userRelation: (parent) => {
@@ -134,6 +156,80 @@ export const resolvers =  {
 				background: metas['background'] ? metas['background'].value : '',
 				logo: metas['logo'] ? metas['logo'].value : '',
 			}
-		}
+		},
+
+		async bestSellers(_, { filter, pagination }) {
+			const _filter = sanitizeFilter(filter, { excludeFilters: ['active'], table: 'orderproduct' });
+
+			const products = await OrderProduct.findAll({
+				attributes: [
+					[conn.col('productId'), 'id'],
+					[conn.col('productRelated.name'), 'name'],
+					[conn.col('productRelated.image'), 'image'],
+					[conn.fn('COUNT', conn.col('productId')), 'qty']
+				],
+				group: ['productId'],
+				order: [[conn.fn('COUNT', conn.col('productId')), 'DESC'], [conn.col('name'), 'ASC']],
+				include: [{
+					model: Product,
+					as: 'productRelated'
+				}],
+				
+				where: _filter,
+				...getSQLPagination(pagination),
+			});
+
+			return products.map(row => row.get());
+		},
+
+		async businessHours(parent) {
+			// check if meta exists
+			const [meta] = await parent.getMetas({ where: { key: 'businessHours' } })
+			if (!meta) return defaultBusinessHours();
+		
+			return JSON.parse(meta.value);
+		},
+
+		countProducts(parent, { filter }) {
+			const _filter = sanitizeFilter(filter);
+
+			// find and count products
+			return parent.countProducts({ where: _filter });
+		},
+		products: (parent, { filter, pagination }) => {
+			const _filter = sanitizeFilter(filter);
+
+			return parent.getProducts({
+				where: _filter,
+				order: [['name', 'ASC']],
+				...getSQLPagination(pagination),
+			})
+		},
+
+		countOrders(parent, { filter }) {
+			const search = ['street', 'complement', '$user.firstName$', '$user.lastName$', '$user.email$'];
+			const _filter = sanitizeFilter(filter, { search, excludeFilters: ['active'], table: 'order' });
+
+			return parent.countOrders({ where: _filter, include: [User] });
+		},
+		orders(parent, { filter, pagination }) {
+			const search = ['street', 'complement', '$user.firstName$', '$user.lastName$', '$user.email$'];
+			const _filter = sanitizeFilter(filter, { search, excludeFilters: ['active'], table: 'order' });
+
+			return parent.getOrders({
+				where: _filter,
+				order: [['createdAt', 'DESC']],
+				...getSQLPagination(pagination),
+
+				include: [User]
+			});
+		},
+
+		paymentMethods(parent) {
+			return parent.getPaymentMethods();
+		},
+		deliveryAreas(parent) {
+			return parent.getDeliveryAreas();
+		},
 	}
 }

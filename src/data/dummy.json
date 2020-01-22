@@ -483,7 +483,8 @@
 			"type": "inline",
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-12-03T00:07:01.000Z",
-			"categoryId": 1
+			"categoryId": 1,
+			"companyId": 1
 		},
 		{ 
 			"price": 0,
@@ -497,7 +498,8 @@
 			"type": "inline",
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-12-02T23:04:49.000Z",
-			"categoryId": 2
+			"categoryId": 2,
+			"companyId": 2
 		},
 		{ 
 			"price": 16.98,
@@ -511,7 +513,8 @@
 			"type": "inline",
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"categoryId": 4
+			"categoryId": 4,
+			"companyId": 2
 		},
 		{ 
 			"price": 0,
@@ -525,7 +528,8 @@
 			"type": "panel",
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-12-03T00:06:51.000Z",
-			"categoryId": 3
+			"categoryId": 3,
+			"companyId": 2
 		},
 		{ 
 			"price": 4.8,
@@ -539,7 +543,8 @@
 			"type": "inline",
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"categoryId": 5
+			"categoryId": 5,
+			"companyId": 1
 		},
 		{ 
 			"price": 55.9,
@@ -553,7 +558,8 @@
 			"type": "panel",
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"categoryId": 6
+			"categoryId": 6,
+			"companyId": 1
 		},
 		{ 
 			"price": 16.98,
@@ -567,7 +573,8 @@
 			"type": "inline",
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"categoryId": 7
+			"categoryId": 7,
+			"companyId": 2
 		},
 		{ 
 			"price": 4.8,
@@ -581,7 +588,8 @@
 			"type": "inline",
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"categoryId": 8
+			"categoryId": 8,
+			"companyId": 2
 		},
 		{ 
 			"price": 55.9,
@@ -595,7 +603,8 @@
 			"type": "panel",
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"categoryId": 9
+			"categoryId": 9,
+			"companyId": 1
 		},
 		{ 
 			"price": 20,
@@ -609,7 +618,8 @@
 			"type": "inline",
 			"createdAt": "2019-12-02T22:50:18.000Z",
 			"updatedAt": "2019-12-02T23:01:56.000Z",
-			"categoryId": 1
+			"categoryId": 1,
+			"companyId": 2
 		}
 	],
 	"option_groups": [ 
@@ -767,7 +777,7 @@
 			"active": true,
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-12-02T22:42:18.000Z",
-			"optionGroupId": 1,
+			"optionsGroupId": 1,
 			"itemId": null
 		},
 		{ 
@@ -779,7 +789,7 @@
 			"active": true,
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-12-02T22:42:18.000Z",
-			"optionGroupId": 1,
+			"optionsGroupId": 1,
 			"itemId": null
 		},
 		{ 
@@ -791,7 +801,7 @@
 			"active": true,
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-12-02T22:43:03.000Z",
-			"optionGroupId": 1,
+			"optionsGroupId": 1,
 			"itemId": null
 		},
 		{ 
@@ -803,7 +813,7 @@
 			"active": true,
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"optionGroupId": 2,
+			"optionsGroupId": 2,
 			"itemId": null
 		},
 		{ 
@@ -815,7 +825,7 @@
 			"active": true,
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"optionGroupId": 2,
+			"optionsGroupId": 2,
 			"itemId": null
 		},
 		{ 
@@ -827,7 +837,7 @@
 			"active": true,
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"optionGroupId": 2,
+			"optionsGroupId": 2,
 			"itemId": null
 		},
 		{ 
@@ -839,7 +849,7 @@
 			"active": true,
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"optionGroupId": 2,
+			"optionsGroupId": 2,
 			"itemId": null
 		},
 		{ 
@@ -851,7 +861,7 @@
 			"active": true,
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"optionGroupId": 2,
+			"optionsGroupId": 2,
 			"itemId": null
 		},
 		{ 
@@ -863,7 +873,7 @@
 			"active": true,
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"optionGroupId": 2,
+			"optionsGroupId": 2,
 			"itemId": null
 		},
 		{ 
@@ -875,7 +885,7 @@
 			"active": true,
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"optionGroupId": 2,
+			"optionsGroupId": 2,
 			"itemId": null
 		},
 		{ 
@@ -887,7 +897,7 @@
 			"active": true,
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"optionGroupId": 2,
+			"optionsGroupId": 2,
 			"itemId": null
 		},
 		{ 
@@ -899,7 +909,7 @@
 			"active": true,
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"optionGroupId": 2,
+			"optionsGroupId": 2,
 			"itemId": null
 		},
 		{ 
@@ -911,7 +921,7 @@
 			"active": true,
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"optionGroupId": 2,
+			"optionsGroupId": 2,
 			"itemId": null
 		},
 		{ 
@@ -923,7 +933,7 @@
 			"active": true,
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"optionGroupId": 2,
+			"optionsGroupId": 2,
 			"itemId": null
 		},
 		{ 
@@ -935,7 +945,7 @@
 			"active": true,
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"optionGroupId": 2,
+			"optionsGroupId": 2,
 			"itemId": null
 		},
 		{ 
@@ -947,7 +957,7 @@
 			"active": true,
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"optionGroupId": 4,
+			"optionsGroupId": 4,
 			"itemId": null
 		},
 		{ 
@@ -959,7 +969,7 @@
 			"active": true,
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"optionGroupId": 4,
+			"optionsGroupId": 4,
 			"itemId": null
 		},
 		{ 
@@ -971,7 +981,7 @@
 			"active": true,
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"optionGroupId": 4,
+			"optionsGroupId": 4,
 			"itemId": null
 		},
 		{ 
@@ -983,7 +993,7 @@
 			"active": true,
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"optionGroupId": 9,
+			"optionsGroupId": 9,
 			"itemId": null
 		},
 		{ 
@@ -995,7 +1005,7 @@
 			"active": true,
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"optionGroupId": 9,
+			"optionsGroupId": 9,
 			"itemId": null
 		},
 		{ 
@@ -1007,7 +1017,7 @@
 			"active": true,
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"optionGroupId": 9,
+			"optionsGroupId": 9,
 			"itemId": null
 		},
 		{ 
@@ -1019,7 +1029,7 @@
 			"active": true,
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"optionGroupId": 9,
+			"optionsGroupId": 9,
 			"itemId": null
 		},
 		{ 
@@ -1031,7 +1041,7 @@
 			"active": true,
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"optionGroupId": 9,
+			"optionsGroupId": 9,
 			"itemId": null
 		},
 		{ 
@@ -1043,7 +1053,7 @@
 			"active": true,
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"optionGroupId": 5,
+			"optionsGroupId": 5,
 			"itemId": null
 		},
 		{ 
@@ -1055,7 +1065,7 @@
 			"active": true,
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"optionGroupId": 5,
+			"optionsGroupId": 5,
 			"itemId": null
 		},
 		{ 
@@ -1067,7 +1077,7 @@
 			"active": true,
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"optionGroupId": 5,
+			"optionsGroupId": 5,
 			"itemId": null
 		},
 		{ 
@@ -1079,7 +1089,7 @@
 			"active": true,
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"optionGroupId": 8,
+			"optionsGroupId": 8,
 			"itemId": null
 		},
 		{ 
@@ -1091,7 +1101,7 @@
 			"active": true,
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"optionGroupId": 8,
+			"optionsGroupId": 8,
 			"itemId": null
 		},
 		{ 
@@ -1103,7 +1113,7 @@
 			"active": true,
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-12-02T22:43:54.000Z",
-			"optionGroupId": 3,
+			"optionsGroupId": 3,
 			"itemId": null
 		},
 		{ 
@@ -1115,7 +1125,7 @@
 			"active": true,
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-12-02T22:43:54.000Z",
-			"optionGroupId": 3,
+			"optionsGroupId": 3,
 			"itemId": null
 		},
 		{ 
@@ -1127,7 +1137,7 @@
 			"active": true,
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-12-02T22:43:54.000Z",
-			"optionGroupId": 3,
+			"optionsGroupId": 3,
 			"itemId": null
 		},
 		{ 
@@ -1139,7 +1149,7 @@
 			"active": true,
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"optionGroupId": 7,
+			"optionsGroupId": 7,
 			"itemId": null
 		},
 		{ 
@@ -1151,7 +1161,7 @@
 			"active": true,
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"optionGroupId": 7,
+			"optionsGroupId": 7,
 			"itemId": null
 		},
 		{ 
@@ -1163,7 +1173,7 @@
 			"active": true,
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"optionGroupId": 7,
+			"optionsGroupId": 7,
 			"itemId": null
 		},
 		{ 
@@ -1175,7 +1185,7 @@
 			"active": true,
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"optionGroupId": 6,
+			"optionsGroupId": 6,
 			"itemId": null
 		},
 		{ 
@@ -1187,7 +1197,7 @@
 			"active": true,
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"optionGroupId": 9,
+			"optionsGroupId": 9,
 			"itemId": null
 		},
 		{ 
@@ -1199,7 +1209,7 @@
 			"active": true,
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"optionGroupId": 9,
+			"optionsGroupId": 9,
 			"itemId": null
 		},
 		{ 
@@ -1211,7 +1221,7 @@
 			"active": true,
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"optionGroupId": 9,
+			"optionsGroupId": 9,
 			"itemId": null
 		},
 		{ 
@@ -1223,7 +1233,7 @@
 			"active": true,
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"optionGroupId": 9,
+			"optionsGroupId": 9,
 			"itemId": null
 		},
 		{ 
@@ -1235,7 +1245,7 @@
 			"active": true,
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"optionGroupId": 9,
+			"optionsGroupId": 9,
 			"itemId": null
 		},
 		{ 
@@ -1247,7 +1257,7 @@
 			"active": true,
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"optionGroupId": 9,
+			"optionsGroupId": 9,
 			"itemId": null
 		},
 		{ 
@@ -1259,7 +1269,7 @@
 			"active": true,
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"optionGroupId": 9,
+			"optionsGroupId": 9,
 			"itemId": null
 		},
 		{ 
@@ -1271,7 +1281,7 @@
 			"active": true,
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"optionGroupId": 8,
+			"optionsGroupId": 8,
 			"itemId": null
 		},
 		{ 
@@ -1283,7 +1293,7 @@
 			"active": true,
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"optionGroupId": 6,
+			"optionsGroupId": 6,
 			"itemId": null
 		},
 		{ 
@@ -1295,7 +1305,7 @@
 			"active": true,
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"optionGroupId": 6,
+			"optionsGroupId": 6,
 			"itemId": null
 		},
 		{ 
@@ -1307,7 +1317,7 @@
 			"active": true,
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"optionGroupId": 6,
+			"optionsGroupId": 6,
 			"itemId": null
 		},
 		{ 
@@ -1319,7 +1329,7 @@
 			"active": true,
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"optionGroupId": 6,
+			"optionsGroupId": 6,
 			"itemId": null
 		},
 		{ 
@@ -1331,7 +1341,7 @@
 			"active": true,
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"optionGroupId": 6,
+			"optionsGroupId": 6,
 			"itemId": null
 		},
 		{ 
@@ -1343,7 +1353,7 @@
 			"active": true,
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"optionGroupId": 6,
+			"optionsGroupId": 6,
 			"itemId": null
 		},
 		{ 
@@ -1355,7 +1365,7 @@
 			"active": true,
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"optionGroupId": 6,
+			"optionsGroupId": 6,
 			"itemId": null
 		},
 		{ 
@@ -1367,7 +1377,7 @@
 			"active": true,
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"optionGroupId": 6,
+			"optionsGroupId": 6,
 			"itemId": null
 		},
 		{ 
@@ -1379,7 +1389,7 @@
 			"active": true,
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"optionGroupId": 6,
+			"optionsGroupId": 6,
 			"itemId": null
 		},
 		{ 
@@ -1391,7 +1401,7 @@
 			"active": true,
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"optionGroupId": 6,
+			"optionsGroupId": 6,
 			"itemId": null
 		},
 		{ 
@@ -1403,7 +1413,7 @@
 			"active": true,
 			"createdAt": "2019-11-27T14:45:24.000Z",
 			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"optionGroupId": 6,
+			"optionsGroupId": 6,
 			"itemId": null
 		},
 		{ 
@@ -1415,7 +1425,7 @@
 			"active": true,
 			"createdAt": "2019-11-27T20:10:03.000Z",
 			"updatedAt": "2019-11-27T20:10:03.000Z",
-			"optionGroupId": 10,
+			"optionsGroupId": 10,
 			"itemId": null
 		},
 		{ 
@@ -1427,7 +1437,7 @@
 			"active": true,
 			"createdAt": "2019-11-27T20:10:03.000Z",
 			"updatedAt": "2019-11-27T20:10:03.000Z",
-			"optionGroupId": 10,
+			"optionsGroupId": 10,
 			"itemId": null
 		},
 		{ 
@@ -1439,7 +1449,7 @@
 			"active": true,
 			"createdAt": "2019-11-27T20:10:03.000Z",
 			"updatedAt": "2019-11-27T20:10:03.000Z",
-			"optionGroupId": 10,
+			"optionsGroupId": 10,
 			"itemId": null
 		},
 		{ 
@@ -1451,7 +1461,7 @@
 			"active": true,
 			"createdAt": "2019-11-27T20:10:03.000Z",
 			"updatedAt": "2019-11-27T20:10:03.000Z",
-			"optionGroupId": 10,
+			"optionsGroupId": 10,
 			"itemId": null
 		},
 		{ 
@@ -1463,7 +1473,7 @@
 			"active": true,
 			"createdAt": "2019-12-02T22:42:18.000Z",
 			"updatedAt": "2019-12-02T22:42:18.000Z",
-			"optionGroupId": 1,
+			"optionsGroupId": 1,
 			"itemId": null
 		},
 		{ 
@@ -1475,7 +1485,7 @@
 			"active": true,
 			"createdAt": "2019-12-02T22:50:18.000Z",
 			"updatedAt": "2019-12-02T22:50:18.000Z",
-			"optionGroupId": 11,
+			"optionsGroupId": 11,
 			"itemId": null
 		},
 		{ 
@@ -1487,7 +1497,7 @@
 			"active": true,
 			"createdAt": "2019-12-02T22:50:18.000Z",
 			"updatedAt": "2019-12-02T22:50:18.000Z",
-			"optionGroupId": 11,
+			"optionsGroupId": 11,
 			"itemId": null
 		},
 		{ 
@@ -1499,7 +1509,7 @@
 			"active": true,
 			"createdAt": "2019-12-02T22:50:18.000Z",
 			"updatedAt": "2019-12-02T22:50:18.000Z",
-			"optionGroupId": 11,
+			"optionsGroupId": 11,
 			"itemId": null
 		},
 		{ 
@@ -1511,7 +1521,7 @@
 			"active": true,
 			"createdAt": "2019-12-02T22:50:18.000Z",
 			"updatedAt": "2019-12-02T22:50:18.000Z",
-			"optionGroupId": 11,
+			"optionsGroupId": 11,
 			"itemId": null
 		}
 	]

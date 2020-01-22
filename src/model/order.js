@@ -49,10 +49,10 @@ Order.init({
 	},
 	status: {
 		type: Sequelize.STRING,
-		comment: 'waiting | preparing | delivery | delivered | canceled',
+		comment: 'waiting | preparing | delivering | delivered | canceled',
 		defaultValue: 'waiting',
 		validate: {
-			isIn: [['waiting', 'preparing', 'delivery', 'delivered', 'canceled']],
+			isIn: [['waiting', 'preparing', 'delivering', 'delivered', 'canceled']],
 		}
 	},
 	message: Sequelize.TEXT,

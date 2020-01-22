@@ -25,20 +25,17 @@ export const typeDefs =  gql`
 		zipcodeB: Int
 	}
 
-	extend type Query {
-		calculateDeliveryPrice(zipcode: Int!): DeliveryArea!
-	}
-
 	extend type Mutation {
+		calculateDeliveryPrice(zipcode: Int!): DeliveryArea!
 		modifyDeliveryAreas(data: [DeliveryAreaInput]!): [DeliveryArea]!
 		removeDeliveryArea(id: ID!): DeliveryArea!
 	}
 `;
 
 export const resolvers =  {
-	Query: {
+	Mutation: {
 		calculateDeliveryPrice: async (_, { zipcode }, { company }) => {
-			const deliveryArea = await company.getDeliveryAreas({
+			const [deliveryArea] = await company.getDeliveryAreas({
 				order: [['price', 'DESC']],
 				limit: 1,
 				where: {
@@ -49,14 +46,12 @@ export const resolvers =  {
 					]
 				}
 			})
-			
+					
 			// check if delivery area exists
 			if (!deliveryArea) throw new ZipcodeError('Não há entregas para esse local');
-
+		
 			return deliveryArea;
 		},
-	},
-	Mutation: {
 		modifyDeliveryAreas: (_, { data }, { company }) => {
 			const update = data.filter(row=>row.id);
 			const create = data.filter(row=>!row.id);

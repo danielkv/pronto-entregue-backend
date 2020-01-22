@@ -1,5 +1,5 @@
 import crypto  from 'crypto';
-import Sequelize  from 'sequelize';
+import { Op, col, fn, where }  from 'sequelize';
 
 export function sanitizeFilter(_filter = {}, _options = {}) {
 	let options = {
@@ -34,9 +34,9 @@ export function sanitizeFilter(_filter = {}, _options = {}) {
 	if (search) {
 		filter = {
 			...filter,
-			[Sequelize.Op.or]: options.search.map(option => (
+			[Op.or]: options.search.map(option => (
 				[{
-					[option]: { [Sequelize.Op.like]: `%${search}%` }
+					[option]: { [Op.like]: `%${search}%` }
 				}]
 			))
 		}
@@ -47,9 +47,9 @@ export function sanitizeFilter(_filter = {}, _options = {}) {
 		delete filter.createdAt;
 		
 		filter = {
-			[Sequelize.Op.and]: [
+			[Op.and]: [
 				filter,
-				Sequelize.where(Sequelize.fn('date', Sequelize.col(`${options.table ? `${options.table}.`: ''}createdAt`)), Sequelize.fn(createdAt)),
+				where(fn('date', col(`${options.table ? `${options.table}.`: ''}createdAt`)), fn(createdAt)),
 			]
 		}
 	}

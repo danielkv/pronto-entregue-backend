@@ -11,12 +11,11 @@ import Company from './company';
 import CompanyMeta from './companyMeta';
 import CompanyPaymentMethod from './companyPaymentMethod';
 import CompanyUser from './companyUser';
-import Coupon from './coupon';
 import DeliveryArea from './deliveryArea';
 import Options from './option';
 import OptionsGroup from './OptionsGroup';
 import Order from './order';
-import OrderOption from './orderOption';
+import OrderOptions from './orderOptions';
 import orderOptionsGroup  from './orderOptionsGroup';
 import OrderProduct from './orderProduct';
 import PaymentMethod from './paymentMethod';
@@ -72,25 +71,21 @@ Options.belongsTo(OptionsGroup);
 Order.belongsTo(User);
 Order.belongsTo(Company);
 Order.hasMany(OrderProduct, { as: 'products' });
-OrderProduct.hasMany(orderOptionsGroup, { as: 'optionGroups', onDelete: 'cascade' });
-orderOptionsGroup.hasMany(OrderOption, { as: 'options', onDelete: 'cascade' });
+OrderProduct.hasMany(orderOptionsGroup, { as: 'optionsGroups', onDelete: 'cascade' });
+orderOptionsGroup.hasMany(OrderOptions, { as: 'options', onDelete: 'cascade' });
 Order.belongsTo(PaymentMethod);
 
 OrderProduct.belongsTo(Product, { as: 'productRelated' });
-orderOptionsGroup.belongsTo(OptionsGroup, { as: 'optionGroupRelated' });
-OrderOption.belongsTo(Options, { as: 'optionRelated' });
-
-// coupon relations
-Order.belongsTo(Coupon);
-Coupon.hasMany(Order);
-Coupon.belongsToMany(Product, { through: 'product_coupons' });
-Product.belongsToMany(Coupon, { through: 'product_coupons' });
-Coupon.belongsToMany(Company, { through: 'company_coupons' });
-Company.belongsToMany(Coupon, { through: 'company_coupons' });
+orderOptionsGroup.belongsTo(OptionsGroup, { as: 'optionsGroupRelated' });
+OrderOptions.belongsTo(Options, { as: 'optionRelated' });
 
 // campaign relations
-Campaign.belongsTo(Product);
-Product.hasOne(Campaign);
+Campaign.belongsToMany(Product, { through: 'campaign_products' });
+Product.belongsToMany(Campaign, { through: 'campaign_products' });
+Campaign.belongsToMany(Company, { through: 'campaign_companies' });
+Company.belongsToMany(Campaign, { through: 'campaign_companies' });
+Campaign.belongsToMany(User, { through: 'campaign_users' });
+User.belongsToMany(Campaign, { through: 'campaign_users' });
 
 // campaign relations
 Rating.belongsTo(Product);

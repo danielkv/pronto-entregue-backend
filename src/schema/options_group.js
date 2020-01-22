@@ -1,10 +1,9 @@
 import { gql }  from 'apollo-server';
+import { Op } from 'sequelize';
 
 import OptionsGroup  from '../model/OptionsGroup';
 import Products  from '../model/product';
-import conn from '../services/connection';
 
-const { Op } = conn;
 
 
 export const typeDefs =  gql`
@@ -20,11 +19,11 @@ export const typeDefs =  gql`
 		createdAt: DateTime!
 		updatedAt: DateTime!
 		product: Product!
-		optionsQty(filter: Filter): Int!
 
 		groupRestrained: OptionsGroup
 		restrainedBy: OptionsGroup
 
+		countOptions(filter: Filter): Int!
 		options(filter: Filter): [Option]!
 	}
 
@@ -42,7 +41,7 @@ export const typeDefs =  gql`
 	}
 
 	extend type Query {
-		searchOptionGroup(search: String!): [OptionsGroup]! @hasRole(permission: "products_edit", scope: "adm")
+		searchOptionsGroups(search: String!): [OptionsGroup]! @hasRole(permission: "products_edit", scope: "adm")
 		optionsGroup(id: ID!): OptionsGroup!
 	}
 
@@ -50,9 +49,9 @@ export const typeDefs =  gql`
 
 export const resolvers =  {
 	Query: {
-		searchOptionGroup: (_, { search }, { company }) => {
+		searchOptionsGroups: (_, { search }, { company }) => {
 			return OptionsGroup.findAll({
-				where: { name: { [Op.like]: `%${search}%` }, [`$product->companyId$`]: company.get('id') },
+				where: { name: { [Op.like]: `%${search}%` }, [`$product.companyId$`]: company.get('id') },
 				include: [{
 					model: Products,
 				}]
@@ -69,7 +68,7 @@ export const resolvers =  {
 
 			return parent.getOptions({ where, order: [['order', 'ASC']] });
 		},
-		optionsQty: (parent, { filter }) => {
+		countOptions: (parent, { filter }) => {
 			let where = { active: true };
 			if (filter && filter.showInactive) delete where.active;
 

@@ -14,10 +14,10 @@ export const typeDefs =  gql`
 
 export const resolvers =  {
 	OrderProduct: {
-		optionsGroups: (parent) => {
+		optionsGroups(parent) {
 			return parent.getOptionsGroups();
 		},
-		productRelated: (parent) => {
+		productRelated(parent) {
 			return parent.getProductRelated();
 		},
 	}

@@ -23,7 +23,7 @@ class OptionsGroup extends Sequelize.Model {
 						} else if (group.action === 'create') {
 							groupModel = await product.createOptionGroup(group, { transaction });
 						} else if (group.id && group.action === 'update') {
-							[groupModel] = await product.getOptionGroup({ where: { id: group.id } });
+							[groupModel] = await product.getOptionsGroups({ where: { id: group.id } });
 							groupModel = await groupModel.update(group, { fields: ['name', 'active', 'type', 'minSelect', 'maxSelect', 'order', 'maxSelectRestrain'], transaction });
 						}
 						
@@ -77,8 +77,8 @@ OptionsGroup.init({
 		defaultValue: 1,
 	},
 }, {
-	modelName: 'OptionsGroup',
-	tableName: 'option_groups',
+	modelName: 'optionsGroup',
+	tableName: 'options_groups',
 	sequelize: conn
 });
 

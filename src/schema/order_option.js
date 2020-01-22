@@ -1,7 +1,7 @@
 import { gql }  from 'apollo-server';
 
 export const typeDefs =  gql`
-	type OrderOption {
+	type OrderOptions {
 		id: ID!
 		name: String!
 		price: Float!
@@ -10,7 +10,7 @@ export const typeDefs =  gql`
 `;
 
 export const resolvers =  {
-	OrderOption: {
+	OrderOptions: {
 		optionRelated: (parent) => {
 			return parent.getOptionRelated();
 		},

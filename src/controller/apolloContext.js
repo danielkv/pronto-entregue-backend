@@ -6,7 +6,7 @@ export const createContext = async ({ req, connection }) => {
 	if (connection) {
 		console.log(connection.context)
 	} else {
-		const { authorization, companyId } = req.headers;
+		const { authorization, companyid: companyId } = req.headers;
 		let user = null, company = null;
 		
 		if (authorization) user = await authenticate(authorization);

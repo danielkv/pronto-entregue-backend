@@ -5,7 +5,7 @@ export const typeDefs =  gql`
 		id: ID!
 		name: String!
 		optionsGroupRelated: OptionsGroup!
-		options: [OrderOption]!
+		options: [OrderOptions]!
 	}
 `;
 

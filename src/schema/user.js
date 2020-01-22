@@ -1,5 +1,6 @@
 import { gql }  from 'apollo-server';
 import jwt  from 'jsonwebtoken';
+import{ Op }  from 'sequelize';
 
 import Company  from '../model/company';
 import Role  from '../model/role';
@@ -7,8 +8,6 @@ import User  from '../model/user';
 import UserMeta  from '../model/userMeta';
 import conn  from '../services/connection';
 import { salt, getSQLPagination, sanitizeFilter }  from '../utilities';
-
-const Op = conn.Op;
 
 export const typeDefs = gql`
 
@@ -43,16 +42,12 @@ export const typeDefs = gql`
 		firstName: String
 		lastName: String
 		password: String
-		role: String
 		email: String
 		active: Boolean
-
-		assignedCompany: AssignedCompanyInput
 		metas: [MetaInput]
-	}
 
-	input AssignedCompanyInput {
-		active: Boolean!
+		assignCompany: Boolean
+		role: String
 	}
 
 	type Login {
@@ -106,8 +101,8 @@ export const resolvers = {
 					return user;
 				});
 		},
-		searchCompanyUsers: (parent, { search }, ctx) => {
-			return ctx.company.getUsers({
+		searchCompanyUsers(_, { search }, { company }) {
+			return company.getUsers({
 				where: {
 					[Op.or]: [{ firstName: { [Op.like]: `%${search}%` } }, { lastName: { [Op.like]: `%${search}%` } }, { email: { [Op.like]: `%${search}%` } }]
 				}
@@ -315,13 +310,12 @@ export const resolvers = {
 				through: { where: { active: true } }
 			});
 		},
-		company: (parent, { companyId }) => {
-			return parent.getCompanies({ where: { id: companyId } })
-				.then (([company])=>{
-					if (!company) throw new Error('Empresa não encontrada');
+		async company(parent, { companyId }) {
+			// check if company exists
+			const [_company] = await parent.getCompanies({ where: { id: companyId } });
+			if (!_company) throw new Error('Empresa não encontrada');
 
-					return company;
-				})
+			return _company;
 		},
 		orders: (parent) => {
 			return parent.getOrders();
