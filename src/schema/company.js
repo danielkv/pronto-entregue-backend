@@ -22,8 +22,8 @@ export const typeDefs =  gql`
 		lastMonthRevenue: Float!
 		userRelation: CompanyRelation!
 
-		countUsers(filter: Filter): Int! @hasRole(permission: "users_read", scope: "adm")
-		users(filter: Filter, pagination: Pagination): [User]! @hasRole(permission: "users_read", scope: "adm")
+		countUsers(filter: Filter): Int! @hasRole(permission: "users_read")
+		users(filter: Filter, pagination: Pagination): [User]! @hasRole(permission: "users_read")
 
 		deliveryTime: Int! #minutes
 		customization: CompanyCustomization!
@@ -63,13 +63,13 @@ export const typeDefs =  gql`
 	}
 
 	extend type Mutation {
-		createCompany(data: CompanyInput!): Company! @hasRole(permission: "company_edit", scope: "adm")
-		updateCompany(id: ID!, data: CompanyInput!): Company! @hasRole(permission: "company_edit", scope: "adm")
+		createCompany(data: CompanyInput!): Company! @hasRole(permission: "company_edit")
+		updateCompany(id: ID!, data: CompanyInput!): Company! @hasRole(permission: "company_edit")
 	}
 
 	extend type Query {
 		company(id: ID!): Company!
-		userCompany: [Company!] @hasRole(permission: "company_read", scope: "adm")
+		userCompany: [Company!] @hasRole(permission: "company_read")
 	}
 `;
 

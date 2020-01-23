@@ -27,7 +27,7 @@ import { typeDefs as User, resolvers as userResolvers }  from './user';
 
 const typeDefs = gql`
 	directive @isAuthenticated on FIELD | FIELD_DEFINITION
-	directive @hasRole(permission: String!, scope: String = "master") on FIELD | FIELD_DEFINITION
+	directive @hasRole(permission: String!, checkSameUser: Boolean, variableKey: String) on FIELD | FIELD_DEFINITION
 
 	scalar Upload
 	scalar DateTime
@@ -57,7 +57,6 @@ const typeDefs = gql`
 
 	type Query {
 		companies: [Company]!
-		roles: [Role]! @hasRole(permission: "roles_edit", scope: "adm")
 	}
 
 	type Mutation {

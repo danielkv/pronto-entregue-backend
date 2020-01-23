@@ -3,11 +3,11 @@ import jwt  from 'jsonwebtoken';
 import{ Op }  from 'sequelize';
 
 import Company  from '../model/company';
-import Role  from '../model/role';
 import User  from '../model/user';
 import UserMeta  from '../model/userMeta';
 import conn  from '../services/connection';
 import { salt, getSQLPagination, sanitizeFilter }  from '../utilities';
+import { userCanSetRole, extractRole } from '../utilities/roles';
 
 export const typeDefs = gql`
 
@@ -30,10 +30,10 @@ export const typeDefs = gql`
 		addresses: [Address]!
 		
 		orders: [Order]!
-		company(companyId: ID!): Company!
+		company(companyId: ID!): Company
 
-		countCompanies(filter: Filter): Int! @hasRole(permission: "companies_read", scope: "adm")
-		companies(filter: Filter, pagination: Pagination): [Company]! @hasRole(permission: "companies_read", scope: "adm")
+		countCompanies(filter: Filter): Int! @hasRole(permission: "companies_read")
+		companies(filter: Filter, pagination: Pagination): [Company]! @hasRole(permission: "companies_read")
 
 		favoriteProducts(pagination: Pagination): [Product]!
 	}
@@ -60,10 +60,7 @@ export const typeDefs = gql`
 		authenticate (token: String!): User!
 		
 		createUser (data: UserInput!): User!
-		updateUser (id: ID!, data: UserInput!): User!
-		
-		setUserRole (id: ID!, roleId: ID!): User! @hasRole(permission: "adm")
-		setUserScopeRole (id: ID!, role: String!): User! @hasRole(permission: "adm")
+		updateUser (id: ID!, data: UserInput!): User! @hasRole(permission: "users_edit", checkSameUser: true)
 
 		removeUserAddress (id: ID!): Address! @isAuthenticated
 		updateUserAddress (id: ID!, data: AddressInput!): Address! @isAuthenticated
@@ -71,6 +68,7 @@ export const typeDefs = gql`
 	}
 
 	extend type Query {
+		countUsers(filter: Filter): Int! @hasRole(permission: "master")
 		users(filter: Filter, pagination: Pagination): [User]! @hasRole(permission: "master")
 		user(id: ID!): User!
 		searchCompanyUsers(search: String!): [User]!
@@ -96,10 +94,16 @@ export const resolvers = {
 				...getSQLPagination(pagination),
 			});
 		},
+		countUsers: (_, { filter }) => {
+			const search = ['firstName', 'lastName', 'email'];
+			const where = sanitizeFilter(filter, { search, table: 'order' });
+
+			return User.count({ where });
+		},
 		user: (_, { id }, ctx) => {
 
 			if (
-				(ctx.user && !ctx.user.can('users_read', { scope: 'adm' })) &&
+				(ctx.user && !ctx.user.can('users_read')) &&
 				!ctx.user.id === id
 			) throw new Error('Você não tem autorização')
 
@@ -129,35 +133,42 @@ export const resolvers = {
 		},
 	},
 	Mutation: {
-		createUser: async (_, { data }, ctx) => {
-			if (data.role === 'default' || data.role === 'adm') {
-				if (!ctx.user.can('adm')) throw new Error(`Você não tem premissões para cadastrar um usuário com permissão ${data.role}`);
-			}
-			
-			if (data.role === 'master') {
-				if (!ctx.user.can('master')) throw new Error(`Você não tem premissões para cadastrar um usuário com permissão ${data.role}`);
-			}
+		createUser: async (_, { data }, { user, company }) => {
+			// if user cannot set role throw an error
+			userCanSetRole(data.role, user);
 
-			// check if email exists in database
-			const userExists = await User.findOne({ where: { email: data.email } });
-			if (userExists) throw new Error('Esse email já está cadastrado');
+			return conn.transaction(async (transaction) => {
+				// check if email exists in database
+				const userExists = await User.findOne({ where: { email: data.email } });
+				if (userExists) throw new Error('Esse email já está cadastrado');
 
-			// create new user
-			return User.create(data, { include: [UserMeta] })
+				// extract Role
+				const { roleName, role } = await extractRole(data.role);
+				// sanitize role data
+				data.role = roleName;
+
+				// create new user
+				const createdUser = await User.create(data, { include: [UserMeta], transaction });
+
+				// case assignCompany is true
+				if (data.assignCompany === true && roleName === 'adm') await company.addUser(createdUser, { through: { roleId: role.get('id') }, transaction });
+
+				return createdUser
+			});
 		},
-		updateUser: (_, { id, data }, { user }) => {
-			if (data.role === 'default' || data.role === 'adm') {
-				if (id !== user.get('id') && !user.can('adm')) throw new Error(`Você não tem premissões para cadastrar um usuário com permissão ${data.role}`);
-			}
-			
-			if (data.role === 'master') {
-				if (!user.can('master')) throw new Error(`Você não tem premissões para cadastrar um usuário com permissão ${data.role}`);
-			}
+		updateUser: (_, { id, data }, { user, company }) => {
+			// if user cannot set role throw an error
+			userCanSetRole(data.role, user);
 
 			return conn.transaction(async (transaction) => {
 				// check if user exists
 				const user = await User.findByPk(id);
 				if (!user) throw new Error('Usuário não encontrada');
+
+				// extract Role
+				const { roleName, role } = await extractRole(data.role);
+				// sanitize role data
+				data.role = roleName;
 
 				// update user
 				const updatedUser = await user.update(data, { fields: ['firstName', 'lastName', 'password', 'role', 'active'], transaction })
@@ -165,32 +176,14 @@ export const resolvers = {
 				// case needs to update metas
 				if (data.metas) await UserMeta.updateAll(data.metas, updatedUser, transaction);
 
+				// case assignCompany is true
+				if (data.assignCompany === true && roleName === 'adm')
+					await company.addUser(updatedUser, { through: { roleId: role.get('id') }, transaction });
+				else
+					await company.removeUser(updatedUser, { transaction });
+
 				return updatedUser;
 			})
-		},
-		setUserScopeRole: (_, { id, role }, ctx) => {
-			return ctx.company.getUsers({ where: { id } })
-				.then(async ([user])=>{
-					if (!user) throw new Error('Usuário não encontrada');
-
-					const userUpdated = await user.update({ role });
-
-					return userUpdated;
-				});
-		},
-		setUserRole: async (_, { id, roleId }, { company }) => {
-			// check if user exists
-			const [user] = await company.getUsers({ where: { id } })
-			if (!user || !user.companyRelation) throw new Error('Usuário não encontrada');
-
-			// check if role exists
-			const role = await Role.findByPk(roleId);
-			if (!role) throw new Error('Função não encontrada');
-
-			// update role
-			await user.companyRelation.setRole(role);
-
-			return user;
 		},
 		/*
 		* Autoriza usuário retornando o token com dados,
@@ -318,10 +311,13 @@ export const resolvers = {
 				through: { where: { active: true } }
 			});
 		},
-		async company(parent, { companyId }) {
+		async company(parent, { companyId }, { user }) {
 			// check if company exists
 			const [_company] = await parent.getCompanies({ where: { id: companyId } });
-			if (!_company) throw new Error('Empresa não encontrada');
+			if (!_company) {
+				if (!user.can('master')) throw new Error('Empresa não encontrada');
+				return null;
+			}
 
 			return _company;
 		},

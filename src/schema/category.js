@@ -36,9 +36,9 @@ export const typeDefs =  gql`
 	}
 
 	extend type Mutation {
-		createCategory(data: CategoryInput!): Category! @hasRole(permission: "productsEdit", scope: "adm")
-		updateCategory(id: ID!, data: CategoryInput!): Category! @hasRole(permission: "productsEdit", scope: "adm")
-		updateCategoriesOrder(data: [CategoryInput!]!): [Category!]! @hasRole(permission: "productsEdit", scope: "adm")
+		createCategory(data: CategoryInput!): Category! @hasRole(permission: "productsEdit")
+		updateCategory(id: ID!, data: CategoryInput!): Category! @hasRole(permission: "productsEdit")
+		updateCategoriesOrder(data: [CategoryInput!]!): [Category!]! @hasRole(permission: "productsEdit")
 	}
 `;
 

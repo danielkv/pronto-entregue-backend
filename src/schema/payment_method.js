@@ -12,12 +12,12 @@ export const typeDefs =  gql`
 	}
 
 	extend type Query {
-		paymentMethods: [PaymentMethod]! @hasRole(permission: "payment_methods_read", scope: "adm")
+		paymentMethods: [PaymentMethod]! @hasRole(permission: "payment_methods_read")
 	}
 
 	extend type Mutation {
-		enablePaymentMethod(id: ID!): PaymentMethod! @hasRole(permission:"payment_methods_edit", scope:"adm")
-		disablePaymentMethod(id: ID!): PaymentMethod! @hasRole(permission:"payment_methods_edit", scope:"adm")
+		enablePaymentMethod(id: ID!): PaymentMethod! @hasRole(permission:"payment_methods_edit")
+		disablePaymentMethod(id: ID!): PaymentMethod! @hasRole(permission:"payment_methods_edit")
 	}
 `;
 

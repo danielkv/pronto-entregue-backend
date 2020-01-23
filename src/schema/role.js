@@ -11,6 +11,10 @@ export const typeDefs = gql`
 		createdAt: DateTime!
 		updatedAt: DateTime!
 	}
+
+	extend type Query {
+		roles: [Role]! @hasRole(permission: "roles_edit")
+	}
 `;
 
 export const resolvers = {

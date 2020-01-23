@@ -51,8 +51,8 @@ export const typeDefs =  gql`
 	}
 
 	extend type Mutation {
-		createProduct(data: ProductInput!): Product! @hasRole(permission: "users_edit", scope: "adm")
-		updateProduct(id: ID!, data: ProductInput!): Product! @hasRole(permission: "users_edit", scope: "adm")
+		createProduct(data: ProductInput!): Product! @hasRole(permission: "users_edit")
+		updateProduct(id: ID!, data: ProductInput!): Product! @hasRole(permission: "users_edit")
 
 		addFavoriteProduct(productId: ID!, userId: ID!): Product!
 		removeFavoriteProduct(productId: ID!, userId: ID!): Product!

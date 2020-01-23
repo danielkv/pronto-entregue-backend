@@ -1,5 +1,4 @@
 import { gql }  from 'apollo-server';
-import { defaultBusinessHours } from '../utilities/company';
 
 export const typeDefs =  gql`
 
@@ -22,7 +21,7 @@ export const typeDefs =  gql`
 	}
 
 	extend type Mutation {
-		updateBusinessHours(data: [BusinessHourInput]!): [BusinessHour]! @hasRole(permission:"company_edit", scope:"adm")
+		updateBusinessHours(data: [BusinessHourInput]!): [BusinessHour]! @hasRole(permission:"company_edit")
 	}
 
 `;

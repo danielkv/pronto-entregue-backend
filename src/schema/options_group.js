@@ -41,7 +41,7 @@ export const typeDefs =  gql`
 	}
 
 	extend type Query {
-		searchOptionsGroups(search: String!): [OptionsGroup]! @hasRole(permission: "products_edit", scope: "adm")
+		searchOptionsGroups(search: String!): [OptionsGroup]! @hasRole(permission: "products_edit")
 		optionsGroup(id: ID!): OptionsGroup!
 	}
 

@@ -18,11 +18,9 @@ class User extends Sequelize.Model {
 		if (!this.permissions) throw new Error('As permissões não foram definidas');
 		
 		const every = options.every || true;
-		const scope = options.scope || 'master';
 		const userPermissions = this.permissions;
 
 		if (userPermissions.includes('master')) return true;
-		if (scope && userPermissions.includes(scope)) return true;
 		
 		if (every) {
 			if (perms.every(r => userPermissions.includes(r))) return true;
