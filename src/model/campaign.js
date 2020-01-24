@@ -8,6 +8,11 @@ Campaign.init({
 	image: Sequelize.TEXT,
 	expiresAt: Sequelize.DATE,
 	description: Sequelize.STRING,
+	masterOnly: {
+		comment: 'Se verdadeiro, apenas usuário master consegue alterar',
+		type: Sequelize.BOOLEAN,
+		defaultValue: false,
+	},
 	chargeCompany: {
 		comment: 'Desconto/Cashback deve ser cobrada da(s) empresas',
 		type: Sequelize.BOOLEAN,
