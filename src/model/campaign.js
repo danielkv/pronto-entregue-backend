@@ -6,10 +6,10 @@ class Campaign extends Sequelize.Model {}
 Campaign.init({
 	name: Sequelize.STRING,
 	image: Sequelize.TEXT,
-	coupon: Sequelize.STRING,
-	expiresAt: Sequelize.DATEONLY,
+	expiresAt: Sequelize.DATE,
 	description: Sequelize.STRING,
-	createdByMaster: {
+	chargeCompany: {
+		comment: 'Desconto/Cashback deve ser cobrada da(s) empresas',
 		type: Sequelize.BOOLEAN,
 		defaultValue: false,
 	},

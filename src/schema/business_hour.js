@@ -21,7 +21,7 @@ export const typeDefs =  gql`
 	}
 
 	extend type Mutation {
-		updateBusinessHours(data: [BusinessHourInput]!): [BusinessHour]! @hasRole(permission:"company_edit")
+		updateBusinessHours(data: [BusinessHourInput]!): [BusinessHour]! @hasRole(permission:"companies_edit")
 	}
 
 `;

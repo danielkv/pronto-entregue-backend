@@ -1,13 +1,15 @@
 import { gql }  from 'apollo-server';
+import { Op } from 'sequelize';
 
 import { upload }  from '../controller/uploads';
 import Category from '../model/category';
+import Company from '../model/company';
 import Option  from '../model/option';
 import OptionsGroup  from '../model/OptionsGroup';
 import Product  from '../model/product';
 import User from '../model/user';
 import conn  from '../services/connection';
-import { getSQLPagination } from '../utilities';
+import { getSQLPagination, sanitizeFilter } from '../utilities';
 
 export const typeDefs =  gql`
 	type Product {
@@ -32,6 +34,7 @@ export const typeDefs =  gql`
 		favoritedBy(pagination: Pagination): [User]!
 		
 		category: Category!
+		company: Company!
 	}
 
 	input ProductInput {
@@ -51,6 +54,8 @@ export const typeDefs =  gql`
 	}
 
 	extend type Mutation {
+		searchProducts(search: String, exclude: [ID], companies: [ID]): [Product]!
+
 		createProduct(data: ProductInput!): Product! @hasRole(permission: "users_edit")
 		updateProduct(id: ID!, data: ProductInput!): Product! @hasRole(permission: "users_edit")
 
@@ -61,6 +66,15 @@ export const typeDefs =  gql`
 
 export const resolvers =  {
 	Mutation: {
+		searchProducts(_, { search, exclude, companies }) {
+			const where = sanitizeFilter({ search }, { search: ['name', 'description', '$company.name$', '$company.displayName$'] });
+			if (companies) where['$company.id$'] = companies;
+
+			return Product.findAll({
+				where: { ...where, active: true, id: { [Op.notIn]: exclude } },
+				include: [Company]
+			});
+		},
 		async createProduct(_, { data }, { company }) {
 			if (data.file) {
 				data.image = await upload(company.name, await data.file);
@@ -166,6 +180,9 @@ export const resolvers =  {
 			return parent.getFavoritedBy({
 				...getSQLPagination(pagination)
 			});
+		},
+		company (parent) {
+			return parent.getCompany();
 		}
 	}
 }

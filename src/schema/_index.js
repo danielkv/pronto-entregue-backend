@@ -56,7 +56,8 @@ const typeDefs = gql`
 	}
 
 	type Query {
-		companies: [Company]!
+		countCompanies(filter: Filter): Int! @hasRole(permission: "master")
+		companies(filter: Filter, pagination: Pagination): [Company]! @hasRole(permission: "master")
 	}
 
 	type Mutation {

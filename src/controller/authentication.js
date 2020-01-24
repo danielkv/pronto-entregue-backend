@@ -1,8 +1,8 @@
 import { AuthenticationError }  from 'apollo-server';
 import jwt  from 'jsonwebtoken';
 
-import Companies from '../model/company';
-import Users from '../model/user';
+import Company from '../model/company';
+import User from '../model/user';
 
 /**
  * Faz autenticação de usuário e insere no contexto
@@ -14,7 +14,7 @@ export function authenticate (authorization) {
 	if (authorization.split(' ')[0] !== 'Bearer') throw new AuthenticationError('Autorização desconhecida');
 	const { id, email } = jwt.verify(authorization.split(' ')[1], process.env.SECRET, { ignoreExpiration: true });
 
-	return Users.findOne({
+	return User.findOne({
 		where: { id, email },
 		attributes: { exclude: ['password', 'salt'] }
 	})
@@ -32,27 +32,21 @@ export function authenticate (authorization) {
  * Faz a seleção da empresa e insere no contexto
  * 
  * @param {integer} companyId ID da empresa
- * @param {Users} user ID da empresa
+ * @param {User} user ID da empresa
  */
 
-export function selectCompany (companyId, user) {
+export async function selectCompany (companyId, user) {
+	// check if company exists
+	const companyFound = await Company.findOne({ where: { id: companyId } });
+	if (!companyFound) throw new Error('Empresa selecionada não foi encontrada');
 
-	return Companies.findOne({ where: { id: companyId } })
-		.then((companyFound)=>{
-			if (!companyFound) throw new Error('Empresa selecionada não foi encontrada');
-			//if (!companyFound.active) throw new Error('Essa empresa não está ativa');
+	if (user) {
+		const [assignedUser] = await companyFound.getUsers({ where: { id: user.get('id') } });
+		if (assignedUser && assignedUser.companyRelation.active) {
+			const role = await assignedUser.companyRelation.getRole();
+			user.permissions = role.get('permissions');
+		}
+	}
 
-			return companyFound;
-		})
-		.then (async (companyFound) => {
-			if (user) {
-				const [assignedUser] = await companyFound.getUsers({ where: { id: user.get('id') } });
-			
-				if (assignedUser && assignedUser.companyRelation.active) {
-					companyFound.userRelation = assignedUser.companyRelation;
-				}
-			}
-
-			return companyFound;
-		});
+	return companyFound;
 }

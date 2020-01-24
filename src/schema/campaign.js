@@ -10,10 +10,9 @@ export const typeDefs =  gql`
 		id: ID!
 		name: String!
 		image: String!
-		counpon: String!
 		description: String
 
-		createdByMaster: Boolean!
+		chargeCompany: Boolean!
 		acceptOtherCompaign: Boolean!
 		active: Boolean!
 		type: Type!

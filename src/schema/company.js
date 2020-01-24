@@ -1,4 +1,5 @@
 import { gql }  from 'apollo-server';
+import { Op } from 'sequelize';
 
 import Company  from '../model/company';
 import CompanyMeta  from '../model/companyMeta';
@@ -63,18 +64,24 @@ export const typeDefs =  gql`
 	}
 
 	extend type Mutation {
-		createCompany(data: CompanyInput!): Company! @hasRole(permission: "company_edit")
-		updateCompany(id: ID!, data: CompanyInput!): Company! @hasRole(permission: "company_edit")
+		searchCompanies(search: String!, exclude: [ID]): [Company]!
+		createCompany(data: CompanyInput!): Company! @hasRole(permission: "companies_edit")
+		updateCompany(id: ID!, data: CompanyInput!): Company! @hasRole(permission: "companies_edit")
 	}
 
 	extend type Query {
 		company(id: ID!): Company!
-		userCompany: [Company!] @hasRole(permission: "company_read")
+		userCompany: [Company!] @hasRole(permission: "companies_read")
 	}
 `;
 
 export const resolvers =  {
 	Mutation: {
+		searchCompanies(_, { search, exclude = [] }) {
+			const where = sanitizeFilter({ search }, { search: ['name', 'displayName'] });
+
+			return Company.findAll({ where: { ...where, active: true, id: { [Op.notIn]: exclude } } });
+		},
 		createCompany: (_, { data }) => {
 			return conn.transaction(transaction => {
 				return Company.create(data, { include: [CompanyMeta], transaction })
@@ -98,8 +105,18 @@ export const resolvers =  {
 		}
 	},
 	Query: {
-		companies: () => {
-			return Company.findAll();
+		countCompanies: (_, { filter }) => {
+			const where = sanitizeFilter(filter, { search: ['name', 'displayName'], table: 'company' });
+
+			return Company.count({ where });
+		},
+		companies: (_, { filter, pagination }) => {
+			const where = sanitizeFilter(filter, { search: ['name', 'displayName'], table: 'company' });
+
+			return Company.findAll({
+				where,
+				...getSQLPagination(pagination),
+			});
 		},
 		userCompany: (_, __, { user }) => {
 			if (user.can('master'))
