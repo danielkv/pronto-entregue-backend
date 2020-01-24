@@ -32,8 +32,8 @@ export const typeDefs = gql`
 		orders: [Order]!
 		company(companyId: ID!): Company
 
-		countCompanies(filter: Filter): Int! @hasRole(permission: "companies_read")
-		companies(filter: Filter, pagination: Pagination): [Company]! @hasRole(permission: "companies_read")
+		countCompanies(filter: Filter): Int!
+		companies(filter: Filter, pagination: Pagination): [Company]!
 
 		favoriteProducts(pagination: Pagination): [Product]!
 	}
@@ -56,6 +56,8 @@ export const typeDefs = gql`
 	}
 
 	extend type Mutation {
+		searchUsers(search: String, exclude: [ID], companies: [ID]): [User]!
+
 		login (email: String!, password: String!): Login!
 		authenticate (token: String!): User!
 		
@@ -133,6 +135,15 @@ export const resolvers = {
 		},
 	},
 	Mutation: {
+		searchUsers(_, { search, exclude = [], companies }) {
+			const where = sanitizeFilter({ search }, { search: ['firstName', 'lastName'] });
+			if (companies) where['$company.id$'] = companies;
+
+			return User.findAll({
+				where: { ...where, active: true, id: { [Op.notIn]: exclude } },
+				include: [Company]
+			});
+		},
 		createUser: async (_, { data }, { user, company }) => {
 			// if user cannot set role throw an error
 			userCanSetRole(data.role, user);

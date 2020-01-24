@@ -2,6 +2,7 @@ import { gql }  from 'apollo-server';
 
 import { upload } from '../controller/uploads';
 import Campaign from '../model/campaign';
+import connection from '../services/connection';
 import { sanitizeFilter, getSQLPagination } from '../utilities';
 
 export const typeDefs =  gql`
@@ -31,13 +32,19 @@ export const typeDefs =  gql`
 	input CampaignInput {
 		name: String
 		file: Upload
-		image: String
 		description: String
+
+		chargeCompany: Boolean
+		acceptOtherCompaign: Boolean
 		active: Boolean
 		type: Type
 		valueType: ValueType
 		value: Float
 		expiresAt: Int
+
+		companies: [ID]
+		products: [ID]
+		users: [ID]
 	}
 
 	extend type Query {
@@ -53,21 +60,37 @@ export const typeDefs =  gql`
 
 export const resolvers = {
 	Mutation: {
-		async createCampaign(_, { data }) {
-			// if needs to upload a file
-			if (data.file) data.image = await upload('campaigns', await data.file);
+		createCampaign(_, { data }) {
+			return connection.transaction(async transaction => {
+				// if needs to upload a file
+				if (data.file) data.image = await upload('campaigns', await data.file);
 
-			return Campaign.create(data);
+				const createdCampaign = await Campaign.create(data, { transaction });
+
+				if (data.companies) await createdCampaign.setCompanies(data.companies, { transaction });
+				if (data.products) await createdCampaign.setProducts(data.products, { transaction });
+				if (data.users) await createdCampaign.setUsers(data.users, { transaction });
+
+				return createdCampaign;
+			});
 		},
-		async updateCampaign(_, { id, data }) {
-			// check if campaign exists
-			const campaignFound = await Campaign.findByPk(id);
-			if (!campaignFound) throw new Error('Campanha não encontrado');
+		updateCampaign(_, { id, data }) {
+			return connection.transaction(async transaction => {
+				// check if campaign exists
+				const campaignFound = await Campaign.findByPk(id);
+				if (!campaignFound) throw new Error('Campanha não encontrado');
 
-			// if needs to upload a file
-			if (data.file) data.image = await upload('campaigns', await data.file);
+				// if needs to upload a file
+				if (data.file) data.image = await upload('campaigns', await data.file);
 
-			return campaignFound.update(data, { fields: ['name', 'image', 'description', 'active', 'type', 'valueType', 'value', 'expiresAt'] });
+				const updatedCampaign = await campaignFound.update(data, { fields: ['name', 'image', 'description', 'active', 'type', 'valueType', 'value', 'expiresAt'], transaction });
+
+				if (data.companies) await updatedCampaign.setCompanies(data.companies, { transaction });
+				if (data.products) await updatedCampaign.setProducts(data.products, { transaction });
+				if (data.users) await updatedCampaign.setUsers(data.users, { transaction });
+
+				return updatedCampaign;
+			});
 		}
 	},
 	Query: {
@@ -79,10 +102,10 @@ export const resolvers = {
 			return campaignFound;
 		},
 		campaigns(_, { filter, pagination }) {
-			const _filter = sanitizeFilter(filter, { search: ['name', 'description'] });
+			const where = sanitizeFilter(filter, { search: ['name', 'description'] });
 
 			return Campaign.findAll({
-				where: _filter,
+				where,
 				order: [['expiresAt', 'DESC'], ['createdAt', 'Desc']],
 				...getSQLPagination(pagination),
 			})

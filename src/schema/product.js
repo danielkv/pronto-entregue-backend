@@ -66,7 +66,7 @@ export const typeDefs =  gql`
 
 export const resolvers =  {
 	Mutation: {
-		searchProducts(_, { search, exclude, companies }) {
+		searchProducts(_, { search, exclude = [], companies }) {
 			const where = sanitizeFilter({ search }, { search: ['name', 'description', '$company.name$', '$company.displayName$'] });
 			if (companies) where['$company.id$'] = companies;
 

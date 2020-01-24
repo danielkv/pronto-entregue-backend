@@ -71,7 +71,6 @@ export const typeDefs =  gql`
 
 	extend type Query {
 		company(id: ID!): Company!
-		userCompany: [Company!] @hasRole(permission: "companies_read")
 	}
 `;
 
@@ -117,12 +116,6 @@ export const resolvers =  {
 				where,
 				...getSQLPagination(pagination),
 			});
-		},
-		userCompany: (_, __, { user }) => {
-			if (user.can('master'))
-				return Company.findAll();
-
-			return user.getCompany({ through: { where: { active: true } } });
 		},
 		async company(_, { id }) {
 			// check if company exists
