@@ -40,7 +40,7 @@ export const typeDefs =  gql`
 		type: Type
 		valueType: ValueType
 		value: Float
-		expiresAt: Int
+		expiresAt: DateTime
 
 		companies: [ID]
 		products: [ID]

@@ -50,7 +50,7 @@ const startUpload = async (bucket, file) => {
 		createReadStream().pipe(writeStream)
 			.on('error', reject)
 			.on('finish', ()=>{
-				const url = `https: /${newFile.storage.apiEndpoint}/${newFile.bucket.name}/${newFile.name}`;
+				const url = `https://${newFile.storage.apiEndpoint}/${newFile.bucket.name}/${newFile.name}`;
 				
 				resolve({ file: newFile, url });
 			});

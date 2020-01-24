@@ -44,7 +44,7 @@ export async function selectCompany (companyId, user) {
 		const [assignedUser] = await companyFound.getUsers({ where: { id: user.get('id') } });
 		if (assignedUser && assignedUser.companyRelation.active) {
 			const role = await assignedUser.companyRelation.getRole();
-			user.permissions = role.get('permissions');
+			user.permissions = [user.role, ...role.get('permissions')];
 		}
 	}
 
