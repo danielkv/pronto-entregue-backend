@@ -1,6 +1,7 @@
 import { gql }  from 'apollo-server';
 
 import Rating from '../model/rating';
+import User from '../model/user';
 import { sanitizeFilter, getSQLPagination } from '../utilities';
 
 
@@ -16,6 +17,7 @@ export const typeDefs =  gql`
 
 		company: Company!
 		user: User!
+		order: Order!
 	}
 
 	input RatingInput {
@@ -24,8 +26,7 @@ export const typeDefs =  gql`
 		comment: String
 		hidden: Boolean
 
-		userId: ID
-		productId: ID
+		orderId: ID
 	}
 
 	extend type Query {
@@ -41,7 +42,12 @@ export const typeDefs =  gql`
 
 export const resolvers = {
 	Mutation: {
-		createRating(_, { data }) {
+		createRating(_, { data }, { user, company }) {
+			// set related data
+			data.companyId = company.get('id');
+			data.userId = user.get('id');
+
+			// create rating
 			return Rating.create(data);
 		},
 		async updateRating(_, { id, data }) {
@@ -49,7 +55,7 @@ export const resolvers = {
 			const ratingFound = await Rating.findByPk(id);
 			if (!ratingFound) throw new Error('Avaliação não encontrado');
 
-			return ratingFound.update(data, { fields: ['rate', 'comment', 'hidden'] });
+			return ratingFound.update(data, { fields: ['hidden'] });
 		}
 	},
 	Query: {
@@ -61,12 +67,14 @@ export const resolvers = {
 			return ratingFound;
 		},
 		ratings(_, { filter, pagination }) {
-			const _filter = sanitizeFilter(filter, { search: ['comment'] });
+			const _filter = sanitizeFilter(filter, { search: ['comment', '$user.firstName$', '$user.email$'] });
 
 			return Rating.findAll({
 				where: _filter,
 				order: [['createdAt', 'Desc']],
 				...getSQLPagination(pagination),
+
+				include: [User]
 			})
 		}
 	},
@@ -76,6 +84,9 @@ export const resolvers = {
 		},
 		user(parent) {
 			return parent.getUser();
+		},
+		order(parent) {
+			return parent.getOrder();
 		}
 	}
 }
