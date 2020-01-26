@@ -1,7 +1,8 @@
 import { gql }  from 'apollo-server';
-import { Op } from 'sequelize';
+import { Op, fn } from 'sequelize';
 
 import { upload }  from '../controller/uploads';
+import Campaign from '../model/campaign';
 import Category from '../model/category';
 import Company from '../model/company';
 import Option  from '../model/option';
@@ -35,6 +36,10 @@ export const typeDefs =  gql`
 		
 		category: Category!
 		company: Company!
+
+
+		countCampaigns: Int!
+		campaigns: [Campaign]!
 	}
 
 	input ProductInput {
@@ -183,6 +188,54 @@ export const resolvers =  {
 		},
 		company (parent) {
 			return parent.getCompany();
+		},
+		countCampaigns(parent) {
+			// count all realted campaigns
+			return Campaign.count({
+				where: {
+					'$companies.id$': {
+						[Op.or]: [
+							parent.get('companyId'),
+							{ [Op.is]: null }
+						]
+					},
+					'$products.id$': {
+						[Op.or]: [
+							parent.get('id'),
+							{ [Op.is]: null }
+						]
+					},
+
+					active: true,
+					startsAt: { [Op.lte]: fn('NOW') },
+					expiresAt: { [Op.gte]: fn('NOW') }
+				},
+				include: [Product, Company]
+			})
+		},
+		campaigns(parent) {
+			// get all realted campaigns
+			return Campaign.findAll({
+				where: {
+					'$companies.id$': {
+						[Op.or]: [
+							parent.get('companyId'),
+							{ [Op.is]: null }
+						]
+					},
+					'$products.id$': {
+						[Op.or]: [
+							parent.get('id'),
+							{ [Op.is]: null }
+						]
+					},
+
+					active: true,
+					startsAt: { [Op.lte]: fn('NOW') },
+					expiresAt: { [Op.gte]: fn('NOW') }
+				},
+				include: [Product, Company]
+			})
 		}
 	}
 }

@@ -6,6 +6,7 @@ class Campaign extends Sequelize.Model {}
 Campaign.init({
 	name: Sequelize.STRING,
 	image: Sequelize.TEXT,
+	startsAt: Sequelize.DATE,
 	expiresAt: Sequelize.DATE,
 	description: Sequelize.STRING,
 	masterOnly: {

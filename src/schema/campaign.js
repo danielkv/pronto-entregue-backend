@@ -24,6 +24,7 @@ export const typeDefs =  gql`
 		valueType: ValueType!
 		value: Float!
 
+		startsAt: DateTime!
 		expiresAt: DateTime!
 		createdAt: DateTime!
 		updatedAt: DateTime!
@@ -44,6 +45,7 @@ export const typeDefs =  gql`
 		type: Type
 		valueType: ValueType
 		value: Float
+		startsAt: DateTime
 		expiresAt: DateTime
 
 		companies: [ID]
@@ -95,6 +97,9 @@ export const resolvers = {
 				const campaignFound = await Campaign.findByPk(id);
 				if (!campaignFound) throw new Error('Campanha não encontrado');
 
+				// check if user can update campaign
+				if (campaignFound.get('masterOnly') === true && !user.can('master')) throw new Error('Você não tem permissões para alterar essa campanha');
+
 				// if needs to upload a file
 				if (data.file) data.image = await upload('campaigns', await data.file);
 
@@ -108,7 +113,7 @@ export const resolvers = {
 					if (!data.companies.length) data.companies = [company.get('id')]
 				}
 
-				const updatedCampaign = await campaignFound.update(data, { fields: ['name', 'image', 'description', 'active', 'type', 'valueType', 'value', 'expiresAt', 'masterOnly', 'acceptOtherCampaign', 'chargeCompany'], transaction });
+				const updatedCampaign = await campaignFound.update(data, { fields: ['name', 'image', 'description', 'active', 'type', 'valueType', 'value', 'startsAt', 'expiresAt', 'masterOnly', 'acceptOtherCampaign', 'chargeCompany'], transaction });
 
 				if (data.companies) await updatedCampaign.setCompanies(data.companies, { transaction });
 				if (data.products) await updatedCampaign.setProducts(data.products, { transaction });
