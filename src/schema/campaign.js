@@ -18,7 +18,7 @@ export const typeDefs =  gql`
 
 		masterOnly: Boolean!
 		chargeCompany: Boolean!
-		acceptOtherCompaign: Boolean!
+		acceptOtherCampaign: Boolean!
 		active: Boolean!
 		type: Type!
 		valueType: ValueType!
@@ -39,7 +39,7 @@ export const typeDefs =  gql`
 		description: String
 
 		chargeCompany: Boolean
-		acceptOtherCompaign: Boolean
+		acceptOtherCampaign: Boolean
 		active: Boolean
 		type: Type
 		valueType: ValueType

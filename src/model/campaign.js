@@ -18,7 +18,7 @@ Campaign.init({
 		type: Sequelize.BOOLEAN,
 		defaultValue: false,
 	},
-	acceptOtherCompaign: {
+	acceptOtherCampaign: {
 		type: Sequelize.BOOLEAN,
 		defaultValue: false,
 	},
