@@ -42,7 +42,7 @@ export const typeDefs =  gql`
 		countProducts(filter:Filter): Int!
 		products(filter:Filter, pagination: Pagination): [Product]! @hasRole(permission: "products_read")
 
-		countRatings(filter:Filter): [Rating]! @hasRole(permission: "adm")
+		countRatings(filter:Filter): Int! @hasRole(permission: "adm")
 		ratings(filter:Filter, pagination: Pagination): [Rating]! @hasRole(permission: "adm")
 	}
 
@@ -248,7 +248,7 @@ export const resolvers =  {
 		countRatings(parent, { filter }) {
 			const _filter = sanitizeFilter(filter, { excludeFilters: ['active'], search: ['comment', '$user.firstName$', '$user.email$'] });
 
-			return parent.getRatings({
+			return parent.countRatings({
 				where: _filter,
 				order: [['createdAt', 'Desc']],
 
