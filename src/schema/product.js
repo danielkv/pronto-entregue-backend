@@ -1,5 +1,5 @@
 import { gql }  from 'apollo-server';
-import { Op, fn } from 'sequelize';
+import { Op } from 'sequelize';
 
 import { upload }  from '../controller/uploads';
 import Campaign from '../model/campaign';
@@ -11,6 +11,7 @@ import Product  from '../model/product';
 import User from '../model/user';
 import conn  from '../services/connection';
 import { getSQLPagination, sanitizeFilter } from '../utilities';
+import { campaignProductWhere, calculateProcuctPromotionalPrice } from '../utilities/campaign';
 
 export const typeDefs =  gql`
 	type Product {
@@ -40,6 +41,7 @@ export const typeDefs =  gql`
 
 		countCampaigns: Int!
 		campaigns: [Campaign]!
+		promotionalPrice: Float! # if has some campaign
 	}
 
 	input ProductInput {
@@ -192,50 +194,37 @@ export const resolvers =  {
 		countCampaigns(parent) {
 			// count all realted campaigns
 			return Campaign.count({
-				where: {
-					'$companies.id$': {
-						[Op.or]: [
-							parent.get('companyId'),
-							{ [Op.is]: null }
-						]
-					},
-					'$products.id$': {
-						[Op.or]: [
-							parent.get('id'),
-							{ [Op.is]: null }
-						]
-					},
-
-					active: true,
-					startsAt: { [Op.lte]: fn('NOW') },
-					expiresAt: { [Op.gte]: fn('NOW') }
-				},
+				where: campaignProductWhere(parent),
 				include: [Product, Company]
 			})
 		},
 		campaigns(parent) {
 			// get all realted campaigns
 			return Campaign.findAll({
-				where: {
-					'$companies.id$': {
-						[Op.or]: [
-							parent.get('companyId'),
-							{ [Op.is]: null }
-						]
-					},
-					'$products.id$': {
-						[Op.or]: [
-							parent.get('id'),
-							{ [Op.is]: null }
-						]
-					},
-
-					active: true,
-					startsAt: { [Op.lte]: fn('NOW') },
-					expiresAt: { [Op.gte]: fn('NOW') }
-				},
+				where: campaignProductWhere(parent),
 				include: [Product, Company]
 			})
+		},
+		async promotionalPrice(parent) {
+			const campaigns = await Campaign.findAll({
+				where: {
+					...campaignProductWhere(parent),
+					type: 'discount'
+				},
+				order: [['value', 'ASC']],
+				include: [Product, Company]
+			});
+
+			const acceptOtherCampaigns = campaigns.filter(c => c.acceptOtherCampaign === true);
+			const doNotAcceptOtherCampaigns = campaigns.find(c => c.acceptOtherCampaign === false);
+
+			if (acceptOtherCampaigns.length)
+				return calculateProcuctPromotionalPrice(parent, acceptOtherCampaigns);
+				
+			if (doNotAcceptOtherCampaigns)
+				return calculateProcuctPromotionalPrice(parent, [doNotAcceptOtherCampaigns]);
+
+			return 0;
 		}
 	}
 }
