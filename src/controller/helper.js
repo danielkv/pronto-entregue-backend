@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import Category from '../model/category';
 import Company from '../model/company';
 import CompanyMeta from '../model/companyMeta';
@@ -6,9 +7,14 @@ import CompanyUser from '../model/companyUser';
 import DeliveryArea from '../model/deliveryArea';
 import Option from '../model/option';
 import OptionsGroup from '../model/OptionsGroup';
+import Order from '../model/order';
+import OrderOptions from '../model/orderOptions';
+import OrderOptionsGroup from '../model/orderOptionsGroup';
+import OrderProduct from '../model/orderProduct';
 import Product from '../model/product';
 import User from '../model/user';
 import UserMeta from '../model/userMeta';
+import Rating from '../model/rating';
 
 
 export const exportDB = async (exclude) => {
@@ -20,6 +26,11 @@ export const exportDB = async (exclude) => {
 		companyMeta: await CompanyMeta.findAll({ attributes: { exclude } }),
 		companyUser: await CompanyUser.findAll({ attributes: { exclude } }),
 		companyPaymentMethod: await CompanyPaymentMethod.findAll({ attributes: { exclude } }),
+
+		orders: await Order.findAll({ attributes: { exclude } }),
+		order_products: OrderProduct.findAll({ attributes: { exclude } }),
+		order_option_groups: OrderOptionsGroup.findAll({ attributes: { exclude } }),
+		order_options: OrderOptions.findAll({ attributes: { exclude } }),
 		
 		deliveryArea: await DeliveryArea.findAll({ attributes: { exclude } }),
 		category: await Category.findAll({ attributes: { exclude } }),
@@ -37,6 +48,13 @@ export const importDB = async (data) => {
 
 	await User.bulkCreate(data.users);
 	await UserMeta.bulkCreate(data.user_metas);
+	
+	await Order.bulkCreate(data.orders);
+	await OrderProduct.bulkCreate(data.order_products);
+	await OrderOptionsGroup.bulkCreate(data.order_option_groups);
+	await OrderOptions.bulkCreate(data.order_options);
+	
+	await Rating.bulkCreate(data.ratings);
 
 	await CompanyUser.bulkCreate(data.company_users);
 	

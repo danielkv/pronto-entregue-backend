@@ -40,7 +40,10 @@ export const typeDefs =  gql`
 		orders(filter:Filter, pagination: Pagination): [Order]!
 
 		countProducts(filter:Filter): Int!
-		products(filter:Filter, pagination: Pagination): [Product]!
+		products(filter:Filter, pagination: Pagination): [Product]! @hasRole(permission: "products_read")
+
+		countRatings(filter:Filter): [Rating]! @hasRole(permission: "adm")
+		ratings(filter:Filter, pagination: Pagination): [Rating]! @hasRole(permission: "adm")
 	}
 
 	type ProductBestSeller {
@@ -241,5 +244,27 @@ export const resolvers =  {
 		deliveryAreas(parent) {
 			return parent.getDeliveryAreas();
 		},
+
+		countRatings(parent, { filter }) {
+			const _filter = sanitizeFilter(filter, { excludeFilters: ['active'], search: ['comment', '$user.firstName$', '$user.email$'] });
+
+			return parent.getRatings({
+				where: _filter,
+				order: [['createdAt', 'Desc']],
+
+				include: [User]
+			})
+		},
+		ratings(parent, { filter, pagination }) {
+			const _filter = sanitizeFilter(filter, { excludeFilters: ['active'], search: ['comment', '$user.firstName$', '$user.email$'] });
+
+			return parent.getRatings({
+				where: _filter,
+				order: [['createdAt', 'Desc']],
+				...getSQLPagination(pagination),
+
+				include: [User]
+			})
+		}
 	}
 }
