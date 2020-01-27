@@ -8,6 +8,7 @@ import { typeDefs as BusinessHour, resolvers as businessHourResolvers }  from '.
 import { typeDefs as Campaign, resolvers as campaignResolvers }  from './campaign';
 import { typeDefs as Category, resolvers as categoryResolvers }  from './category';
 import { typeDefs as Company, resolvers as companyResolvers }  from './company';
+import { typeDefs as CompanyType, resolvers as companyTypeResolvers }  from './company-type';
 import { typeDefs as DeliveryArea, resolvers as deliveryAreaResolvers }  from './delivery_area';
 import directives  from './directives';
 import { typeDefs as Emails, resolvers as emailsResolvers }  from './emails';
@@ -88,7 +89,7 @@ const resolvers = {
 }
 
 export default makeExecutableSchema({
-	typeDefs: [typeDefs, BusinessHour, Rating, Emails, Campaign, Category, Company, Option, OptionsGroup, OrderOptions, OrderOptionsGroup, OrderProduct, Order, PaymentMethod, Product, Role, DeliveryArea, User, Address, Phone, Meta],
-	resolvers: merge(resolvers, businessHourResolvers, ratingResolvers, emailsResolvers, campaignResolvers, categoryResolvers, companyResolvers, optionResolvers, optionsGroupResolvers, orderOptionResolvers, orderOptionsGroupResolvers, orderProductResolvers, orderResolvers, paymentMethodResolvers, productResolvers, roleResolvers, deliveryAreaResolvers, userResolvers, addressResolvers, phoneResolvers, metaResolvers),
+	typeDefs: [typeDefs, CompanyType, BusinessHour, Rating, Emails, Campaign, Category, Company, Option, OptionsGroup, OrderOptions, OrderOptionsGroup, OrderProduct, Order, PaymentMethod, Product, Role, DeliveryArea, User, Address, Phone, Meta],
+	resolvers: merge(resolvers, companyTypeResolvers, businessHourResolvers, ratingResolvers, emailsResolvers, campaignResolvers, categoryResolvers, companyResolvers, optionResolvers, optionsGroupResolvers, orderOptionResolvers, orderOptionsGroupResolvers, orderProductResolvers, orderResolvers, paymentMethodResolvers, productResolvers, roleResolvers, deliveryAreaResolvers, userResolvers, addressResolvers, phoneResolvers, metaResolvers),
 	directiveResolvers: directives,
 })

@@ -191,7 +191,8 @@
 			"displayName": "Copeiro hamburguer",
 			"active": true,
 			"createdAt": "2019-11-27T14:45:24.000Z",
-			"updatedAt": "2019-11-27T14:45:24.000Z"
+			"updatedAt": "2019-11-27T14:45:24.000Z",
+			"companyTypeId": 1
 		},
 		{ 
 			"id": 2,
@@ -199,7 +200,8 @@
 			"displayName": "Pizzaria Temperoma",
 			"active": true,
 			"createdAt": "2019-11-27T14:45:24.000Z",
-			"updatedAt": "2019-11-27T14:45:24.000Z"
+			"updatedAt": "2019-11-27T14:45:24.000Z",
+			"companyTypeId": 5
 		}
 	],
 	"company_metas": [ 

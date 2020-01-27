@@ -23,6 +23,8 @@ export const typeDefs =  gql`
 		lastMonthRevenue: Float!
 		userRelation: CompanyRelation!
 
+		type: CompanyType!
+
 		countUsers(filter: Filter): Int! @hasRole(permission: "users_read")
 		users(filter: Filter, pagination: Pagination): [User]! @hasRole(permission: "users_read")
 
@@ -56,6 +58,7 @@ export const typeDefs =  gql`
 	input CompanyInput {
 		name: String
 		displayName: String
+		companyTypeId: ID
 		active: Boolean
 		metas: [MetaInput]
 	}
@@ -84,25 +87,22 @@ export const resolvers =  {
 
 			return Company.findAll({ where: { ...where, active: true, id: { [Op.notIn]: exclude } } });
 		},
-		createCompany: (_, { data }) => {
-			return conn.transaction(transaction => {
-				return Company.create(data, { include: [CompanyMeta], transaction })
-			})
+		createCompany(_, { data }) {
+			return Company.create(data, { include: [CompanyMeta] })
 		},
-		updateCompany: (_, { id, data }) => {
-			return conn.transaction(transaction => {
-				return Company.findByPk(id)
-					.then(company=>{
-						if (!company) throw new Error('Empresa não encontrada');
+		updateCompany(_, { id, data }) {
+			return conn.transaction(async transaction => {
+				// check if company exists
+				const companyFound = await Company.findByPk(id)
+				if (!companyFound) throw new Error('Empresa não encontrada');
 
-						return company.update(data, { fields: ['name', 'displayName', 'active'], transaction })
-					})
-					.then(async (companyUpdated) => {
-						if (data.metas) {
-							await CompanyMeta.updateAll(data.metas, companyUpdated, transaction);
-						}
-						return companyUpdated;
-					})
+				// update company
+				const updatedCompany = await companyFound.update(data, { fields: ['name', 'displayName', 'active', 'companyTypeId'], transaction })
+			
+				// check if there are metas to update
+				if (data.metas) await CompanyMeta.updateAll(data.metas, updatedCompany, transaction);
+				
+				return updatedCompany;
 			})
 		}
 	},
@@ -236,6 +236,9 @@ export const resolvers =  {
 
 				include: [User]
 			});
+		},
+		type(parent) {
+			return parent.getCompanyType();
 		},
 
 		paymentMethods(parent) {
