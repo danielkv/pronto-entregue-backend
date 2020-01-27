@@ -11,7 +11,8 @@ import Product  from '../model/product';
 import User from '../model/user';
 import conn  from '../services/connection';
 import { getSQLPagination, sanitizeFilter } from '../utilities';
-import { campaignProductWhere, calculateProcuctPromotionalPrice } from '../utilities/campaign';
+import { campaignProductWhere } from '../utilities/campaign';
+import { calculateProcuctFinalPrice } from '../utilities/product';
 
 export const typeDefs =  gql`
 	type Product {
@@ -23,6 +24,7 @@ export const typeDefs =  gql`
 		type: String!
 		listed: Boolean!
 		price: Float!
+		finalPrice: Float! # if has some campaign
 		featured: Boolean!
 
 		active: Boolean!
@@ -39,10 +41,8 @@ export const typeDefs =  gql`
 		category: Category!
 		company: Company!
 
-
-		countCampaigns: Int!
-		campaigns: [Campaign]!
-		promotionalPrice: Float! # if has some campaign
+		countCampaigns(notIn: [ID]): Int!
+		campaigns(notIn: [ID]): [Campaign]!
 	}
 
 	input ProductInput {
@@ -195,21 +195,29 @@ export const resolvers =  {
 		company (parent) {
 			return parent.getCompany();
 		},
-		countCampaigns(parent) {
+		countCampaigns(parent, { notIn = {} }) {
 			// count all realted campaigns
 			return Campaign.count({
-				where: campaignProductWhere(parent),
+				where: {
+					...campaignProductWhere(parent),
+					id: { [Op.notIn]: notIn }
+				},
 				include: [Product, Company]
 			})
 		},
-		campaigns(parent) {
+		campaigns(parent, { notIn = {} }) {
 			// get all realted campaigns
 			return Campaign.findAll({
-				where: campaignProductWhere(parent),
+				where: {
+					...campaignProductWhere(parent),
+					id: { [Op.notIn]: notIn }
+				},
 				include: [Product, Company]
 			})
 		},
-		async promotionalPrice(parent) {
+
+		// calculate price should be charged (campaigns, discounts, etc)
+		async finalPrice(parent) {
 			const campaigns = await Campaign.findAll({
 				where: {
 					...campaignProductWhere(parent),
@@ -223,10 +231,10 @@ export const resolvers =  {
 			const doNotAcceptOtherCampaigns = campaigns.find(c => c.acceptOtherCampaign === false);
 
 			if (acceptOtherCampaigns.length)
-				return calculateProcuctPromotionalPrice(parent, acceptOtherCampaigns);
+				return calculateProcuctFinalPrice(parent, acceptOtherCampaigns);
 				
 			if (doNotAcceptOtherCampaigns)
-				return calculateProcuctPromotionalPrice(parent, [doNotAcceptOtherCampaigns]);
+				return calculateProcuctFinalPrice(parent, [doNotAcceptOtherCampaigns]);
 
 			return 0;
 		}
