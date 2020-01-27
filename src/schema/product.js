@@ -33,6 +33,7 @@ export const typeDefs =  gql`
 		
 		countOptions(filter: Filter): Int!
 
+		countFavoritedBy: Int!
 		favoritedBy(pagination: Pagination): [User]!
 		
 		category: Category!
@@ -182,6 +183,9 @@ export const resolvers =  {
 		},
 		category(parent) {
 			return parent.getCategory();
+		},
+		countFavoritedBy(parent) {
+			return parent.countFavoritedBy();
 		},
 		favoritedBy(parent, { pagination }) {
 			return parent.getFavoritedBy({

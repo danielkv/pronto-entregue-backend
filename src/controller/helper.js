@@ -12,9 +12,9 @@ import OrderOptions from '../model/orderOptions';
 import OrderOptionsGroup from '../model/orderOptionsGroup';
 import OrderProduct from '../model/orderProduct';
 import Product from '../model/product';
+import Rating from '../model/rating';
 import User from '../model/user';
 import UserMeta from '../model/userMeta';
-import Rating from '../model/rating';
 
 
 export const exportDB = async (exclude) => {
