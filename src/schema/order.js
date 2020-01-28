@@ -45,7 +45,7 @@ export const typeDefs =  gql`
 		message: String
 		
 		street: String
-		number: String
+		number: Int
 		complement: String
 		city: String
 		state: String

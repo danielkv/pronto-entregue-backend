@@ -6,7 +6,7 @@ export const typeDefs = gql`
 		id: ID!
 		name: String
 		street: String!
-		number: String!
+		number: Int!
 		complement: String
 		zipcode: Int!
 		district: String!
@@ -17,7 +17,7 @@ export const typeDefs = gql`
 	input AddressInput {
 		name: String!
 		street: String!
-		number: String!
+		number: Int!
 		complement: String
 		zipcode: Int!
 		district: String!

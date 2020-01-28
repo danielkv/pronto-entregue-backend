@@ -56,7 +56,7 @@ export const typeDefs = gql`
 	}
 
 	extend type Mutation {
-		searchUsers(search: String, exclude: [ID], companies: [ID]): [User]!
+		searchUsers(search: String!, exclude: [ID], companies: [ID]): [User]!
 
 		login (email: String!, password: String!): Login!
 		authenticate (token: String!): User!
@@ -73,7 +73,6 @@ export const typeDefs = gql`
 		countUsers(filter: Filter): Int! @hasRole(permission: "master")
 		users(filter: Filter, pagination: Pagination): [User]! @hasRole(permission: "master")
 		user(id: ID!): User!
-		searchCompanyUsers(search: String!): [User]!
 		me: User! @isAuthenticated
 
 		userAddress (id: ID!): Address! @isAuthenticated
@@ -114,13 +113,6 @@ export const resolvers = {
 					if (!user) throw new Error('Usuário não encontrada');
 					return user;
 				});
-		},
-		searchCompanyUsers(_, { search }, { company }) {
-			return company.getUsers({
-				where: {
-					[Op.or]: [{ firstName: { [Op.like]: `%${search}%` } }, { lastName: { [Op.like]: `%${search}%` } }, { email: { [Op.like]: `%${search}%` } }]
-				}
-			})
 		},
 		userAddress: (parent, { id }, ctx) => {
 			return ctx.user.getMetas({ where: { id } })
