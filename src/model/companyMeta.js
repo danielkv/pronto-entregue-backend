@@ -46,7 +46,7 @@ CompanyMeta.init({
 				const meta = await CompanyMeta.findOne({ where: { companyId: this.getDataValue('companyId'), key: value } });
 				const unique = this.getDataValue('unique');
 				if (meta) {
-					if (meta.unique === true) return done(new Error('Esse metadado já existe, você pode apenas altera-lo'));
+					if (meta.unique === true) return done(new Error(`O metadado ${meta.key} já existe, você pode apenas altera-lo`));
 					if (unique === true) return done(new Error('Esse metadado deve ser unico, já existem outros metadados desse tipo.'));
 				}
 				

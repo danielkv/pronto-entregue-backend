@@ -27,6 +27,7 @@ export const typeDefs =  gql`
 	}
 
 	extend type Query {
+		companyType(id: ID): CompanyType! @hasRole(permission: "master")
 		countCompanyTypes(filter: Filter): Int! @hasRole(permission: "master")
 		companyTypes(filter: Filter, pagination: Pagination): [CompanyType]! @hasRole(permission: "master")
 	}
@@ -69,6 +70,14 @@ export const resolvers =  {
 		}
 	},
 	Query: {
+		companyType(_, { id }) {
+			return CompanyType.findByPk(id);
+		},
+		countCompanyTypes(_, { filter }) {
+			const where = sanitizeFilter(filter);
+
+			return CompanyType.count({ where })
+		},
 		companyTypes(_, { filter, pagination }) {
 			const where = sanitizeFilter(filter);
 

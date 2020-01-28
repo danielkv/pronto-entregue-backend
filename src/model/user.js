@@ -44,8 +44,8 @@ User.init({
 		set(val) {
 			//Adiciona o salt para salvar a senha do usuário
 			const salted = salt(val);
-			this.setDataValue('password', salted.password);
 			this.setDataValue('salt', salted.salt);
+			this.setDataValue('password', salted.password);
 		}
 	},
 	salt: Sequelize.STRING,

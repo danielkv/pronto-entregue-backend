@@ -185,18 +185,16 @@ export const resolvers = {
 
 					// case assignCompany is true
 					if (data.assignCompany === true && roleName === 'adm')
-						await company.addUser(updatedUser, { through: { roleId: role.get('id') }, transaction });
+						await company.addUser(user, { through: { roleId: role.get('id') }, transaction });
 					else
-						await company.removeUser(updatedUser, { transaction });
+						await company.removeUser(user, { transaction });
 				}
 
 				// update user
-				const updatedUser = await user.update(data, { fields: ['firstName', 'lastName', 'password', 'role', 'active'], transaction })
+				const updatedUser = await user.update(data, { fields: ['firstName', 'lastName', 'password', 'salt', 'role', 'active'], transaction })
 				
 				// case needs to update metas
 				if (data.metas) await UserMeta.updateAll(data.metas, updatedUser, transaction);
-
-				
 
 				return updatedUser;
 			})

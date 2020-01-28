@@ -47,7 +47,7 @@ UserMeta.init({
 				const meta = await UserMeta.findOne({ where: { userId: this.getDataValue('userId'), key: value } });
 				const unique = this.getDataValue('unique');
 				if (meta) {
-					if (meta.unique === true) return done(new Error('Esse metadado já existe, você pode apenas altera-lo'));
+					if (meta.unique === true) return done(new Error(`O metadado ${meta.key} já existe, você pode apenas altera-lo`));
 					if (unique === true) return done(new Error('Esse metadado deve ser unico, já existem outros metadados desse tipo.'));
 				}
 				
