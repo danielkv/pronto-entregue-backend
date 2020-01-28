@@ -167,7 +167,7 @@ export const resolvers = {
 				return createdUser
 			});
 		},
-		updateUser: (_, { id, data }, { user, company }) => {
+		updateUser(_, { id, data }, { user, company }) {
 			// if user cannot set role throw an error
 			userCanSetRole(data.role, user);
 
@@ -176,10 +176,19 @@ export const resolvers = {
 				const user = await User.findByPk(id);
 				if (!user) throw new Error('Usuário não encontrada');
 
-				// extract Role
-				const { roleName, role } = await extractRole(data.role);
-				// sanitize role data
-				data.role = roleName;
+				// if update role
+				if (data.role) {
+					// extract Role
+					const { roleName, role } = await extractRole(data.role);
+					// sanitize role data
+					data.role = roleName;
+
+					// case assignCompany is true
+					if (data.assignCompany === true && roleName === 'adm')
+						await company.addUser(updatedUser, { through: { roleId: role.get('id') }, transaction });
+					else
+						await company.removeUser(updatedUser, { transaction });
+				}
 
 				// update user
 				const updatedUser = await user.update(data, { fields: ['firstName', 'lastName', 'password', 'role', 'active'], transaction })
@@ -187,11 +196,7 @@ export const resolvers = {
 				// case needs to update metas
 				if (data.metas) await UserMeta.updateAll(data.metas, updatedUser, transaction);
 
-				// case assignCompany is true
-				if (data.assignCompany === true && roleName === 'adm')
-					await company.addUser(updatedUser, { through: { roleId: role.get('id') }, transaction });
-				else
-					await company.removeUser(updatedUser, { transaction });
+				
 
 				return updatedUser;
 			})
