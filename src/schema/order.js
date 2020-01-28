@@ -16,7 +16,8 @@ export const typeDefs =  gql`
 		discount: Float!
 		status: String!
 		message: String!
-		updatedAt: String!
+		createdAt: DateTime!
+		updatedAt: DateTime!
 		paymentMethod: PaymentMethod!
 		
 		street: String
@@ -28,10 +29,7 @@ export const typeDefs =  gql`
 		zipcode: String
 
 		countProducts: Int!
-		products: [OrderProduct]!
-
-		createdDate: String!
-		createdTime: String!
+		products: [OrderProduct]!		
 	}	
 
 	input OrderInput {
@@ -123,26 +121,6 @@ export const resolvers =  {
 		},
 		paymentMethod: (parent) => {
 			return parent.getPaymentMethod();
-		},
-		createdDate: (parent) => {
-			const date = new Date(parent.get('createdAt'));
-			let day = date.getDate();
-			let month = date.getMonth()+1;
-
-			if (day < 10) day = `0${day}`;
-			if (month < 10) month = `0${month}`;
-
-			return `${day}/${month}`;
-		},
-		createdTime: (parent) => {
-			const date = new Date(parent.get('createdAt'));
-			let hours = date.getHours();
-			let minutes = date.getMinutes();
-
-			if (hours < 10) hours = `0${hours}`;
-			if (minutes < 10) minutes = `0${minutes}`;
-
-			return `${hours}:${minutes}`;
 		},
 	},
 	Query: {

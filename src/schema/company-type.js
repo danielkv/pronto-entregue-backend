@@ -13,6 +13,9 @@ export const typeDefs =  gql`
 		image: String!
 		createdAt: DateTime!
 		updatedAt: DateTime!
+
+		countCompanies: Int!
+		companies: [Company]!
 	}
 
 	input CompanyTypeInput {
@@ -24,6 +27,7 @@ export const typeDefs =  gql`
 	}
 
 	extend type Query {
+		countCompanyTypes(filter: Filter): Int! @hasRole(permission: "master")
 		companyTypes(filter: Filter, pagination: Pagination): [CompanyType]! @hasRole(permission: "master")
 	}
 
@@ -74,4 +78,12 @@ export const resolvers =  {
 			})
 		}
 	},
+	CompanyType: {
+		companies(parent) {
+			return parent.getCompanies();
+		},
+		countCompanies(parent) {
+			return parent.countCompanies();
+		}
+	}
 }
