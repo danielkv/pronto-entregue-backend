@@ -4,6 +4,7 @@
  * 
  */
 
+import Address from './address';
 import Campaign from './campaign';
 import Category from './category';
 import Company from './company';
@@ -32,7 +33,8 @@ Company.hasMany(DeliveryArea);
 Company.belongsToMany(PaymentMethod, { through: CompanyPaymentMethod });
 Company.belongsToMany(User, { through: CompanyUser });
 Company.belongsTo(CompanyType);
-CompanyType.hasMany(Company)
+CompanyType.hasMany(Company);
+Company.belongsTo(Address);
 
 // rating relations
 Rating.belongsTo(Company);
@@ -53,6 +55,7 @@ PaymentMethod.belongsToMany(Company, { through: CompanyPaymentMethod });
 User.hasMany(UserMeta);
 User.hasMany(Order);
 User.belongsToMany(Company, { through: CompanyUser });
+User.belongsToMany(Address, { through: 'user_addresses' });
 
 //UserMeta
 UserMeta.belongsTo(User);

@@ -1,4 +1,5 @@
 /* eslint-disable camelcase */
+import Address from '../model/address';
 import Category from '../model/category';
 import Company from '../model/company';
 import CompanyMeta from '../model/companyMeta';
@@ -64,6 +65,8 @@ export const importDB = async (data) => {
 	await Product.bulkCreate(data.products);
 	await OptionsGroup.bulkCreate(data.option_groups);
 	await Option.bulkCreate(data.options);
+	
+	await Address.bulkCreate(data.addresses);
 }
 
 export const importTable = async (table, data) => {
