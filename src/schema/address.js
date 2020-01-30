@@ -12,10 +12,11 @@ export const typeDefs = gql`
 		district: String!
 		city: String!
 		state: String!
+		location: GeoPoint!
 	}
 
 	input AddressInput {
-		name: String!
+		name: String
 		street: String!
 		number: Int!
 		complement: String
@@ -23,6 +24,7 @@ export const typeDefs = gql`
 		district: String!
 		city: String!
 		state: String!
+		location: GeoPoint
 	}
 
 `;

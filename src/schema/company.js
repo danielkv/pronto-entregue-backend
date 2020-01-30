@@ -9,6 +9,7 @@ import User from '../model/user';
 import conn  from '../services/connection';
 import { getSQLPagination, sanitizeFilter }  from '../utilities';
 import { defaultBusinessHours } from '../utilities/company';
+import Address from '../model/address';
 
 export const typeDefs =  gql`
 
@@ -22,6 +23,8 @@ export const typeDefs =  gql`
 		metas: [Meta]!
 		lastMonthRevenue: Float!
 		userRelation: CompanyRelation!
+
+		address: Address!
 
 		type: CompanyType!
 
@@ -61,6 +64,7 @@ export const typeDefs =  gql`
 		companyTypeId: ID
 		active: Boolean
 		metas: [MetaInput]
+		address: AddressInput
 	}
 
 	type CompanyCustomization {
@@ -88,13 +92,17 @@ export const resolvers =  {
 			return Company.findAll({ where: { ...where, active: true, id: { [Op.notIn]: exclude } } });
 		},
 		createCompany(_, { data }) {
-			return Company.create(data, { include: [CompanyMeta] })
+			return Company.create(data, { include: [CompanyMeta, Address] })
 		},
 		updateCompany(_, { id, data }) {
 			return conn.transaction(async transaction => {
 				// check if company exists
 				const companyFound = await Company.findByPk(id)
 				if (!companyFound) throw new Error('Empresa não encontrada');
+
+				// update company address
+				const address = await companyFound.getAddress();
+				address.update(data.address);
 
 				// update company
 				const updatedCompany = await companyFound.update(data, { fields: ['name', 'displayName', 'active', 'companyTypeId'], transaction })
@@ -129,6 +137,9 @@ export const resolvers =  {
 		},
 	},
 	Company: {
+		address(parent) {
+			return parent.getAddress();
+		},
 		userRelation: (parent) => {
 			if (!parent.companyRelation) throw new Error('Nenhum usuário selecionado');
 

@@ -1,6 +1,4 @@
 import { makeExecutableSchema, gql }  from 'apollo-server';
-import { GraphQLScalarType } from 'graphql';
-import { Kind } from 'graphql/language';
 import { merge }  from 'lodash';
 
 import { typeDefs as Address, resolvers as addressResolvers }  from './address';
@@ -9,6 +7,7 @@ import { typeDefs as Campaign, resolvers as campaignResolvers }  from './campaig
 import { typeDefs as Category, resolvers as categoryResolvers }  from './category';
 import { typeDefs as Company, resolvers as companyResolvers }  from './company';
 import { typeDefs as CompanyType, resolvers as companyTypeResolvers }  from './company-type';
+import * as customTypes from './customTypes';
 import { typeDefs as DeliveryArea, resolvers as deliveryAreaResolvers }  from './delivery_area';
 import directives  from './directives';
 import { typeDefs as Emails, resolvers as emailsResolvers }  from './emails';
@@ -32,6 +31,7 @@ const typeDefs = gql`
 
 	scalar Upload
 	scalar DateTime
+	scalar GeoPoint
 
 	input Filter {
 		showInactive: Boolean
@@ -70,26 +70,11 @@ const resolvers = {
 	Mutation: {
 		
 	},
-	DateTime: new GraphQLScalarType({
-		name: 'Date',
-		description: 'Date custom scalar type',
-		parseValue(value) {
-			return new Date(value); // value from the client
-		},
-		serialize(value) {
-			return value.getTime(); // value sent to the client
-		},
-		parseLiteral(ast) {
-			if (ast.kind === Kind.INT) {
-				return parseInt(ast.value, 10); // ast value is always in string format
-			}
-			return null;
-		},
-	})
+	...customTypes
 }
 
 export default makeExecutableSchema({
-	typeDefs: [typeDefs, CompanyType, BusinessHour, Rating, Emails, Campaign, Category, Company, Option, OptionsGroup, OrderOptions, OrderOptionsGroup, OrderProduct, Order, PaymentMethod, Product, Role, DeliveryArea, User, Address, Phone, Meta],
-	resolvers: merge(resolvers, companyTypeResolvers, businessHourResolvers, ratingResolvers, emailsResolvers, campaignResolvers, categoryResolvers, companyResolvers, optionResolvers, optionsGroupResolvers, orderOptionResolvers, orderOptionsGroupResolvers, orderProductResolvers, orderResolvers, paymentMethodResolvers, productResolvers, roleResolvers, deliveryAreaResolvers, userResolvers, addressResolvers, phoneResolvers, metaResolvers),
+	typeDefs: [typeDefs, Address, CompanyType, BusinessHour, Rating, Emails, Campaign, Category, Company, Option, OptionsGroup, OrderOptions, OrderOptionsGroup, OrderProduct, Order, PaymentMethod, Product, Role, DeliveryArea, User, Phone, Meta],
+	resolvers: merge(resolvers, addressResolvers, companyTypeResolvers, businessHourResolvers, ratingResolvers, emailsResolvers, campaignResolvers, categoryResolvers, companyResolvers, optionResolvers, optionsGroupResolvers, orderOptionResolvers, orderOptionsGroupResolvers, orderProductResolvers, orderResolvers, paymentMethodResolvers, productResolvers, roleResolvers, deliveryAreaResolvers, userResolvers, phoneResolvers, metaResolvers),
 	directiveResolvers: directives,
 })
