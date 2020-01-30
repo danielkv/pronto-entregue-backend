@@ -24,7 +24,7 @@ export const typeDefs =  gql`
 		lastMonthRevenue: Float!
 		userRelation: CompanyRelation!
 
-		address: Address!
+		address: Address
 
 		type: CompanyType!
 
