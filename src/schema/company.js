@@ -1,11 +1,12 @@
 import { gql }  from 'apollo-server';
-import { Op } from 'sequelize';
+import { Op, fn, col, where, literal } from 'sequelize';
 
 import Address from '../model/address';
 import Company  from '../model/company';
 import CompanyMeta  from '../model/companyMeta';
 import OrderProduct from '../model/orderProduct';
 import Product from '../model/product';
+import Rating  from '../model/rating';
 import User from '../model/user';
 import conn  from '../services/connection';
 import { getSQLPagination, sanitizeFilter }  from '../utilities';
@@ -23,6 +24,8 @@ export const typeDefs =  gql`
 		metas(keys: [String]): [Meta]!
 		lastMonthRevenue: Float!
 		userRelation: CompanyRelation!
+
+		rankPosition(radius: Int!): Int!
 
 		address: Address
 
@@ -285,6 +288,21 @@ export const resolvers =  {
 
 				include: [User]
 			})
-		}
+		},
+		async rankPosition(parent, { radius }) {
+			const companyAddress = await parent.getAddress();
+			//const companyPoint = fn('ST_GeomFromText', fn('POINT', companyAddress.location.coordinates[0], companyAddress.location.coordinates[1]));
+			const companyPoint = fn('ST_GeomFromText', literal(`'POINT(${companyAddress.location.coordinates[0]} ${companyAddress.location.coordinates[1]})'`));
+			
+			const companies = await Company.findAll({
+				attributes: ['id', 'name', [fn('AVG', col('ratings.rate')), 'averageRate']],
+				include: [Address, Rating],
+				where: where(fn('ST_Distance_Sphere', companyPoint, col('address.location')), '<', radius * 1000),
+				order: [[literal('averageRate'), 'DESC']],
+				group: 'company.id'
+			})
+
+			return companies.findIndex(c => parent.get('id') === c.get('id')) + 1;
+		},
 	}
 }
