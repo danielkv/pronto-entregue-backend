@@ -225,7 +225,7 @@ export const resolvers = {
 					};
 				});
 		},
-		authenticate: async (_, { token }) => {
+		async authenticate (_, { token }) {
 			// break the token
 			const { id, email } = jwt.verify(token, process.env.SECRET);
 
@@ -235,15 +235,15 @@ export const resolvers = {
 
 			return userFound;
 		},
-		removeUserAddress: (_, { id }) => {
-			return UserMeta.findByPk(id)
-				.then(async (addressFound)=>{
-					if (!addressFound) throw new Error('Endereço não encontrado');
+		async removeUserAddress (_, { id })  {
+			// check if addres exists
+			const addressFound = await UserMeta.findByPk(id);
+			if (!addressFound) throw new Error('Endereço não encontrado');
 
-					const removed = await addressFound.destroy();
+			// remove address
+			const removed = await addressFound.destroy();
 
-					return { id, ...JSON.parse(removed.value) };
-				})
+			return { id, ...JSON.parse(removed.value) };
 		},
 		updateUserAddress: (_, { id, data }, ctx) => {
 			return ctx.user.getMetas({ where: { key: 'address', id } })

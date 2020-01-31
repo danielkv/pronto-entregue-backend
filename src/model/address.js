@@ -12,7 +12,10 @@ Address.init({
 	zipcode: Sequelize.INTEGER,
 	city: Sequelize.STRING,
 	state: Sequelize.STRING,
-	location: Sequelize.GEOMETRY('POINT')
+	location: {
+		type: Sequelize.GEOMETRY('POINT'),
+		allowNull: false
+	}
 }, {
 	modelName: 'address',
 	tableName: 'addresses',

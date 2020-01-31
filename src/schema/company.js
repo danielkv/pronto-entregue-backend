@@ -20,7 +20,7 @@ export const typeDefs =  gql`
 		active: Boolean!
 		createdAt: DateTime!
 		updatedAt: DateTime!
-		metas: [Meta]!
+		metas(keys: [String]): [Meta]!
 		lastMonthRevenue: Float!
 		userRelation: CompanyRelation!
 
@@ -102,7 +102,10 @@ export const resolvers =  {
 
 				// update company address
 				const address = await companyFound.getAddress();
-				address.update(data.address);
+				if (address)
+					address.update(data.address);
+				else
+					companyFound.createAddress(data.address);
 
 				// update company
 				const updatedCompany = await companyFound.update(data, { fields: ['name', 'displayName', 'active', 'companyTypeId'], transaction })
@@ -159,7 +162,10 @@ export const resolvers =  {
 				...getSQLPagination(pagination),
 			});
 		},
-		metas: (parent) => {
+		metas: (parent, { keys }) => {
+			if (keys)
+				return parent.getMetas({ where: { key: keys } });
+			
 			return parent.getMetas();
 		},
 		lastMonthRevenue: () => {
