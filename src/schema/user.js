@@ -45,6 +45,7 @@ export const typeDefs = gql`
 		email: String
 		active: Boolean
 		metas: [MetaInput]
+		addresses: [AddressInput]
 
 		assignCompany: Boolean
 		role: String
@@ -62,7 +63,7 @@ export const typeDefs = gql`
 		authenticate (token: String!): User!
 		
 		createUser (data: UserInput!): User!
-		updateUser (id: ID!, data: UserInput!): User! @hasRole(permission: "users_edit", checkSameUser: true)
+		updateUser (id: ID!, data: UserInput!): User! @hasRole(permission: "master", checkSameUser: true)
 
 		removeUserAddress (id: ID!): Address! @isAuthenticated
 		updateUserAddress (id: ID!, data: AddressInput!): Address! @isAuthenticated
@@ -72,7 +73,7 @@ export const typeDefs = gql`
 	extend type Query {
 		countUsers(filter: Filter): Int! @hasRole(permission: "master")
 		users(filter: Filter, pagination: Pagination): [User]! @hasRole(permission: "master")
-		user(id: ID!): User!
+		user(id: ID!): User! @hasRole(permission: "master", checkSameUser: true)
 		me: User! @isAuthenticated
 
 		userAddress (id: ID!): Address! @isAuthenticated
@@ -101,20 +102,12 @@ export const resolvers = {
 
 			return User.count({ where });
 		},
-		user: (_, { id }, ctx) => {
-
-			if (
-				(ctx.user && !ctx.user.can('users_read')) &&
-				!ctx.user.id === id
-			) throw new Error('Você não tem autorização')
-
-			return User.findByPk(id)
-				.then(user => {
-					if (!user) throw new Error('Usuário não encontrada');
-					return user;
-				});
+		user: async (_, { id }) => {
+			const user = await User.findByPk(id);
+			if (!user) throw new Error('Usuário não encontrada');
+			return user;
 		},
-		userAddress: (parent, { id }, ctx) => {
+		userAddress: (_, { id }, ctx) => {
 			return ctx.user.getMetas({ where: { id } })
 				.then(([address]) => {
 					if (!address) throw new Error('Endereço não encontrado');
@@ -184,6 +177,15 @@ export const resolvers = {
 
 				// update user
 				const updatedUser = await user.update(data, { fields: ['firstName', 'lastName', 'password', 'salt', 'role', 'active'], transaction })
+
+				// update user addresses
+				if (data.addresses) {
+					const deleteAddresses = await user.getAddresses({ where: { id: { [Op.notIn]: data.addresses.map(add=>add.id) } } })
+
+					await Promise.all(deleteAddresses.map(address => {
+						return address.destroy();
+					}));
+				}
 				
 				// case needs to update metas
 				if (data.metas) await UserMeta.updateAll(data.metas, updatedUser, transaction);
@@ -266,15 +268,7 @@ export const resolvers = {
 	},
 	User: {
 		addresses: (parent) => {
-			return parent.getMetas({ where: { key: 'address' } })
-				.then(metas=>{
-					return metas.map(meta=> {
-						return {
-							id: meta.id,
-							...JSON.parse(meta.value)
-						}
-					});
-				})
+			return parent.getAddresses();
 		},
 		fullName: (parent) => {
 			return `${parent.firstName} ${parent.lastName}`;

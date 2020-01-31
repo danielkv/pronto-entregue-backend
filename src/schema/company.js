@@ -1,6 +1,7 @@
 import { gql }  from 'apollo-server';
 import { Op } from 'sequelize';
 
+import Address from '../model/address';
 import Company  from '../model/company';
 import CompanyMeta  from '../model/companyMeta';
 import OrderProduct from '../model/orderProduct';
@@ -9,7 +10,6 @@ import User from '../model/user';
 import conn  from '../services/connection';
 import { getSQLPagination, sanitizeFilter }  from '../utilities';
 import { defaultBusinessHours } from '../utilities/company';
-import Address from '../model/address';
 
 export const typeDefs =  gql`
 

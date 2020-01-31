@@ -16,6 +16,7 @@ export const typeDefs = gql`
 	}
 
 	input AddressInput {
+		id: ID
 		name: String
 		street: String!
 		number: Int!
