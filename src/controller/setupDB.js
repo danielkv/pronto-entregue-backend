@@ -36,12 +36,14 @@ export function setupDataBase (req, res) {
 			result += '<li>Connected to Database</li>';
 
 			// drop all tables
-			await conn.query('SET FOREIGN_KEY_CHECKS = 0', { raw: true }).then(()=>conn.drop());
-			result += '<li>Dropped all tables</li>';
+			if (req.query.force) {
+				await conn.query('SET FOREIGN_KEY_CHECKS = 0', { raw: true }).then(()=>conn.drop());
+				result += '<li>Dropped all tables</li>';
+			}
 
 			// recreate all tables
-			await conn.sync({ force: true });
-			result += '<li>Tables created</li>';
+			await conn.sync({ force: Boolean(req.query.force) });
+			result += `<li>Tables created ${req.query.force ? 'forced' : ''}</li>`;
 		
 			result += '<li>creating default data...</li><ul>';
 			// default data

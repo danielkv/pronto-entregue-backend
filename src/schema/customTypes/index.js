@@ -7,7 +7,11 @@ export const GeoPoint = new GraphQLScalarType({
 	serialize: extractGeoPoint,
 	parseValue: sanitizeToGeoPoint,
 	parseLiteral(ast) {
-		return sanitizeToGeoPoint(ast.value);
+		if (ast.kind === Kind.LIST) {
+			const coordinates = [parseFloat(ast.values[0].value), parseFloat(ast.values[1].value)];
+			return sanitizeToGeoPoint(coordinates);
+		}
+		return null;
 	}
 })
 
@@ -22,6 +26,8 @@ function extractGeoPoint(point) {
 }
 
 function sanitizeToGeoPoint(coordinates) {
+	
+
 	if (!isArray(coordinates)
 	|| !isNumber(coordinates[0])
 	|| !isNumber(coordinates[1]))

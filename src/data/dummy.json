@@ -315,59 +315,24 @@
 		}
 	],
 	"delivery_areas": [ 
-		{ 
-			"id": 1,
-			"name": "Sombrio",
-			"type": "single",
-			"zipcodeA": 88960000,
-			"zipcodeB": null,
-			"price": "3.00",
-			"createdAt": "2019-11-27T14:45:24.000Z",
-			"updatedAt": "2019-12-03T00:09:09.000Z",
+		{
+			"distance": 5,
+			"price": 5,
 			"companyId": 1
 		},
-		{ 
-			"id": 2,
-			"name": "Gaivota",
-			"type": "single",
-			"zipcodeA": 88955000,
-			"zipcodeB": null,
-			"price": "5.00",
-			"createdAt": "2019-11-27T14:45:24.000Z",
-			"updatedAt": "2019-12-03T00:09:09.000Z",
+		{
+			"distance": 15,
+			"price": 7,
 			"companyId": 1
 		},
-		{ 
-			"id": 3,
-			"name": "Guarita",
-			"type": "set",
-			"zipcodeA": 88960001,
-			"zipcodeB": 88960010,
-			"price": "10.00",
-			"createdAt": "2019-11-27T14:45:24.000Z",
-			"updatedAt": "2019-12-03T00:09:09.000Z",
-			"companyId": 1
+		{
+			"distance": 10,
+			"price": 10,
+			"companyId": 2
 		},
-		{ 
-			"id": 4,
-			"name": "Gaivota",
-			"type": "single",
-			"zipcodeA": 88955000,
-			"zipcodeB": null,
-			"price": "5.00",
-			"createdAt": "2019-11-27T14:45:24.000Z",
-			"updatedAt": "2019-11-27T14:45:24.000Z",
-			"companyId": 3
-		},
-		{ 
-			"id": 5,
-			"name": "Gaivota",
-			"type": "single",
-			"zipcodeA": 88955000,
-			"zipcodeB": null,
-			"price": "5.00",
-			"createdAt": "2019-11-27T14:45:24.000Z",
-			"updatedAt": "2019-11-27T14:45:24.000Z",
+		{
+			"distance": 10,
+			"price": 10,
 			"companyId": 2
 		}
 	],

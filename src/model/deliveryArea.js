@@ -9,45 +9,14 @@ import conn from '../services/connection';
 class DeliveryArea extends Sequelize.Model {}
 
 DeliveryArea.init({
-	name: {
-		type: Sequelize.STRING,
-		allowNull: false,
-		validate: {
-			notEmpty: { msg: 'Você deve definir um nome para o local de entrega' },
-			notNull: { msg: 'Você deve definir um nome para o local de entrega' },
-		}
-	},
-	type: {
-		type: Sequelize.STRING,
-		allowNull: false,
-		comment: 'single | joker | set',
-		validate: {
-			notEmpty: { msg: 'O tipo do local de entrega não pode ser vazio' },
-			notNull: { msg: 'O tipo do local de entrega não pode ser vazio' },
-			isIn: {
-				args: [['single', 'joker', 'set']],
-				msg: 'O tipo local de entrega é inválido',
-			}
-		}
-	},
-	zipcodeA: {
+	distance: {
 		type: Sequelize.INTEGER,
-		allowNull: false,
-		validate: {
-			notEmpty: { msg: 'Você deve definir o CEP para o local de entrega' },
-			notNull: { msg: 'Você deve definir o CEP para o local de entrega' },
-		}
-	},
-	zipcodeB: {
-		type: Sequelize.INTEGER,
-		allowNull: true,
-		defaultValue: null,
-		comment: "In case of type is 'set'"
+		allowNull: false
 	},
 	price: {
-		type: Sequelize.DECIMAL(10,2),
-		defaultValue: 0
-	},
+		type: Sequelize.FLOAT,
+		allowNull: false
+	}
 }, {
 	modelName: 'deliveryArea',
 	tableName: 'delivery_areas',

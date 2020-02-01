@@ -1,32 +1,26 @@
 import { gql }  from 'apollo-server';
-import { Op, col, fn }  from 'sequelize';
+import { fn, where, literal }  from 'sequelize';
 
 import sequelize  from '../services/connection';
-import { ZipcodeError }  from '../utilities/errors';
+import { DeliveryAreaError }  from '../utilities/errors';
 
 export const typeDefs =  gql`
 	type DeliveryArea {
 		id: ID!
-		name: String!
-		type: String!
+		distance: Int!
 		price: Float!
-		zipcodeA: Int!
-		zipcodeB: Int
 		createdAt: DateTime!
 		updatedAt: DateTime!
 	}
 
 	input DeliveryAreaInput {
 		id: ID
-		name: String
-		type: String
+		distance: Int
 		price: Float
-		zipcodeA: Int
-		zipcodeB: Int
 	}
 
 	extend type Mutation {
-		calculateDeliveryPrice(zipcode: Int!): DeliveryArea!
+		calculateDeliveryPrice(location: GeoPoint!): DeliveryArea!
 		modifyDeliveryAreas(data: [DeliveryAreaInput]!): [DeliveryArea]!
 		removeDeliveryArea(id: ID!): DeliveryArea!
 	}
@@ -34,21 +28,19 @@ export const typeDefs =  gql`
 
 export const resolvers =  {
 	Mutation: {
-		calculateDeliveryPrice: async (_, { zipcode }, { company }) => {
+		calculateDeliveryPrice: async (_, { location }, { company }) => {
+			const companyAddress = await company.getAddress();
+			const companyPoint = fn('ST_GeomFromText', literal(`'POINT(${companyAddress.location.coordinates[0]} ${companyAddress.location.coordinates[1]})'`));
+			const userPoint = fn('ST_GeomFromText', literal(`'POINT(${location.coordinates[0]} ${location.coordinates[1]})'`));
+
 			const [deliveryArea] = await company.getDeliveryAreas({
-				order: [['price', 'DESC']],
+				order: [['distance', 'ASC']],
 				limit: 1,
-				where: {
-					[Op.or]: [
-						{ type: 'single', zipcodeA: zipcode },
-						{ type: 'set', zipcodeA: { [Op.lte]: zipcode }, zipcodeB: { [Op.gte]: zipcode } },
-						{ type: 'joker', zipcodeA: fn('substring', zipcode, 1, fn('char_length', col('zipcodeA'))) },
-					]
-				}
+				where: where(fn('ST_Distance_Sphere', userPoint, companyPoint), '<', literal('distance * 1000')),
 			})
 					
 			// check if delivery area exists
-			if (!deliveryArea) throw new ZipcodeError('Não há entregas para esse local');
+			if (!deliveryArea) throw new DeliveryAreaError('Não há entregas para esse local');
 		
 			return deliveryArea;
 		},
@@ -67,7 +59,7 @@ export const resolvers =  {
 						.then(([areaFound])=>{
 							if (!areaFound) throw new Error('Área de entrega não encontrada');
 						
-							return areaFound.update(area, { field: ['name', 'type', 'zipcodeA', 'zipcodeB', 'price'], transaction });
+							return areaFound.update(area, { field: ['distance', 'price'], transaction });
 						})
 				}));
 

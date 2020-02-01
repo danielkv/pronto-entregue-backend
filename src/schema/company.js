@@ -291,7 +291,6 @@ export const resolvers =  {
 		},
 		async rankPosition(parent, { radius }) {
 			const companyAddress = await parent.getAddress();
-			//const companyPoint = fn('ST_GeomFromText', fn('POINT', companyAddress.location.coordinates[0], companyAddress.location.coordinates[1]));
 			const companyPoint = fn('ST_GeomFromText', literal(`'POINT(${companyAddress.location.coordinates[0]} ${companyAddress.location.coordinates[1]})'`));
 			
 			const companies = await Company.findAll({

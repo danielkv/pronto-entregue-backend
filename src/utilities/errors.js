@@ -1,7 +1,7 @@
-export class ZipcodeError extends Error {
+export class DeliveryAreaError extends Error {
 	constructor (message) {
 		super (message);
-		this.name = "ZipcodeError";
-		this.code = "ZIPCODE_ERROR"
+		this.name = "DeliveryAreaError";
+		this.code = "DELIVERY_AREA_ERROR"
 	}
 }
