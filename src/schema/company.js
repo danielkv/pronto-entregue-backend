@@ -52,6 +52,9 @@ export const typeDefs =  gql`
 
 		countRatings(filter:Filter): Int! @hasRole(permission: "adm")
 		ratings(filter:Filter, pagination: Pagination): [Rating]! @hasRole(permission: "adm")
+
+		countCategories(filter: Filter): Int!
+		categories(filter: Filter, pagination: Pagination): [Category]!
 	}
 
 	type ProductBestSeller {
@@ -302,6 +305,22 @@ export const resolvers =  {
 			})
 
 			return companies.findIndex(c => parent.get('id') === c.get('id')) + 1;
+		},
+
+		countCategories(parent, { filter }) {
+			const search = ['name', 'description'];
+			const where = sanitizeFilter(filter, { search, table: 'order' });
+
+			return parent.countCategories({ where });
+		},
+		categories(parent, { filter, pagination }) {
+			const search = ['name', 'description'];
+			const where = sanitizeFilter(filter, { search, table: 'order' });
+
+			return parent.getCategories({
+				where,
+				...getSQLPagination(pagination),
+			});
 		},
 	}
 }

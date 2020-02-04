@@ -3,7 +3,7 @@ import { gql }  from 'apollo-server';
 import { upload }  from '../controller/uploads';
 import Category  from '../model/category';
 import sequelize  from '../services/connection';
-import { getSQLPagination, sanitizeFilter } from '../utilities'
+import { sanitizeFilter } from '../utilities'
 
 export const typeDefs =  gql`
 	type Category {
@@ -30,8 +30,6 @@ export const typeDefs =  gql`
 	}
 
 	extend type Query {
-		countCategories(filter: Filter): Int!
-		categories(filter: Filter, pagination: Pagination): [Category]!
 		category(id: ID!): Category!
 	}
 
@@ -44,12 +42,12 @@ export const typeDefs =  gql`
 
 export const resolvers =  {
 	Mutation: {
-		createCategory: async (_, { data }) => {
+		createCategory: async (_, { data }, company) => {
 			if (data.file) {
 				data.image = await upload('categories', await data.file);
 			}
 
-			return Category.create(data);
+			return company.createCategory(data);
 		},
 		updateCategory: async (_, { id, data }) => {
 			if (data.file) {
@@ -75,21 +73,6 @@ export const resolvers =  {
 		}
 	},
 	Query: {
-		countCategories(_, { filter }) {
-			const search = ['name', 'description'];
-			const where = sanitizeFilter(filter, { search, table: 'order' });
-
-			return Category.count({ where });
-		},
-		categories(_, { filter, pagination }) {
-			const search = ['name', 'description'];
-			const where = sanitizeFilter(filter, { search, table: 'order' });
-
-			return Category.findAll({
-				where,
-				...getSQLPagination(pagination),
-			});
-		},
 		async category(_, { id }) {
 			// check if category exists
 			const category = await Category.findByPk(id);

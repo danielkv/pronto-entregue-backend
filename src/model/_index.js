@@ -36,6 +36,10 @@ Company.belongsTo(CompanyType);
 CompanyType.hasMany(Company);
 Company.belongsTo(Address);
 
+// categories relations
+Category.belongsTo(Company);
+Company.hasMany(Category);
+
 // rating relations
 Rating.belongsTo(Company);
 Company.hasMany(Rating);
