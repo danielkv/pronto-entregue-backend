@@ -58,14 +58,15 @@ Order.init({
 	message: Sequelize.TEXT,
 
 	//Endereço da entrega
-	street: Sequelize.STRING,
-	number: Sequelize.INTEGER,
-	complement: Sequelize.STRING,
-	city: Sequelize.STRING,
-	state: Sequelize.STRING,
-	district: Sequelize.STRING,
-	zipcode: Sequelize.STRING,
-	
+	nameAddress: Sequelize.STRING,
+	streetAddress: Sequelize.STRING,
+	numberAddress: Sequelize.INTEGER,
+	complementAddress: Sequelize.STRING,
+	districtAddress: Sequelize.STRING,
+	zipcodeAddress: Sequelize.INTEGER,
+	cityAddress: Sequelize.STRING,
+	stateAddress: Sequelize.STRING,
+	locationAddress: Sequelize.GEOMETRY('POINT'),
 }, {
 	modelName: 'order',
 	tableName: 'orders',

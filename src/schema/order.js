@@ -20,13 +20,7 @@ export const typeDefs =  gql`
 		updatedAt: DateTime!
 		paymentMethod: PaymentMethod!
 		
-		street: String
-		number: Int
-		complement: String
-		city: String
-		state: String
-		district: String
-		zipcode: String
+		address: Address!
 
 		countProducts: Int!
 		products: [OrderProduct]!		
@@ -44,13 +38,7 @@ export const typeDefs =  gql`
 		price: Float
 		message: String
 		
-		street: String
-		number: Int
-		complement: String
-		city: String
-		state: String
-		district: String
-		zipcode: Int
+		address: AddressInput
 
 		products: [OrderProductInput]
 	}
@@ -122,6 +110,20 @@ export const resolvers =  {
 		paymentMethod: (parent) => {
 			return parent.getPaymentMethod();
 		},
+		address(parent) {
+			return {
+				id: `_order_${parent.get('id')}`,
+				name: parent.get('nameAddress'),
+				street: parent.get('streetAddress'),
+				number: parent.get('numberAddress'),
+				complement: parent.get('complementAddress'),
+				zipcode: parent.get('zipcodeAddress'),
+				district: parent.get('districtAddress'),
+				city: parent.get('cityAddress'),
+				state: parent.get('stateAddress'),
+				location: parent.get('locationAddress'),
+			}
+		}
 	},
 	Query: {
 		order: (_, { id }, { company }) => {
@@ -135,6 +137,21 @@ export const resolvers =  {
 	Mutation: {
 		createOrder(_, { data }, { company }) {
 			return sequelize.transaction(async (transaction) => {
+				// sanitize address
+				const address = {
+					nameAddress: data.address.name,
+					streetAddress: data.address.street,
+					numberAddress: data.address.number,
+					complementAddress: data.address.complement,
+					zipcodeAddress: data.address.zipcode,
+					districtAddress: data.address.district,
+					cityAddress: data.address.city,
+					stateAddress: data.address.state,
+					locationAddress: data.address.location,
+				}
+				delete data.address;
+				data = { ...data, ...address };
+
 				// create order
 				const order = await company.createOrder(data, { transaction });
 				
@@ -152,6 +169,23 @@ export const resolvers =  {
 				// check if order exists
 				const [order] = await company.getOrders({ where: { id } });
 				if (!order) throw new Error('Pedido não encontrado');
+
+				// sanitize address
+				if (data.address) {
+					const address = {
+						nameAddress: data.address.name,
+						streetAddress: data.address.street,
+						numberAddress: data.address.number,
+						complementAddress: data.address.complement,
+						zipcodeAddress: data.address.zipcode,
+						districtAddress: data.address.district,
+						cityAddress: data.address.city,
+						stateAddress: data.address.state,
+						locationAddress: data.address.location,
+					}
+					delete data.address;
+					data = { ...data, ...address };
+				}
 
 				// update order
 				const updatedOrder = await order.update(data, { transaction });

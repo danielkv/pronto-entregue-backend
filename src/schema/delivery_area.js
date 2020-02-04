@@ -1,7 +1,8 @@
 import { gql }  from 'apollo-server';
 import { fn, where, literal }  from 'sequelize';
 
-import sequelize  from '../services/connection';
+import Company from '../model/company';
+import conn from '../services/connection';
 import { DeliveryAreaError }  from '../utilities/errors';
 
 export const typeDefs =  gql`
@@ -20,7 +21,7 @@ export const typeDefs =  gql`
 	}
 
 	extend type Mutation {
-		calculateDeliveryPrice(location: GeoPoint!): DeliveryArea!
+		calculateDeliveryPrice(companyId: ID!, address: AddressInput!): DeliveryArea!
 		modifyDeliveryAreas(data: [DeliveryAreaInput]!): [DeliveryArea]!
 		removeDeliveryArea(id: ID!): DeliveryArea!
 	}
@@ -28,8 +29,16 @@ export const typeDefs =  gql`
 
 export const resolvers =  {
 	Mutation: {
-		calculateDeliveryPrice: async (_, { location }, { company }) => {
+		async calculateDeliveryPrice (_, { companyId, address }) {
+			if (!address.location) throw new Error('Localização não encontrada');
+			const { location } = address;
+
+			const company = await Company.findByPk(companyId);
+			if (!company) throw new Error('Empresa não encontrada');
+
 			const companyAddress = await company.getAddress();
+			if (!companyAddress || !companyAddress.location) throw new Error('Localização da empresa não encontrada');
+
 			const companyPoint = fn('ST_GeomFromText', literal(`'POINT(${companyAddress.location.coordinates[0]} ${companyAddress.location.coordinates[1]})'`));
 			const userPoint = fn('ST_GeomFromText', literal(`'POINT(${location.coordinates[0]} ${location.coordinates[1]})'`));
 
@@ -48,7 +57,7 @@ export const resolvers =  {
 			const update = data.filter(row=>row.id);
 			const create = data.filter(row=>!row.id);
 
-			return sequelize.transaction(async (transaction) => {
+			return conn.transaction(async (transaction) => {
 
 				const resultCreate = await Promise.all(create.map(area=>{
 					return company.createDeliveryArea(area, { transaction });
