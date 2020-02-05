@@ -12,6 +12,8 @@ import CompanyMeta from './companyMeta';
 import CompanyPaymentMethod from './companyPaymentMethod';
 import CompanyType from './companyType';
 import CompanyUser from './companyUser';
+import CreditBalance from './creditBalance';
+import CreditHistory from './creditHistory';
 import DeliveryArea from './deliveryArea';
 import Options from './option';
 import OptionsGroup from './OptionsGroup';
@@ -25,6 +27,8 @@ import Rating from './rating';
 import Role from './role';
 import User from './user';
 import UserMeta from './userMeta';
+
+import './triggers';
 
 // Company Relations
 Company.hasMany(CompanyMeta);
@@ -51,6 +55,14 @@ User.hasMany(Rating);
 // Role relations
 Role.hasMany(CompanyUser);
 CompanyUser.belongsTo(Role);
+
+// Statement relations
+CreditHistory.belongsTo(User);
+User.hasMany(CreditHistory);
+
+// CreditBalance relations
+User.hasOne(CreditBalance);
+CreditBalance.belongsTo(User);
 
 // PaymentMethod
 PaymentMethod.belongsToMany(Company, { through: CompanyPaymentMethod });

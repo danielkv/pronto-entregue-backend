@@ -26,8 +26,6 @@ function extractGeoPoint(point) {
 }
 
 function sanitizeToGeoPoint(coordinates) {
-	
-
 	if (!isArray(coordinates)
 	|| !isNumber(coordinates[0])
 	|| !isNumber(coordinates[1]))

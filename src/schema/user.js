@@ -2,6 +2,7 @@ import { gql }  from 'apollo-server';
 import jwt  from 'jsonwebtoken';
 import{ Op }  from 'sequelize';
 
+import balanceLoader from '../loaders/balanceLoader';
 import Company  from '../model/company';
 import User  from '../model/user';
 import UserMeta  from '../model/userMeta';
@@ -36,6 +37,10 @@ export const typeDefs = gql`
 		companies(filter: Filter, pagination: Pagination): [Company]!
 
 		favoriteProducts(pagination: Pagination): [Product]!
+
+		creditBalance: Float!
+		countCreditHistory(filter: Filter): Int!
+		creditHistory(filter: Filter, pagination: Pagination): [CreditHistory]!
 	}
 
 	input UserInput {
@@ -326,6 +331,24 @@ export const resolvers = {
 		},
 		favoriteProducts(parent, { pagination }) {
 			return parent.getFavoriteProducts({
+				...getSQLPagination(pagination)
+			});
+		},
+		async creditBalance(parent) {
+			const balance = await balanceLoader.load(parent.get('id'));
+
+			return balance.get('value');
+		},
+		countCreditHistory(parent, { filter }) {
+			const where = sanitizeFilter(filter, { excludeFilters: ['active'], search: ['history'] });
+
+			return parent.countCreditHistory({ where });
+		},
+		creditHistory(parent, { filter, pagination }) {
+			const where = sanitizeFilter(filter, { excludeFilters: ['active'], search: ['history'] });
+
+			return parent.getCreditHistory({
+				where,
 				...getSQLPagination(pagination)
 			});
 		}

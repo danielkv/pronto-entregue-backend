@@ -7,6 +7,7 @@ import { typeDefs as Campaign, resolvers as campaignResolvers }  from './campaig
 import { typeDefs as Category, resolvers as categoryResolvers }  from './category';
 import { typeDefs as Company, resolvers as companyResolvers }  from './company';
 import { typeDefs as CompanyType, resolvers as companyTypeResolvers }  from './company-type';
+import { typeDefs as CreditHistory, resolvers as creditHistoryResolvers }  from './credit_history';
 import * as customTypes from './customTypes';
 import { typeDefs as DeliveryArea, resolvers as deliveryAreaResolvers }  from './delivery_area';
 import directives  from './directives';
@@ -74,7 +75,7 @@ const resolvers = {
 }
 
 export default makeExecutableSchema({
-	typeDefs: [typeDefs, Address, CompanyType, BusinessHour, Rating, Emails, Campaign, Category, Company, Option, OptionsGroup, OrderOptions, OrderOptionsGroup, OrderProduct, Order, PaymentMethod, Product, Role, DeliveryArea, User, Phone, Meta],
-	resolvers: merge(resolvers, addressResolvers, companyTypeResolvers, businessHourResolvers, ratingResolvers, emailsResolvers, campaignResolvers, categoryResolvers, companyResolvers, optionResolvers, optionsGroupResolvers, orderOptionResolvers, orderOptionsGroupResolvers, orderProductResolvers, orderResolvers, paymentMethodResolvers, productResolvers, roleResolvers, deliveryAreaResolvers, userResolvers, phoneResolvers, metaResolvers),
+	typeDefs: [typeDefs, Address, CreditHistory, CompanyType, BusinessHour, Rating, Emails, Campaign, Category, Company, Option, OptionsGroup, OrderOptions, OrderOptionsGroup, OrderProduct, Order, PaymentMethod, Product, Role, DeliveryArea, User, Phone, Meta],
+	resolvers: merge(resolvers, addressResolvers, creditHistoryResolvers ,companyTypeResolvers, businessHourResolvers, ratingResolvers, emailsResolvers, campaignResolvers, categoryResolvers, companyResolvers, optionResolvers, optionsGroupResolvers, orderOptionResolvers, orderOptionsGroupResolvers, orderProductResolvers, orderResolvers, paymentMethodResolvers, productResolvers, roleResolvers, deliveryAreaResolvers, userResolvers, phoneResolvers, metaResolvers),
 	directiveResolvers: directives,
 })

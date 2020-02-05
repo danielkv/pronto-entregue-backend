@@ -49,6 +49,11 @@ export const importDB = async (data) => {
 
 	await User.bulkCreate(data.users);
 	await UserMeta.bulkCreate(data.user_metas);
+
+	await Category.bulkCreate(data.categories);
+	await Product.bulkCreate(data.products);
+	await OptionsGroup.bulkCreate(data.option_groups);
+	await Option.bulkCreate(data.options);
 	
 	await Order.bulkCreate(data.orders);
 	await OrderProduct.bulkCreate(data.order_products);
@@ -61,11 +66,6 @@ export const importDB = async (data) => {
 	
 	await DeliveryArea.bulkCreate(data.delivery_areas);
 
-	await Category.bulkCreate(data.categories);
-	await Product.bulkCreate(data.products);
-	await OptionsGroup.bulkCreate(data.option_groups);
-	await Option.bulkCreate(data.options);
-	
 	await Address.bulkCreate(data.addresses);
 }
 
