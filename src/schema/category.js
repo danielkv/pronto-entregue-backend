@@ -42,7 +42,7 @@ export const typeDefs =  gql`
 
 export const resolvers =  {
 	Mutation: {
-		createCategory: async (_, { data }, company) => {
+		async createCategory (_, { data }, { company }) {
 			if (data.file) {
 				data.image = await upload('categories', await data.file);
 			}
