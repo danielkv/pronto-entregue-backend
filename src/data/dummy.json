@@ -124,10 +124,10 @@
 	"addresses":[
 		{
 			"street": "Pankratz",
-			"number": "8",
+			"number": 8,
 			"city": "Stockton",
 			"state": "California",
-			"zipcode": "95298",
+			"zipcode": 95298,
 			"district": "CA",
 			"name": "Bald",
 			"location": {
@@ -137,10 +137,10 @@
 		},
 		{
 			"street": "Scott",
-			"number": "33413",
+			"number": 33413,
 			"city": "Brooklyn",
 			"state": "New York",
-			"zipcode": "11241",
+			"zipcode": 11241,
 			"district": "NY",
 			"name": "Alastair",
 			"location": {
@@ -150,10 +150,10 @@
 		}, 
 		{
 			"street": "Claremont",
-			"number": "87711",
+			"number": 87711,
 			"city": "Dallas",
 			"state": "Texas",
-			"zipcode": "75251",
+			"zipcode": 75251,
 			"district": "TX",
 			"name": "Andi",
 			"location": {
@@ -163,10 +163,10 @@
 		}, 
 		{
 			"street": "Mesta",
-			"number": "2",
+			"number": 2,
 			"city": "Richmond",
 			"state": "Virginia",
-			"zipcode": "23228",
+			"zipcode": 23228,
 			"district": "VA",
 			"name": "Sabrina",
 			"location": {
@@ -1498,7 +1498,7 @@
 			"numberAddress": 8,
 			"cityAddress": "Stockton",
 			"stateAddress": "California",
-			"zipcodeAddress": "95298",
+			"zipcodeAddress": 95298,
 			"districtAddress": "CA",
 			"nameAddress": "Bald",
 			"locationAddress": {
@@ -1526,7 +1526,7 @@
 			"numberAddress": 8,
 			"cityAddress": "Stockton",
 			"stateAddress": "California",
-			"zipcodeAddress": "95298",
+			"zipcodeAddress": 95298,
 			"districtAddress": "CA",
 			"nameAddress": "Bald",
 			"locationAddress": {
