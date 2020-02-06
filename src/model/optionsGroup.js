@@ -18,10 +18,10 @@ class OptionsGroup extends Sequelize.Model {
 						if (!['create', 'remove', 'update'].includes(group.action)) return resolve(group);
 
 						if (group.id && group.action === "remove") {
-							groupModel = await product.removeOptionGroup(groupModel, { transaction });
+							groupModel = await product.removeOptionsGroup(groupModel, { transaction });
 							return resolve(groupModel);
 						} else if (group.action === 'create') {
-							groupModel = await product.createOptionGroup(group, { transaction });
+							groupModel = await product.createOptionsGroup(group, { transaction });
 						} else if (group.id && group.action === 'update') {
 							[groupModel] = await product.getOptionsGroups({ where: { id: group.id } });
 							groupModel = await groupModel.update(group, { fields: ['name', 'active', 'type', 'minSelect', 'maxSelect', 'order', 'maxSelectRestrain'], transaction });

@@ -126,7 +126,7 @@ export const resolvers =  {
 				}
 
 				// create, update, remove options groups
-				if (data.optionsGroups) await OptionsGroup.updateAll(data.optionsGroups, product, transaction);
+				if (data.optionsGroups) await OptionsGroup.updateAll(data.optionsGroups, productUpdated, transaction);
 			
 				return productUpdated;
 			})
