@@ -349,7 +349,8 @@ export const resolvers = {
 
 			return parent.getCreditHistory({
 				where,
-				...getSQLPagination(pagination)
+				...getSQLPagination(pagination),
+				order: [['createdAt', 'DESC']]
 			});
 		}
 	}

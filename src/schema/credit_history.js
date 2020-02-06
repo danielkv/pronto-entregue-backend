@@ -1,6 +1,7 @@
 import { gql }  from 'apollo-server';
 
 import CreditHistory from '../model/creditHistory';
+import User from '../model/user';
 
 export const typeDefs = gql`
 
@@ -19,15 +20,23 @@ export const typeDefs = gql`
 	}
 
 	extend type Mutation {
-		createCreditHistory(userId: ID!, data: CreditHistoryInput!): CreditHistory!
+		createCreditHistory(userId: ID!, data: CreditHistoryInput!): CreditHistory! @hasRole(permission: "master")
 	}
 
 `;
 
 export const resolvers =  {
 	Mutation: {
-		createCreditHistory(_, { userId, data }) {
-			return CreditHistory.create({
+		async createCreditHistory(_, { userId, data }) {
+			// check if user exists
+			const user = await User.findByPk(userId);
+			if (!user) throw new Error('Usuário não encotrado');
+
+			// check user's balance
+			const balance = await user.getCreditBalance();
+			if (balance.value + data.value < 0) throw new Error('Usuário não tem saldo suficiente para essa transação');
+
+			return await CreditHistory.create({
 				...data,
 				userId
 			})

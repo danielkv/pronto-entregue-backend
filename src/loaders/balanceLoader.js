@@ -10,4 +10,4 @@ export default new DataLoader(async keys => {
 	})
 
 	return balances; //remap(keys, balances, 'userId');
-})
+}, { cache: false })
