@@ -35,14 +35,9 @@ Product.init({
 		}
 	},
 	type: {
-		type: Sequelize.STRING(50),
-		comment: 'inline | panel',
-		validate: {
-			isIn: {
-				args: [['inline', 'panel']],
-				msg: 'Tipo de produto inválido'
-			}
-		}
+		type: Sequelize.ENUM('inline', 'panel'),
+		defaultValue: 'inline',
+		allowNull: false
 	},
 	price: {
 		type: Sequelize.DECIMAL(10, 2),

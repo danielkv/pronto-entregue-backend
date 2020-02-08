@@ -12,16 +12,9 @@ Order.init({
 	paymentFee: Sequelize.DECIMAL(10,2),
 	deliveryPrice: Sequelize.STRING,
 	type: {
-		type: Sequelize.STRING,
+		type: Sequelize.ENUM('takeout', 'delivery'),
 		allowNull: false,
-		defaultValue: 'takeout',
-		comment: 'takeout | delivery',
-		validate: {
-			isIn: {
-				args: [['takeout', 'delivery']],
-				msg: 'Esse tipo de pedido não é válido',
-			}
-		}
+		defaultValue: 'delivery'
 	},
 	price: {
 		type: Sequelize.DECIMAL(10, 2),
@@ -48,12 +41,8 @@ Order.init({
 		}
 	},
 	status: {
-		type: Sequelize.STRING,
-		comment: 'waiting | preparing | delivering | delivered | canceled',
+		type: Sequelize.ENUM('waiting', 'preparing', 'delivering', 'delivered', 'canceled'),
 		defaultValue: 'waiting',
-		validate: {
-			isIn: [['waiting', 'preparing', 'delivering', 'delivered', 'canceled']],
-		}
 	},
 	message: Sequelize.TEXT,
 

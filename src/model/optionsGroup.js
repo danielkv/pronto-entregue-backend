@@ -45,14 +45,9 @@ class OptionsGroup extends Sequelize.Model {
 OptionsGroup.init({
 	name: Sequelize.STRING,
 	type: {
-		type: Sequelize.STRING(50),
-		comment: 'single | multi',
-		validate: {
-			isIn: {
-				args: [['single', 'multi']],
-				msg: 'Tipo de grupo inválido'
-			}
-		}
+		type: Sequelize.ENUM('single', 'multi'),
+		defaultValue: 'single',
+		allowNull: false
 	},
 	order: {
 		type: Sequelize.INTEGER,
