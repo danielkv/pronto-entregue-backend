@@ -24,6 +24,7 @@ export const typeDefs =  gql`
 		metas(keys: [String]): [Meta]!
 		lastMonthRevenue: Float!
 		userRelation: CompanyRelation!
+		acceptTakeout: Boolean!
 
 		rankPosition(radius: Int!): Int!
 
@@ -294,6 +295,7 @@ export const resolvers =  {
 		},
 		async rankPosition(parent, { radius }) {
 			const companyAddress = await parent.getAddress();
+			if (!companyAddress) throw new Error('Endereço da empresa não encontrado')
 			const companyPoint = fn('ST_GeomFromText', literal(`'POINT(${companyAddress.location.coordinates[0]} ${companyAddress.location.coordinates[1]})'`));
 			
 			const companies = await Company.findAll({

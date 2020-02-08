@@ -345,7 +345,8 @@
 			"active": true,
 			"order": 0,
 			"createdAt": "2019-11-27T14:45:24.000Z",
-			"updatedAt": "2019-12-22T22:31:50.000Z"
+			"updatedAt": "2019-12-22T22:31:50.000Z",
+			"companyId": 1
 		},
 		{ 
 			"id": 2,
@@ -355,7 +356,8 @@
 			"active": true,
 			"order": 2,
 			"createdAt": "2019-11-27T14:45:24.000Z",
-			"updatedAt": "2019-12-22T22:31:50.000Z"
+			"updatedAt": "2019-12-22T22:31:50.000Z",
+			"companyId": 2
 		},
 		{ 
 			"id": 3,
@@ -365,7 +367,8 @@
 			"active": true,
 			"order": 1,
 			"createdAt": "2019-11-27T14:45:24.000Z",
-			"updatedAt": "2019-12-22T22:31:50.000Z"
+			"updatedAt": "2019-12-22T22:31:50.000Z",
+			"companyId": 2
 		},
 		{ 
 			"id": 4,
@@ -375,7 +378,8 @@
 			"active": true,
 			"order": 0,
 			"createdAt": "2019-11-27T14:45:24.000Z",
-			"updatedAt": "2019-11-27T14:45:24.000Z"
+			"updatedAt": "2019-11-27T14:45:24.000Z",
+			"companyId": 1
 		},
 		{ 
 			"id": 5,
@@ -385,7 +389,8 @@
 			"active": true,
 			"order": 0,
 			"createdAt": "2019-11-27T14:45:24.000Z",
-			"updatedAt": "2019-11-27T14:45:24.000Z"
+			"updatedAt": "2019-11-27T14:45:24.000Z",
+			"companyId": 1
 		},
 		{ 
 			"id": 6,
@@ -395,7 +400,8 @@
 			"active": true,
 			"order": 0,
 			"createdAt": "2019-11-27T14:45:24.000Z",
-			"updatedAt": "2019-11-27T14:45:24.000Z"
+			"updatedAt": "2019-11-27T14:45:24.000Z",
+			"companyId": 2
 		},
 		{ 
 			"id": 7,
@@ -405,7 +411,8 @@
 			"active": true,
 			"order": 0,
 			"createdAt": "2019-11-27T14:45:24.000Z",
-			"updatedAt": "2019-11-27T14:45:24.000Z"
+			"updatedAt": "2019-11-27T14:45:24.000Z",
+			"companyId": 2
 		},
 		{ 
 			"id": 8,
@@ -415,7 +422,8 @@
 			"active": true,
 			"order": 0,
 			"createdAt": "2019-11-27T14:45:24.000Z",
-			"updatedAt": "2019-11-27T14:45:24.000Z"
+			"updatedAt": "2019-11-27T14:45:24.000Z",
+			"companyId": 1
 		},
 		{ 
 			"id": 9,
@@ -425,7 +433,8 @@
 			"active": true,
 			"order": 0,
 			"createdAt": "2019-11-27T14:45:24.000Z",
-			"updatedAt": "2019-11-27T14:45:24.000Z"
+			"updatedAt": "2019-11-27T14:45:24.000Z",
+			"companyId": 2
 		}
 	],
 	"products": [ 
