@@ -7,6 +7,7 @@ import Category from '../model/category';
 import Company from '../model/company';
 import Option  from '../model/option';
 import OptionsGroup  from '../model/OptionsGroup';
+import OrderProduct from '../model/orderProduct';
 import Product  from '../model/product';
 import User from '../model/user';
 import conn  from '../services/connection';
@@ -59,6 +60,7 @@ export const typeDefs =  gql`
 
 	extend type Query {
 		product(id: ID!): Product!
+		bestSellers(limit: Int!): [Product]! @isAuthenticated
 	}
 
 	extend type Mutation {
@@ -167,6 +169,24 @@ export const resolvers =  {
 			if (!product) throw new Error('Produto não encontrada');
 
 			return product;
+		},
+		async bestSellers(_, { limit }) {
+			const products = await Product.findAll({
+				include: [{
+					model: OrderProduct,
+					// required: true,
+				}],
+				
+				order: [
+					[conn.fn('COUNT', conn.col('orderProduct.id')), 'DESC'],
+					[conn.col('product.name'), 'ASC']
+				],
+				group: ['product.id'],
+				where: {},
+				limit
+			});
+
+			return products.map(row => row.get());
 		},
 	},
 	Product: {
