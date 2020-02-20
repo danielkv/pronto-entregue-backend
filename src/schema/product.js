@@ -28,6 +28,8 @@ export const typeDefs =  gql`
 		finalPrice: Float! # if has some campaign
 		featured: Boolean!
 
+		fromPrice: Float!
+
 		active: Boolean!
 		createdAt: DateTime!
 		updatedAt: DateTime!
@@ -186,7 +188,7 @@ export const resolvers =  {
 				limit
 			});
 
-			return products.map(row => row.get());
+			return products
 		},
 	},
 	Product: {

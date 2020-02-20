@@ -39,6 +39,19 @@ Product.init({
 		defaultValue: 'inline',
 		allowNull: false
 	},
+	fromPrice: {
+		type: Sequelize.DECIMAL(10, 2),
+		defaultValue: 0,
+		set (val) {
+			if (typeof val == 'string')
+				this.setDataValue('fromPrice', parseFloat(val.replace(',', '.')));
+			else
+				this.setDataValue('fromPrice', val);
+		},
+		get () {
+			return parseFloat(this.getDataValue('fromPrice'));
+		}
+	},
 	price: {
 		type: Sequelize.DECIMAL(10, 2),
 		set (val) {
