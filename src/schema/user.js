@@ -81,7 +81,7 @@ export const typeDefs = gql`
 		user(id: ID!): User! @hasRole(permission: "master", checkSameUser: true)
 		me: User! @isAuthenticated
 
-		userAddress (id: ID!): Address! @isAuthenticated
+		#userAddress (id: ID!): Address! @isAuthenticated
 	}
 
 `;
@@ -112,7 +112,7 @@ export const resolvers = {
 			if (!user) throw new Error('Usuário não encontrada');
 			return user;
 		},
-		userAddress: (_, { id }, ctx) => {
+		/* userAddress: (_, { id }, ctx) => {
 			return ctx.user.getMetas({ where: { id } })
 				.then(([address]) => {
 					if (!address) throw new Error('Endereço não encontrado');
@@ -122,7 +122,7 @@ export const resolvers = {
 						...JSON.parse(address.value)
 					};
 				})
-		},
+		}, */
 	},
 	Mutation: {
 		searchUsers(_, { search, exclude = [], companies }) {

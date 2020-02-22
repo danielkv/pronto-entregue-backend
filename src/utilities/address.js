@@ -26,13 +26,5 @@ export function parseAddresses(results) {
 	}))
 
 	// checks if all data is filled
-	return addresses.filter(addr => (
-		addr.street &&
-		addr.number &&
-		addr.zipcode &&
-		addr.district &&
-		addr.city &&
-		addr.state &&
-		addr.location
-	))
+	return addresses;
 }
