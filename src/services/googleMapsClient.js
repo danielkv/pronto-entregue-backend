@@ -1,6 +1,4 @@
-import { createClient } from '@google/maps';
+//import { createClient } from '@google/maps';
+import { Client } from '@googlemaps/google-maps-services-js';
 
-export default createClient({
-	key: process.env.GMAPS_KEY,
-	Promise: Promise
-});
+export default new Client({});

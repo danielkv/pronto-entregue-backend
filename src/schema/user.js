@@ -240,35 +240,8 @@ export const resolvers = {
 
 			return userFound;
 		},
-		async removeUserAddress (_, { id })  {
-			// check if addres exists
-			const addressFound = await UserMeta.findByPk(id);
-			if (!addressFound) throw new Error('Endereço não encontrado');
-
-			// remove address
-			const removed = await addressFound.destroy();
-
-			return { id, ...JSON.parse(removed.value) };
-		},
-		updateUserAddress: (_, { id, data }, ctx) => {
-			return ctx.user.getMetas({ where: { key: 'address', id } })
-				.then(async ([addressFound])=>{
-					if (!addressFound) throw new Error('Endereço não encontrado');
-					
-					const updated = await addressFound.update({ value: JSON.stringify(data) })
-					
-					return { id, ...JSON.parse(updated.value) };
-				});
-		},
-		createUserAddress: (_, { data }, ctx) => {
-			return ctx.user.createMeta({ key: 'address', value: JSON.stringify(data) })
-				.then((metaAddress) => {
-					console.log(metaAddress.get());
-					return {
-						id: metaAddress.get('id'),
-						...JSON.parse(metaAddress.get('value'))
-					}
-				})
+		createUserAddress (_, { data }, ctx) {
+			return ctx.user.createAddress(data);
 		},
 	},
 	User: {

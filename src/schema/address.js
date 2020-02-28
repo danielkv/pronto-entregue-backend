@@ -1,7 +1,9 @@
+
 import { gql }  from 'apollo-server';
 
 import GMaps from '../services/googleMapsClient';
 import { parseAddresses } from '../utilities/address';
+
 
 export const typeDefs = gql`
 
@@ -41,26 +43,32 @@ export const typeDefs = gql`
 export const resolvers =  {
 	Mutation: {
 		async searchAddress(_, { search }) {
-			const { json: { results } } = await GMaps.geocode({
-				address: search,
-				region: 'BR',
-				language: 'pt-BR'
-			}).asPromise();
+			const { data: { results } } = await GMaps.geocode({
+				params: {
+					key: process.env.GMAPS_KEY,
+					address: search,
+					region: 'BR',
+				}
+			})
 
 			const addresses = parseAddresses(results);
 
 			return addresses;
 		},
 		async searchLocation(_, { location }) {
-			const { json: { results } } = await GMaps.geocode({
-				address: search,
-				region: 'BR',
-				language: 'pt-BR'
-			}).asPromise();
-
+			const { data: { results } } = await GMaps.reverseGeocode({
+				params: {
+					key: process.env.GMAPS_KEY,
+					latlng: {
+						lat: location.coordinates[0],
+						lng: location.coordinates[1],
+					}
+				}
+			})
+			
 			const addresses = parseAddresses(results);
 
-			return addresses;
+			return addresses[0];
 		}
 	}
 }

@@ -2,6 +2,7 @@ function parseAddressesComponents(results) {
 	if (!results.length) return [];
 
 	return results.map(result => {
+		
 		const componentTypes = {
 			location: [result.geometry.location.lat, result.geometry.location.lng]
 		};
