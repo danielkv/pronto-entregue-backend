@@ -25,6 +25,7 @@ import PaymentMethod from './paymentMethod';
 import Product from './product';
 import Rating from './rating';
 import Role from './role';
+import Sale from './sale';
 import User from './user';
 import UserMeta from './userMeta';
 
@@ -120,3 +121,7 @@ User.belongsToMany(Campaign, { through: 'campaign_users' });
 // favorites
 User.belongsToMany(Product, { through: 'favorite_products', as: 'favoriteProducts' });
 Product.belongsToMany(User, { through: 'favorite_products', as: 'favoritedBy' });
+
+// Sales relations
+Sale.belongsTo(Product);
+Product.hasMany(Sale);

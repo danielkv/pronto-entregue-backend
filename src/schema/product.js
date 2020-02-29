@@ -1,5 +1,5 @@
 import { gql }  from 'apollo-server';
-import { Op } from 'sequelize';
+import { Op, fn, literal } from 'sequelize';
 
 import { upload }  from '../controller/uploads';
 import Campaign from '../model/campaign';
@@ -13,7 +13,6 @@ import User from '../model/user';
 import conn  from '../services/connection';
 import { getSQLPagination, sanitizeFilter } from '../utilities';
 import { campaignProductWhere } from '../utilities/campaign';
-import { calculateProcuctFinalPrice } from '../utilities/product';
 
 export const typeDefs =  gql`
 	type Product {
@@ -25,9 +24,6 @@ export const typeDefs =  gql`
 		type: String!
 		listed: Boolean!
 		price: Float!
-		finalPrice: Float! # if has some campaign
-		featured: Boolean!
-
 		fromPrice: Float!
 
 		active: Boolean!
@@ -46,12 +42,13 @@ export const typeDefs =  gql`
 
 		countCampaigns(notIn: [ID]): Int!
 		campaigns(notIn: [ID]): [Campaign]!
+
+		sale(admAccess: Boolean): Sale
 	}
 
 	input ProductInput {
 		name: String
 		description: String
-		featured: Boolean
 		file: Upload
 		type: String
 		price: Float
@@ -117,7 +114,7 @@ export const resolvers =  {
 				if (!product) throw new Error('Produto não encontrado');
 
 				// update product
-				const productUpdated = await product.update(data, { fields: ['name', 'description', 'price', 'order', 'featured', 'active', 'image', 'type'], transaction });
+				const productUpdated = await product.update(data, { fields: ['name', 'description', 'price', 'order', 'active', 'image', 'type'], transaction });
 					
 				// check if needs to update category
 				if (data.categoryId) {
@@ -238,27 +235,25 @@ export const resolvers =  {
 			})
 		},
 
-		// calculate price should be charged (campaigns, discounts, etc)
-		async finalPrice(parent) {
-			const campaigns = await Campaign.findAll({
-				where: {
-					...campaignProductWhere(parent),
-					type: 'discount'
+		async sale(parent, { admAccess=false }) {
+			const where = !admAccess
+				? {
+					startsAt: { [Op.lte]: fn('NOW') },
+					expiresAt: { [Op.gte]: fn('NOW') },
+					active: true
+				} : {}
+			const [sale] = await parent.getSales({
+				attributes: {
+					include: [[literal('IF(startsAt <= NOW() AND expiresAt >= NOW() AND active, true, false)'), 'progress']]
 				},
-				order: [['value', 'ASC']],
-				include: [Product, Company]
-			});
+				where,
+				order: [['startsAt', 'ASC']],
+				limit: 1
+			})
 
-			const acceptOtherCampaigns = campaigns.filter(c => c.acceptOtherCampaign === true);
-			const doNotAcceptOtherCampaigns = campaigns.find(c => c.acceptOtherCampaign === false);
-
-			if (acceptOtherCampaigns.length)
-				return calculateProcuctFinalPrice(parent, acceptOtherCampaigns);
-				
-			if (doNotAcceptOtherCampaigns)
-				return calculateProcuctFinalPrice(parent, [doNotAcceptOtherCampaigns]);
-
-			return 0;
+			
+			
+			return sale;
 		}
 	}
 }

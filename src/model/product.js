@@ -20,11 +20,6 @@ Product.init({
 		defaultValue: true,
 		comment: 'Show the product in product list and search',
 	},
-	featured: {
-		type: Sequelize.BOOLEAN,
-		defaultValue: false,
-		allowNull: false,
-	},
 	order: {
 		type: Sequelize.INTEGER,
 		defaultValue: 0,
@@ -41,7 +36,6 @@ Product.init({
 	},
 	fromPrice: {
 		type: Sequelize.DECIMAL(10, 2),
-		defaultValue: 0,
 		set (val) {
 			if (typeof val == 'string')
 				this.setDataValue('fromPrice', parseFloat(val.replace(',', '.')));
