@@ -52,6 +52,7 @@ export const typeDefs =  gql`
 		file: Upload
 		type: String
 		price: Float
+		fromPrice: Float
 		active: Boolean
 		categoryId: ID
 		optionsGroups: [OptionsGroupInput]
@@ -115,7 +116,7 @@ export const resolvers =  {
 				if (!product) throw new Error('Produto não encontrado');
 
 				// update product
-				const productUpdated = await product.update(data, { fields: ['name', 'description', 'price', 'order', 'active', 'image', 'type', 'categoryId'], transaction });
+				const productUpdated = await product.update(data, { fields: ['name', 'description', 'price', 'fromPrice', 'order', 'active', 'image', 'type', 'categoryId'], transaction });
 
 				// create, update, remove options groups
 				if (data.optionsGroups) await OptionsGroup.updateAll(data.optionsGroups, productUpdated, transaction);
