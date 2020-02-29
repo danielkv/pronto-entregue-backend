@@ -445,7 +445,7 @@
 			"name": "Burguer Fit",
 			"description": "Hambúrguer de frango Copeiro 180g, Tomate Seco, Rúcula e Pão de Centeio Integral",
 			"image": "https://storage.googleapis.com/copeiro-hamburguer_flakery/hamburguer-de-siri-stunt-burger-1432825855665_1280x855-2fbfc5e0b3ed02d962e3ec0bf05d1ada.jpg",
-			"featured": true,
+			
 			"order": 0,
 			"type": "inline",
 			"createdAt": "2019-11-27T14:45:24.000Z",
@@ -460,7 +460,7 @@
 			"name": "Suco de laranja",
 			"description": "Suco natural de laranja",
 			"image": "https://storage.googleapis.com/copeiro-hamburguer_flakery/shutterstock_68566873-311c7352a93489a5d9ac357b29bbf77b.jpg",
-			"featured": true,
+			
 			"order": 0,
 			"type": "inline",
 			"createdAt": "2019-11-27T14:45:24.000Z",
@@ -475,7 +475,7 @@
 			"name": "Hambúrguer com Calabresa",
 			"description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In tincidunt augue a lectus ultricies, eget euismod ex blandit. Phasellus sollicitudin tempus varius.",
 			"image": "http://192.168.234.2:4000/uploads/copeiro-hamburge1r/5ac6194c6c058d82eaa26886605c121f-hamburguer-de-siri-stunt-burger-1432825855665_1280x855.jpg",
-			"featured": false,
+		
 			"order": 0,
 			"type": "inline",
 			"createdAt": "2019-11-27T14:45:24.000Z",
@@ -490,7 +490,7 @@
 			"name": "Pizza",
 			"description": "Pizza cheia de sabor",
 			"image": "https://storage.googleapis.com/copeiro-hamburguer_flakery/01-massa-pizza-d35ccb080bf59caaaefa73b67c3f217f.png",
-			"featured": false,
+		
 			"order": 0,
 			"type": "panel",
 			"createdAt": "2019-11-27T14:45:24.000Z",
@@ -505,7 +505,7 @@
 			"name": "Suco de laranja",
 			"description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In tincidunt augue a lectus ultricies, eget euismod ex blandit. Phasellus sollicitudin tempus varius.",
 			"image": "http://192.168.234.2:4000/uploads/copeiro-hamburge1r/5ac6194c6c058d82eaa26886605c121f-hamburguer-de-siri-stunt-burger-1432825855665_1280x855.jpg",
-			"featured": false,
+	
 			"order": 0,
 			"type": "inline",
 			"createdAt": "2019-11-27T14:45:24.000Z",
@@ -520,7 +520,7 @@
 			"name": "Pizza",
 			"description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In tincidunt augue a lectus ultricies, eget euismod ex blandit. Phasellus sollicitudin tempus varius.",
 			"image": "http://192.168.234.2:4000/uploads/copeiro-hamburge1r/0dfea2e56c3a2a1a331d5d56d4af528b-batata-frita-vagao-gourmet.jpg",
-			"featured": false,
+
 			"order": 0,
 			"type": "panel",
 			"createdAt": "2019-11-27T14:45:24.000Z",
@@ -535,7 +535,7 @@
 			"name": "Hambúrguer com Calabresa",
 			"description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In tincidunt augue a lectus ultricies, eget euismod ex blandit. Phasellus sollicitudin tempus varius.",
 			"image": "http://192.168.234.2:4000/uploads/copeiro-hamburge1r/5ac6194c6c058d82eaa26886605c121f-hamburguer-de-siri-stunt-burger-1432825855665_1280x855.jpg",
-			"featured": false,
+		
 			"order": 0,
 			"type": "inline",
 			"createdAt": "2019-11-27T14:45:24.000Z",
@@ -550,7 +550,7 @@
 			"name": "Suco de laranja",
 			"description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In tincidunt augue a lectus ultricies, eget euismod ex blandit. Phasellus sollicitudin tempus varius.",
 			"image": "http://192.168.234.2:4000/uploads/copeiro-hamburge1r/5ac6194c6c058d82eaa26886605c121f-hamburguer-de-siri-stunt-burger-1432825855665_1280x855.jpg",
-			"featured": false,
+	
 			"order": 0,
 			"type": "inline",
 			"createdAt": "2019-11-27T14:45:24.000Z",
@@ -565,7 +565,7 @@
 			"name": "Pizza",
 			"description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In tincidunt augue a lectus ultricies, eget euismod ex blandit. Phasellus sollicitudin tempus varius.",
 			"image": "http://192.168.234.2:4000/uploads/copeiro-hamburge1r/0dfea2e56c3a2a1a331d5d56d4af528b-batata-frita-vagao-gourmet.jpg",
-			"featured": false,
+
 			"order": 0,
 			"type": "panel",
 			"createdAt": "2019-11-27T14:45:24.000Z",
@@ -580,7 +580,7 @@
 			"name": "Burguer Costela Gaúcha",
 			"description": "2 Hambúrguer Costela 180g, Duplo Queijo Cheddar, Agrião e Pão copeiro",
 			"image": "https://storage.googleapis.com/copeiro-hamburguer_flakery/shutterstock_337714676-1527287683-3245-a51ff5964f357c6def27e2a59b6eba1a.jpg",
-			"featured": true,
+
 			"order": 0,
 			"type": "inline",
 			"createdAt": "2019-12-02T22:50:18.000Z",
