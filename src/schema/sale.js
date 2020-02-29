@@ -1,5 +1,7 @@
 import { gql }  from 'apollo-server';
 
+import Sale from '../model/sale';
+
 export const typeDefs =  gql`
 
 	type Sale {
@@ -21,11 +23,33 @@ export const typeDefs =  gql`
 
 		price: Float
 		active: Boolean
+
+		action: action
+	}
+	
+	enum action {
+		create
+		delete
+	}	
+
+	extend type Mutation {
+		removeSale(id: ID!): Sale!
 	}
 
 `;
 
 export const resolvers =  {
+	Mutation: {
+		async removeSale(_, { id }) {
+			// checks if sale exists
+			const sale = await Sale.findByPk(id)
+			if (!sale) throw new Error('Promoção não encontrada');
+
+			await sale.update({ removed: true });
+
+			return sale;
+		}
+	},
 	Sale: {
 		progress(parent) {
 			return parent.get('progress')

@@ -16,7 +16,13 @@ Sale.init({
 	expiresAt: Sequelize.DATE,
 	active: {
 		type: Sequelize.BOOLEAN,
-		defaultValue: 0,
+		allowNull: false,
+		defaultValue: false
+	},
+	removed: {
+		type: Sequelize.BOOLEAN,
+		allowNull: false,
+		defaultValue: false
 	},
 }, {
 	modelName: 'sale',

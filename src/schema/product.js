@@ -43,7 +43,7 @@ export const typeDefs =  gql`
 		countCampaigns(notIn: [ID]): Int!
 		campaigns(notIn: [ID]): [Campaign]!
 
-		sale(admAccess: Boolean): Sale
+		sale: Sale
 	}
 
 	input ProductInput {
@@ -55,6 +55,7 @@ export const typeDefs =  gql`
 		active: Boolean
 		categoryId: ID
 		optionsGroups: [OptionsGroupInput]
+		sale: SaleInput
 	}
 
 	extend type Query {
@@ -84,12 +85,10 @@ export const resolvers =  {
 				include: [Company]
 			});
 		},
-		async createProduct(_, { data }, { company }) {
-			if (data.file) {
-				data.image = await upload(company.name, await data.file);
-			}
-
+		createProduct(_, { data }, { company }) {
 			return conn.transaction(async (transaction) => {
+				if (data.file) data.image = await upload(company.name, await data.file);
+
 				// check if selected category exists
 				const category = await Category.findByPk(data.categoryId)
 				if (!category) throw new Error('Categoria não encontrada');
@@ -99,35 +98,30 @@ export const resolvers =  {
 
 				// create options groups
 				if (data.optionsGroups) await OptionsGroup.updateAll(data.optionsGroups, product, transaction);
+
+				// sales
+				if (data.sale) await product.createSale(data.sale, { transaction });
 					
 				return product;
 			})
 		},
-		async updateProduct(_, { id, data }, { company }) {
-			if (data.file) {
-				data.image = await upload(company.name, await data.file);
-			}
-
+		updateProduct(_, { id, data }, { company }) {
 			return conn.transaction(async (transaction) => {
+				// product image
+				if (data.file) data.image = await upload(company.name, await data.file);
+
 				// check if product exists
 				const product = await Product.findByPk(id);
 				if (!product) throw new Error('Produto não encontrado');
 
 				// update product
-				const productUpdated = await product.update(data, { fields: ['name', 'description', 'price', 'order', 'active', 'image', 'type'], transaction });
-					
-				// check if needs to update category
-				if (data.categoryId) {
-					// check if selected category exists
-					const category = await Category.findByPk(data.categoryId)
-					if (!category) throw new Error('Categoria não encontrada');
-
-					// update category
-					await productUpdated.setCategory(category, { transaction });
-				}
+				const productUpdated = await product.update(data, { fields: ['name', 'description', 'price', 'order', 'active', 'image', 'type', 'categoryId'], transaction });
 
 				// create, update, remove options groups
 				if (data.optionsGroups) await OptionsGroup.updateAll(data.optionsGroups, productUpdated, transaction);
+
+				// sales
+				if (data.sale) await productUpdated.createSale(data.sale, { transaction });
 			
 				return productUpdated;
 			})
@@ -235,23 +229,23 @@ export const resolvers =  {
 			})
 		},
 
-		async sale(parent, { admAccess=false }) {
-			const where = !admAccess
-				? {
-					startsAt: { [Op.lte]: fn('NOW') },
-					expiresAt: { [Op.gte]: fn('NOW') },
-					active: true
-				} : {}
+		async sale(parent) {
 			const [sale] = await parent.getSales({
 				attributes: {
 					include: [[literal('IF(startsAt <= NOW() AND expiresAt >= NOW() AND active, true, false)'), 'progress']]
 				},
-				where,
-				order: [['startsAt', 'ASC']],
+				where: {
+					[Op.or]: [{
+						expiresAt: { [Op.gte]: fn('NOW') },
+						startsAt: { [Op.lte]: fn('NOW') },
+					}, {
+						startsAt: { [Op.gt]: fn('NOW') },
+					}],
+					removed: false
+				},
+				order: [['startsAt', 'ASC'], ['createdAt', 'DESC']],
 				limit: 1
 			})
-
-			
 			
 			return sale;
 		}
