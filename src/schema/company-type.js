@@ -1,8 +1,11 @@
 import { gql }  from 'apollo-server';
 
 import { upload }  from '../controller/uploads';
+import Address from '../model/address';
+import Company from '../model/company';
 import CompanyType from '../model/companyType';
 import { sanitizeFilter, getSQLPagination } from '../utilities';
+import { whereCompanyDistance } from '../utilities/address';
 
 export const typeDefs =  gql`
 	type CompanyType {
@@ -30,6 +33,7 @@ export const typeDefs =  gql`
 		companyType(id: ID): CompanyType! @hasRole(permission: "master")
 		countCompanyTypes(filter: Filter): Int! @hasRole(permission: "master")
 		companyTypes(filter: Filter, pagination: Pagination): [CompanyType]! @hasRole(permission: "master")
+		sections(limit: Int, location: GeoPoint!): [CompanyType]! @hasRole(permission: "master")
 	}
 
 	extend type Mutation {
@@ -84,6 +88,23 @@ export const resolvers =  {
 			return CompanyType.findAll({
 				where,
 				...getSQLPagination(pagination),
+			})
+		},
+		// company types in the APP
+		sections(_, { limit = 8, location }) {
+			return CompanyType.findAll({
+				where: whereCompanyDistance(location, 'companies'),
+				include: [{
+					model: Company,
+					where: { active: true },
+					required: true,
+					include: [{
+						model: Address,
+						required: true,
+					}],
+				}],
+				subQuery: false,
+				limit
 			})
 		}
 	},

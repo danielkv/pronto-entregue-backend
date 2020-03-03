@@ -6,7 +6,6 @@ import Address from '../model/address';
 import Campaign from '../model/campaign';
 import Category from '../model/category';
 import Company from '../model/company';
-import DeliveryArea from '../model/deliveryArea';
 import Option  from '../model/option';
 import OptionsGroup  from '../model/OptionsGroup';
 import OrderProduct from '../model/orderProduct';
@@ -15,6 +14,7 @@ import Sale from '../model/sale';
 import User from '../model/user';
 import conn  from '../services/connection';
 import { getSQLPagination, sanitizeFilter } from '../utilities';
+import { whereCompanyDistance } from '../utilities/address';
 import { campaignProductWhere } from '../utilities/campaign';
 
 export const typeDefs =  gql`
@@ -65,7 +65,7 @@ export const typeDefs =  gql`
 	extend type Query {
 		product(id: ID!): Product! @isAuthenticated
 		bestSellers(limit: Int!): [Product]! @isAuthenticated
-		productsOnSale(limit: Int!): [Product]! @isAuthenticated
+		productsOnSale(limit: Int!, location: GeoPoint!): [Product]! @isAuthenticated
 	}
 
 	extend type Mutation {
@@ -168,26 +168,28 @@ export const resolvers =  {
 
 			return product;
 		},
-		async productsOnSale(_, { limit }, { address: { location = null } = {} }) {
-			if (!location) throw new Error('Endereço não encontrado');
-
-			const userPoint = fn('ST_GeomFromText', literal(`'POINT(${location[0]} ${location[1]})'`));
-
-			const products = await Product.findAll({
-				where: where(fn('ST_Distance_Sphere', userPoint, col('company.address.location')), '<', literal('(SELECT Max(distance) * 1000 FROM delivery_areas WHERE companyid = company.id)')),
+		productsOnSale(_, { limit, location }) {
+			return Product.findAll({
+				where: {
+					[Op.and]: [
+						whereCompanyDistance(location),
+						{ active: true }
+					]
+				},
 				include: [
 					{
 						model: Company,
+						where: { active: true },
 						include: [
 							{
 								model: Address,
-								//required: true,
+								required: true,
 							},
 						],
 					},
 					{
 						model: Sale,
-						//required: true,
+						required: true,
 						where: {
 							removed: false,
 							active: true,
@@ -196,12 +198,10 @@ export const resolvers =  {
 						}
 					}
 				],
-				limit: 5,
+				limit,
 				subQuery: false,
 				order: literal('RAND()')
 			});
-
-			return products;
 		},
 		
 		async bestSellers(_, { limit }) {

@@ -1,3 +1,5 @@
+import { where, fn, col, literal } from "sequelize";
+
 function parseAddressesComponents(results) {
 	if (!results.length) return [];
 
@@ -28,4 +30,11 @@ export function parseAddresses(results) {
 
 	// checks if all data is filled
 	return addresses;
+}
+
+export function whereCompanyDistance({ coordinates }, companyTableStr='company') {
+	if (!coordinates) throw new Error('Endereço não encontrado');
+	const userPoint = fn('ST_GeomFromText', literal(`'POINT(${coordinates[0]} ${coordinates[1]})'`));
+
+	return where(fn('ST_Distance_Sphere', userPoint, col(`${companyTableStr}.address.location`)), '<', literal(`(SELECT Max(distance) * 1000 FROM delivery_areas WHERE companyid = ${companyTableStr}.id)`))
 }
