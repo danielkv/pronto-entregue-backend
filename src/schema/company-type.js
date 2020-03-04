@@ -33,7 +33,7 @@ export const typeDefs =  gql`
 		companyType(id: ID): CompanyType! @hasRole(permission: "master")
 		countCompanyTypes(filter: Filter): Int! @hasRole(permission: "master")
 		companyTypes(filter: Filter, pagination: Pagination): [CompanyType]! @hasRole(permission: "master")
-		sections(limit: Int, location: GeoPoint!): [CompanyType]! @hasRole(permission: "master")
+		sections(limit: Int, location: GeoPoint!): [CompanyType]! @isAuthenticated
 	}
 
 	extend type Mutation {

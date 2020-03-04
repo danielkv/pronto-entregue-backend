@@ -4,12 +4,14 @@ import { Op, fn, col, where, literal } from 'sequelize';
 import Address from '../model/address';
 import Company  from '../model/company';
 import CompanyMeta  from '../model/companyMeta';
+import CompanyType from '../model/companyType';
 import OrderProduct from '../model/orderProduct';
 import Product from '../model/product';
 import Rating  from '../model/rating';
 import User from '../model/user';
 import conn  from '../services/connection';
 import { getSQLPagination, sanitizeFilter }  from '../utilities';
+import { whereCompanyDistance, getUserPoint } from '../utilities/address';
 import { defaultBusinessHours } from '../utilities/company';
 
 export const typeDefs =  gql`
@@ -53,9 +55,12 @@ export const typeDefs =  gql`
 
 		countRatings(filter:Filter): Int! @hasRole(permission: "adm")
 		ratings(filter:Filter, pagination: Pagination): [Rating]! @hasRole(permission: "adm")
+		rate: Float! @isAuthenticated
 
 		countCategories(filter: Filter): Int!
 		categories(filter: Filter, pagination: Pagination): [Category]!
+
+		distance(location: GeoPoint!): Float! #kilometers
 	}
 
 	type ProductBestSeller {
@@ -81,7 +86,10 @@ export const typeDefs =  gql`
 	}
 
 	extend type Mutation {
-		searchCompanies(search: String!, exclude: [ID]): [Company]!
+		# Search on APP
+		searchCompaniesOnApp(search: String!, location: GeoPoint!): [Company]! @isAuthenticated
+		# Search on ADM
+		searchCompanies(search: String!, exclude: [ID]): [Company]! @hasRole(permission: "companies_edit")
 		createCompany(data: CompanyInput!): Company! @hasRole(permission: "companies_edit")
 		updateCompany(id: ID!, data: CompanyInput!): Company! @hasRole(permission: "companies_edit")
 	}
@@ -93,6 +101,33 @@ export const typeDefs =  gql`
 
 export const resolvers =  {
 	Mutation: {
+		searchCompaniesOnApp(_, { search, location }) {
+			const where = sanitizeFilter({ search }, { search: ['name', 'displayName', '$companyType.name$'] });
+			
+			return Company.findAll({
+				attributes: {
+					include: [[fn('SUM', col('ratings.rate')), 'totalRate']]
+				},
+				where: {
+					[Op.and]: [
+						whereCompanyDistance(location, 'company', 'address.location'),
+						{ ...where,	active: true }
+					]
+				},
+				include: [
+					{
+						model: Address,
+						required: true,
+					},
+					Rating,
+					CompanyType
+				],
+				order: [[col('totalRate'), 'DESC'], [col('company.name'), 'ASC']],
+				group: 'company.id',
+				subQuery: false,
+				limit: 10
+			});
+		},
 		searchCompanies(_, { search, exclude = [] }) {
 			const where = sanitizeFilter({ search }, { search: ['name', 'displayName'] });
 
@@ -324,5 +359,21 @@ export const resolvers =  {
 				...getSQLPagination(pagination),
 			});
 		},
+		async rate(parent) {
+			const [rating] = await parent.getRatings({
+				attributes: [[fn('AVG', col('rate')), 'rateAvarage']]
+			})
+
+			return rating.get('rateAvarage');
+		},
+		async distance(parent, { location }) {
+			const userPoint = getUserPoint(location.coordinates)
+
+			const address = await parent.getAddress({
+				attributes: [[fn('ST_Distance_Sphere', userPoint, col('location')), 'distance']]
+			});
+			
+			return (address.get('distance') / 1000).toFixed(1);
+		}
 	}
 }

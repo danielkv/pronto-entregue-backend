@@ -1,5 +1,5 @@
 import { gql }  from 'apollo-server';
-import { Op, fn, literal, where, col } from 'sequelize';
+import { Op, fn, literal, col } from 'sequelize';
 
 import { upload }  from '../controller/uploads';
 import Address from '../model/address';
@@ -10,6 +10,7 @@ import Option  from '../model/option';
 import OptionsGroup  from '../model/OptionsGroup';
 import OrderProduct from '../model/orderProduct';
 import Product  from '../model/product';
+import Rating from '../model/rating';
 import Sale from '../model/sale';
 import User from '../model/user';
 import conn  from '../services/connection';
@@ -69,18 +70,53 @@ export const typeDefs =  gql`
 	}
 
 	extend type Mutation {
-		searchProducts(search: String, exclude: [ID], companies: [ID]): [Product]!
+		# search on APP
+		searchProductsOnApp(search: String!, location: GeoPoint!): [Product]! @isAuthenticated
 
-		createProduct(data: ProductInput!): Product! @hasRole(permission: "users_edit")
-		updateProduct(id: ID!, data: ProductInput!): Product! @hasRole(permission: "users_edit")
+		# search on ADM
+		searchProducts(search: String, exclude: [ID], companies: [ID]): [Product]! @hasRole(permission: "products_edit")
 
-		addFavoriteProduct(productId: ID!, userId: ID!): Product!
-		removeFavoriteProduct(productId: ID!, userId: ID!): Product!
+		createProduct(data: ProductInput!): Product! @hasRole(permission: "products_edit")
+		updateProduct(id: ID!, data: ProductInput!): Product! @hasRole(permission: "products_edit")
+
+		addFavoriteProduct(productId: ID!, userId: ID!): Product! @isAuthenticated
+		removeFavoriteProduct(productId: ID!, userId: ID!): Product! @isAuthenticated
 	}
 `;
 
 export const resolvers =  {
 	Mutation: {
+		searchProductsOnApp(_, { search, location }) {
+			const where = sanitizeFilter({ search }, { search: ['name', 'description'] });
+			
+			return Product.findAll({
+				attributes: {
+					include: [[fn('SUM', col('company.ratings.rate')), 'totalRate']]
+				},
+				where: {
+					[Op.and]: [
+						whereCompanyDistance(location, 'company'),
+						{ ...where,	active: true }
+					]
+				},
+				include: [{
+					model: Company,
+					where: { active: true },
+					required: true,
+					include: [
+						{
+							model: Address,
+							required: true,
+						},
+						Rating
+					],
+				}],
+				order: [[col('totalRate'), 'DESC'], [col('product.name'), 'ASC']],
+				group: 'product.id',
+				subQuery: false,
+				limit: 10,
+			});
+		},
 		searchProducts(_, { search, exclude = [], companies }) {
 			const where = sanitizeFilter({ search }, { search: ['name', 'description', '$company.name$', '$company.displayName$'] });
 			if (companies) where['$company.id$'] = companies;
@@ -236,6 +272,8 @@ export const resolvers =  {
 			return parent.getOptionsGroups({ where, order: [['order', 'ASC']] });
 		},
 		category(parent) {
+			if (parent.category) return parent.get('category');
+
 			return parent.getCategory();
 		},
 		countFavoritedBy(parent) {
@@ -247,6 +285,8 @@ export const resolvers =  {
 			});
 		},
 		company (parent) {
+			if (parent.company) return parent.get('company');
+
 			return parent.getCompany();
 		},
 		countCampaigns(parent, { notIn = {} }) {
