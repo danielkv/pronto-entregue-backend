@@ -1,4 +1,5 @@
 import { gql }  from 'apollo-server';
+import { Op } from 'sequelize';
 
 import { upload }  from '../controller/uploads';
 import Address from '../model/address';
@@ -18,7 +19,7 @@ export const typeDefs =  gql`
 		updatedAt: DateTime!
 
 		countCompanies: Int!
-		companies: [Company]!
+		companies(location: GeoPoint): [Company]!
 	}
 
 	input CompanyTypeInput {
@@ -30,9 +31,10 @@ export const typeDefs =  gql`
 	}
 
 	extend type Query {
-		companyType(id: ID): CompanyType! @hasRole(permission: "master")
+		companyType(id: ID): CompanyType! @isAuthenticated
 		countCompanyTypes(filter: Filter): Int! @hasRole(permission: "master")
 		companyTypes(filter: Filter, pagination: Pagination): [CompanyType]! @hasRole(permission: "master")
+		
 		sections(limit: Int, location: GeoPoint!): [CompanyType]! @isAuthenticated
 	}
 
@@ -109,8 +111,21 @@ export const resolvers =  {
 		}
 	},
 	CompanyType: {
-		companies(parent) {
-			return parent.getCompanies();
+		companies(parent, { location }) {
+			if (!location) return parent.getCompanies();
+
+			return parent.getCompanies({
+				where: {
+					[Op.and]: [
+						whereCompanyDistance(location, 'company', 'address.location'),
+						{ active: true }
+					],
+				},
+				include: [{
+					model: Address,
+					required: true,
+				}]
+			});
 		},
 		countCompanies(parent) {
 			return parent.countCompanies();

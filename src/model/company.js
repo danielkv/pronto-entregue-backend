@@ -10,6 +10,7 @@ class Company extends Sequelize.Model {}
 Company.init({
 	name: Sequelize.STRING,
 	displayName: Sequelize.STRING,
+	image: Sequelize.TEXT,
 	acceptTakeout: {
 		type: Sequelize.BOOLEAN,
 		allowNull: false,

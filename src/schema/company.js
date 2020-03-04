@@ -13,6 +13,7 @@ import conn  from '../services/connection';
 import { getSQLPagination, sanitizeFilter }  from '../utilities';
 import { whereCompanyDistance, getUserPoint } from '../utilities/address';
 import { defaultBusinessHours } from '../utilities/company';
+import { upload } from '../controller/uploads';
 
 export const typeDefs =  gql`
 
@@ -27,6 +28,7 @@ export const typeDefs =  gql`
 		lastMonthRevenue: Float!
 		userRelation: CompanyRelation!
 		acceptTakeout: Boolean!
+		image: String
 
 		rankPosition(radius: Int!): Int!
 
@@ -73,6 +75,7 @@ export const typeDefs =  gql`
 	input CompanyInput {
 		name: String
 		displayName: String
+		file: Upload
 		companyTypeId: ID
 		active: Boolean
 		metas: [MetaInput]
@@ -133,11 +136,15 @@ export const resolvers =  {
 
 			return Company.findAll({ where: { ...where, active: true, id: { [Op.notIn]: exclude } } });
 		},
-		createCompany(_, { data }) {
-			return Company.create(data, { include: [CompanyMeta, Address] })
+		async createCompany(_, { data }) {
+			if (data.file) data.image = await upload(data.name, await data.file);
+
+			return await Company.create(data, { include: [CompanyMeta, Address] })
 		},
 		updateCompany(_, { id, data }) {
 			return conn.transaction(async transaction => {
+				if (data.file) data.image = await upload(data.name, await data.file);
+
 				// check if company exists
 				const companyFound = await Company.findByPk(id)
 				if (!companyFound) throw new Error('Empresa não encontrada');
@@ -150,7 +157,7 @@ export const resolvers =  {
 					companyFound.createAddress(data.address);
 
 				// update company
-				const updatedCompany = await companyFound.update(data, { fields: ['name', 'displayName', 'active', 'companyTypeId'], transaction })
+				const updatedCompany = await companyFound.update(data, { fields: ['name', 'displayName', 'active', 'companyTypeId', 'image'], transaction })
 			
 				// check if there are metas to update
 				if (data.metas) await CompanyMeta.updateAll(data.metas, updatedCompany, transaction);
@@ -364,7 +371,7 @@ export const resolvers =  {
 				attributes: [[fn('AVG', col('rate')), 'rateAvarage']]
 			})
 
-			return rating.get('rateAvarage');
+			return rating.get('rateAvarage') || 0;
 		},
 		async distance(parent, { location }) {
 			const userPoint = getUserPoint(location.coordinates)
