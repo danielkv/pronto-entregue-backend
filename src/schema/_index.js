@@ -40,9 +40,16 @@ const typeDefs = gql`
 		status: String
 		createdAt: String
 		search: String
+
+		companyId: ID
 	}
 
 	input Pagination {
+		page: Int
+		rowsPerPage: Int!
+	}
+	
+	type PageInfo {
 		page: Int
 		rowsPerPage: Int!
 	}
@@ -61,6 +68,8 @@ const typeDefs = gql`
 	type Query {
 		countCompanies(filter: Filter): Int! @hasRole(permission: "master")
 		companies(filter: Filter, pagination: Pagination): [Company]! @hasRole(permission: "master")
+
+		pageInfo: PageInfo
 	}
 
 	type Mutation {
@@ -69,6 +78,15 @@ const typeDefs = gql`
 `
 
 const resolvers = {
+	Query: {
+		pageInfo(_, __, ___, info) {
+			try {
+				return info.variableValues.pagination;
+			} catch(err) {
+				return 0;
+			}
+		},
+	},
 	Mutation: {
 		
 	},

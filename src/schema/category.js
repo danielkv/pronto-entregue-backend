@@ -3,7 +3,7 @@ import { gql }  from 'apollo-server';
 import { upload }  from '../controller/uploads';
 import Category  from '../model/category';
 import sequelize  from '../services/connection';
-import { sanitizeFilter } from '../utilities'
+import { sanitizeFilter, getSQLPagination } from '../utilities'
 
 export const typeDefs =  gql`
 	type Category {
@@ -31,6 +31,7 @@ export const typeDefs =  gql`
 
 	extend type Query {
 		category(id: ID!): Category!
+		categories(filter: Filter, pagination: Pagination): [Category]!
 	}
 
 	extend type Mutation {
@@ -73,6 +74,14 @@ export const resolvers =  {
 		}
 	},
 	Query: {
+		categories(_, { filter, pagination }) {
+			const where = sanitizeFilter(filter, { search: ['name'] });
+
+			return Category.findAll({
+				where,
+				...getSQLPagination(pagination)
+			})
+		},
 		async category(_, { id }) {
 			// check if category exists
 			const category = await Category.findByPk(id);

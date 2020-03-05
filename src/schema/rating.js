@@ -30,12 +30,13 @@ export const typeDefs =  gql`
 	}
 
 	extend type Query {
-		ratings(filter: Filter, pagination: Pagination): [Rating]! @hasRole(permission: "master")
-		rating(id: ID!): Rating!
+		countRatings(filter: Filter): Int!
+		ratings(filter: Filter, pagination: Pagination): [Rating]! @isAuthenticated
+		rating(id: ID!): Rating! @hasRole(permission: "adm")
 	}
 
 	extend type Mutation {
-		createRating(data: RatingInput!): Rating!
+		createRating(data: RatingInput!): Rating! @isAuthenticated
 		updateRating(id: ID!, data: RatingInput!): Rating! @hasRole(permission: "adm")
 	}
 `;
@@ -76,7 +77,12 @@ export const resolvers = {
 
 				include: [User]
 			})
-		}
+		},
+		countRatings(_, { filter }) {
+			const where = sanitizeFilter(filter, { excludeFilters: ['active'], search: ['comment', '$user.firstName$', '$user.email$'] });
+
+			return Rating.count({ where, include: [User] });
+		},
 	},
 	Rating: {
 		company(parent) {
