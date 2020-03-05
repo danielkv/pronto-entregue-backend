@@ -43,7 +43,7 @@ const typeDefs = gql`
 	}
 
 	input Pagination {
-		page: Int!
+		page: Int
 		rowsPerPage: Int!
 	}
 

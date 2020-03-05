@@ -1,6 +1,6 @@
 import { gql }  from 'apollo-server';
 import jwt  from 'jsonwebtoken';
-import{ Op }  from 'sequelize';
+import { Op }  from 'sequelize';
 
 import balanceLoader from '../loaders/balanceLoader';
 import Company  from '../model/company';
@@ -26,6 +26,7 @@ export const typeDefs = gql`
 		active: Boolean!
 		createdAt: DateTime!
 		updatedAt: DateTime!
+		image: String!
 
 		metas (type: String): [Meta]!
 		addresses: [Address]!
@@ -245,6 +246,16 @@ export const resolvers = {
 		},
 	},
 	User: {
+		image() {
+			const images = [
+				'https://www.biography.com/.image/ar_8:10%2Cc_fill%2Ccs_srgb%2Cfl_progressive%2Cg_faces:center%2Cq_auto:good%2Cw_620/MTY4MzU0MDk2NjYxNjY5MzM3/tulso-gabbard-photo-by-justin-sullivangetty-images.jpg',
+				'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Pierre-Person.jpg/682px-Pierre-Person.jpg',
+				'https://www.westernunion.com/content/dam/wu/rmt/233107497_WU.com_LP_US_Hero_Bill_Pay_640x500_1.jpg',
+				'https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500'
+			]
+
+			return images[Math.round(Math.random()*3)]
+		},
 		addresses: (parent) => {
 			return parent.getAddresses();
 		},

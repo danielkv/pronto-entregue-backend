@@ -1,6 +1,7 @@
 import { gql }  from 'apollo-server';
 import { Op, fn, col, where, literal } from 'sequelize';
 
+import { upload } from '../controller/uploads';
 import Address from '../model/address';
 import Company  from '../model/company';
 import CompanyMeta  from '../model/companyMeta';
@@ -13,7 +14,6 @@ import conn  from '../services/connection';
 import { getSQLPagination, sanitizeFilter }  from '../utilities';
 import { whereCompanyDistance, getUserPoint } from '../utilities/address';
 import { defaultBusinessHours } from '../utilities/company';
-import { upload } from '../controller/uploads';
 
 export const typeDefs =  gql`
 
@@ -28,7 +28,10 @@ export const typeDefs =  gql`
 		lastMonthRevenue: Float!
 		userRelation: CompanyRelation!
 		acceptTakeout: Boolean!
+
+		# customization
 		image: String
+		backgroundColor: String!
 
 		rankPosition(radius: Int!): Int!
 
@@ -40,7 +43,6 @@ export const typeDefs =  gql`
 		users(filter: Filter, pagination: Pagination): [User]! @hasRole(permission: "users_read")
 
 		deliveryTime: Int! #minutes
-		customization: CompanyCustomization!
 
 		deliveryAreas: [DeliveryArea]!
 		paymentMethods: [PaymentMethod]!
@@ -55,8 +57,8 @@ export const typeDefs =  gql`
 		countProducts(filter:Filter): Int!
 		products(filter:Filter, pagination: Pagination): [Product]! @hasRole(permission: "products_read")
 
-		countRatings(filter:Filter): Int! @hasRole(permission: "adm")
-		ratings(filter:Filter, pagination: Pagination): [Rating]! @hasRole(permission: "adm")
+		countRatings(filter:Filter): Int! @isAuthenticated
+		ratings(filter:Filter, pagination: Pagination): [Rating]! @isAuthenticated
 		rate: Float! @isAuthenticated
 
 		countCategories(filter: Filter): Int!
@@ -227,15 +229,18 @@ export const resolvers =  {
 
 			return parseInt(meta.value);
 		},
-		async customization(parent) {
-			const metas = await parent.getMetas({ where: { key: ['color', 'background', 'logo'] } });
+		backgroundColor() {
+			return '#FF7C03';
+		},
+		/* async customization(parent) {
+			//const metas = await parent.getMetas({ where: { key: ['color', 'background', 'logo'] } });
 
 			return {
 				color: metas['color'] ? metas['color'].value : '',
 				background: metas['background'] ? metas['background'].value : '',
 				logo: metas['logo'] ? metas['logo'].value : '',
 			}
-		},
+		}, */
 
 		async bestSellers(_, { filter, pagination }) {
 			const _filter = sanitizeFilter(filter, { excludeFilters: ['active'], table: 'orderproduct' });
@@ -329,7 +334,7 @@ export const resolvers =  {
 
 			return parent.getRatings({
 				where: _filter,
-				order: [['createdAt', 'Desc']],
+				order: [['createdAt', 'DESC']],
 				...getSQLPagination(pagination),
 
 				include: [User]
@@ -363,6 +368,7 @@ export const resolvers =  {
 
 			return parent.getCategories({
 				where,
+				include: [Product],
 				...getSQLPagination(pagination),
 			});
 		},
