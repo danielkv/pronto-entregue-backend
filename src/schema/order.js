@@ -1,7 +1,10 @@
 import { gql, withFilter, PubSub }  from 'apollo-server';
+import { literal, fn, where } from 'sequelize';
 
+import Company from '../model/company';
 import OrderProduct  from '../model/orderProduct';
 import sequelize  from '../services/connection';
+import { pointFromCoordinates } from '../utilities/address';
 
 const pubsub = new PubSub();
 
@@ -31,6 +34,7 @@ export const typeDefs =  gql`
 		type: String
 		status: String
 		paymentMethodId: ID
+		companyId: ID!
 
 		paymentFee: Float
 		deliveryPrice: Float
@@ -78,8 +82,11 @@ export const typeDefs =  gql`
 	}
 
 	extend type Mutation {
-		createOrder(data: OrderInput!): Order!
-		updateOrder(id: ID!, data: OrderInput!): Order!
+		checkOrderAddress(order: OrderInput!): Boolean! @isAuthenticated
+		checkOrderProducts(order: OrderInput!): Boolean! @isAuthenticated
+
+		createOrder(data: OrderInput!): Order! @isAuthenticated
+		updateOrder(id: ID!, data: OrderInput!): Order! @hasRole(permission: "orders_edit")
 	}
 `;
 
@@ -135,7 +142,52 @@ export const resolvers =  {
 		}
 	},
 	Mutation: {
-		createOrder(_, { data }, { company }) {
+		async checkOrderAddress(_, { order: { address, companyId } }) {
+
+			// load
+			const company = await Company.findByPk(companyId);
+			const companyAddress = await company.getAddress();
+
+			// transform points
+			const companyPoint = pointFromCoordinates(companyAddress.location.coordinates);
+			const userPoint = pointFromCoordinates(address.location.coordinates);
+
+			// user addres && companies
+			const [deliveryArea] = await company.getDeliveryAreas({
+				order: [['distance', 'ASC']],
+				limit: 1,
+				where: where(fn('ST_Distance_Sphere', userPoint, companyPoint), '<', literal('distance * 1000')),
+			})
+
+			// case delivery area's not found
+			if (!deliveryArea) throw new Error(`${company.get('displayName')} não faz entrega em sua localização`);
+
+			return true;
+		},
+		async checkOrderProducts(_, { order: { products, companyId }  }) {
+			// load
+			const company = await Company.findByPk(companyId);
+
+			// check if order has products
+			if (!products.length) throw new Error('O pedido não tem nenhum produto');
+
+			// products
+			const productsFound = await company.getProducts({
+				where: {
+					id: products.map(prod => prod.productRelatedId),
+					active: true,
+				}
+			});
+
+			// Check if all prodtucts in order are active
+			if (productsFound.length !== products.length) throw new Error('Alguns produtos não foram encontrados no cardápio do estabelecimento')
+
+			// price ?
+			// coupons ?
+
+			return true;
+		},
+		createOrder(_, { data }) {
 			return sequelize.transaction(async (transaction) => {
 				// sanitize address
 				const address = {
@@ -151,6 +203,10 @@ export const resolvers =  {
 				}
 				delete data.address;
 				data = { ...data, ...address };
+				
+				// check if company exits
+				const company = await Company.findByPk(data.companyId);
+				if (!company) throw new Error('Estabelecimento não encontrado');
 
 				// create order
 				const order = await company.createOrder(data, { transaction });
@@ -164,8 +220,12 @@ export const resolvers =  {
 				return order;
 			});
 		},
-		updateOrder: (_, { id, data }, { company }) => {
+		updateOrder: (_, { id, data }) => {
 			return sequelize.transaction(async (transaction) => {
+				// check if company exits
+				const company = await Company.findByPk(data.companyId);
+				if (!company) throw new Error('Estabelecimento não encontrado');
+
 				// check if order exists
 				const [order] = await company.getOrders({ where: { id } });
 				if (!order) throw new Error('Pedido não encontrado');

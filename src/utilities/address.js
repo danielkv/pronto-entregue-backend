@@ -34,12 +34,12 @@ export function parseAddresses(results) {
 
 export function whereCompanyDistance({ coordinates }, companyTableStr='company', addressColumun) {
 	if (!coordinates) throw new Error('Endereço não encontrado');
-	const userPoint = getUserPoint(coordinates);
+	const userPoint = pointFromCoordinates(coordinates);
 	const addressColumunStr = addressColumun || `${companyTableStr}.address.location`;
 
 	return where(fn('ST_Distance_Sphere', userPoint, col(addressColumunStr)), '<', literal(`(SELECT Max(distance) * 1000 FROM delivery_areas WHERE companyid = ${companyTableStr}.id)`))
 }
 
-export function getUserPoint(coordinates) {
+export function pointFromCoordinates(coordinates) {
 	return fn('ST_GeomFromText', literal(`'POINT(${coordinates[0]} ${coordinates[1]})'`));
 }

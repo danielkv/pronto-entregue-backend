@@ -65,7 +65,7 @@ export const typeDefs =  gql`
 
 	extend type Query {
 		product(id: ID!): Product! @isAuthenticated
-		bestSellers(limit: Int!): [Product]! @isAuthenticated
+		bestSellers(limit: Int!, location: GeoPoint!): [Product]! @isAuthenticated
 		productsOnSale(limit: Int!, location: GeoPoint!): [Product]! @isAuthenticated
 	}
 
@@ -240,19 +240,24 @@ export const resolvers =  {
 			});
 		},
 		
-		async bestSellers(_, { limit }) {
+		async bestSellers(_, { limit, location }) {
 			const products = await Product.findAll({
-				include: [{
-					model: OrderProduct,
-					// required: true,
-				}],
+				include: [
+					OrderProduct,
+					{
+						model: Company,
+						required: true,
+						include: [{ model: Address, required: true }]
+					}
+				],
 				
 				order: [
 					[conn.fn('COUNT', conn.col('orderProduct.id')), 'DESC'],
 					[conn.col('product.name'), 'ASC']
 				],
 				group: ['product.id'],
-				where: {},
+				where: whereCompanyDistance(location, 'company'),
+				subQuery: false,
 				limit
 			});
 

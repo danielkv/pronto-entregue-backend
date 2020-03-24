@@ -8,8 +8,18 @@ import conn from '../services/connection';
 
 class PaymentMethod extends Sequelize.Model {}
 PaymentMethod.init({
-	name: Sequelize.STRING,
+	type: {
+		type: Sequelize.ENUM('money', 'delivery', 'app'),
+		allowNull: false,
+		defaultValue: 'delivery'
+	},
 	displayName: Sequelize.STRING,
+	image: Sequelize.TEXT,
+	active: {
+		type: Sequelize.BOOLEAN,
+		defaultValue: true,
+		allowNull: false
+	}
 }, {
 	modelName: 'paymentMethod',
 	tableName: 'payment_methods',

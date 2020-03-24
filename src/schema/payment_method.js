@@ -5,14 +5,15 @@ import PaymentMethod  from '../model/paymentMethod';
 export const typeDefs =  gql`
 	type PaymentMethod {
 		id: ID!
-		name: String!
+		image: String!
+		type: String!
 		displayName: String!
 		createdAt: DateTime!
 		updatedAt: DateTime!
 	}
 
 	extend type Query {
-		paymentMethods: [PaymentMethod]! @hasRole(permission: "payment_methods_read")
+		paymentMethods(type: String!): [PaymentMethod]! @hasRole(permission: "payment_methods_read")
 	}
 
 	extend type Mutation {
@@ -23,8 +24,8 @@ export const typeDefs =  gql`
 
 export const resolvers =  {
 	Query: {
-		paymentMethods: () => {
-			return PaymentMethod.findAll();
+		paymentMethods: (_, { type }) => {
+			return PaymentMethod.findAll({ where: { type } });
 		}
 	},
 	Mutation: {

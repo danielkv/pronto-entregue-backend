@@ -1,9 +1,9 @@
-import { gql }  from 'apollo-server';
+import { gql, ApolloError }  from 'apollo-server';
 import { fn, where, literal }  from 'sequelize';
 
 import Company from '../model/company';
 import conn from '../services/connection';
-import { DeliveryAreaError }  from '../utilities/errors';
+import { pointFromCoordinates } from '../utilities/address';
 
 export const typeDefs =  gql`
 	type DeliveryArea {
@@ -21,7 +21,7 @@ export const typeDefs =  gql`
 	}
 
 	extend type Mutation {
-		calculateDeliveryPrice(companyId: ID!, address: AddressInput!): DeliveryArea!
+		checkDeliveryLocation(companyId: ID!, address: AddressInput!): DeliveryArea!
 		modifyDeliveryAreas(data: [DeliveryAreaInput]!): [DeliveryArea]!
 		removeDeliveryArea(id: ID!): DeliveryArea!
 	}
@@ -29,28 +29,26 @@ export const typeDefs =  gql`
 
 export const resolvers =  {
 	Mutation: {
-		async calculateDeliveryPrice (_, { companyId, address }) {
-			if (!address.location) throw new Error('Localização não encontrada');
-			const { location } = address;
-
+		async checkDeliveryLocation (_, { companyId, address }) {
+			// load
 			const company = await Company.findByPk(companyId);
-			if (!company) throw new Error('Empresa não encontrada');
-
 			const companyAddress = await company.getAddress();
-			if (!companyAddress || !companyAddress.location) throw new Error('Localização da empresa não encontrada');
 
-			const companyPoint = fn('ST_GeomFromText', literal(`'POINT(${companyAddress.location.coordinates[0]} ${companyAddress.location.coordinates[1]})'`));
-			const userPoint = fn('ST_GeomFromText', literal(`'POINT(${location.coordinates[0]} ${location.coordinates[1]})'`));
+			// transform points
+			const companyPoint = pointFromCoordinates(companyAddress.location.coordinates);
+			const userPoint = pointFromCoordinates(address.location.coordinates);
 
+			// user addres && companies
 			const [deliveryArea] = await company.getDeliveryAreas({
 				order: [['distance', 'ASC']],
 				limit: 1,
 				where: where(fn('ST_Distance_Sphere', userPoint, companyPoint), '<', literal('distance * 1000')),
 			})
-					
-			// check if delivery area exists
-			if (!deliveryArea) throw new DeliveryAreaError('Não há entregas para esse local');
-		
+
+			// case delivery area's not found
+			if (!deliveryArea) throw new ApolloError(`${company.displayName} não faz entregas para esse endereço`, 'DELIVERY_LOCATION');
+
+			//return delivery area
 			return deliveryArea;
 		},
 		modifyDeliveryAreas: (_, { data }, { company }) => {
