@@ -2,6 +2,6 @@ import { Storage }  from '@google-cloud/storage';
 import path  from 'path';
 
 export const storage = new Storage({
-	keyFilename: path.join(__dirname, '../', '../', 'flakery-6c5b2b2fe628.json'),
-	projectId: 'flakery',
+	keyFilename: path.join(__dirname, '../', '../', process.env.GCP_KEY_FILE),
+	projectId: process.env.GCP_PROJECT,
 });
