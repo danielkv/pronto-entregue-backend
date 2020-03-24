@@ -1,4 +1,4 @@
-[
+export default [
 	{
 		"displayName": "American Express",
 		"type": "delivery",

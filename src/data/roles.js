@@ -1,4 +1,4 @@
-[
+export default [
 	{
 		"name": "manager",
 		"displayName": "Administrador",

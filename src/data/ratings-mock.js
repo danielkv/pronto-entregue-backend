@@ -1,4 +1,4 @@
-[{
+export default [{
 	"rate": 5,
 	"comment": "Praesent blandit. Nam nulla. Integer pede justo, lacinia eget, tincidunt eget, tempus vel, pede.",
 	"companyId": 1,

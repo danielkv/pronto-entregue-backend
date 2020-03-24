@@ -4,11 +4,10 @@ import Role  from '../model/role';
 import conn from '../services/connection';
 import { importDB } from './helper';
 
-import companyTypes from '../data/companyTypes.json';
-import dummyData from '../data/dummy.json';
-import paymentMethods from '../data/paymentMethods.json'
-import role from '../data/roles.json';
-
+import companyTypes from '../data/companyTypes';
+import dummyData from '../data/dummy';
+import paymentMethods from '../data/paymentMethods'
+import role from '../data/roles';
 
 export async function setupDefaultData () {
 	let response = '';
