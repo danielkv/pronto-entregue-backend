@@ -1,7 +1,7 @@
 import { gql }  from 'apollo-server';
 import { Op } from 'sequelize';
 
-import OptionsGroup  from '../model/OptionsGroup';
+import OptionsGroup  from '../model/optionsGroup';
 import Products  from '../model/product';
 
 

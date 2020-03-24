@@ -7,7 +7,7 @@ import Campaign from '../model/campaign';
 import Category from '../model/category';
 import Company from '../model/company';
 import Option  from '../model/option';
-import OptionsGroup  from '../model/OptionsGroup';
+import OptionsGroup  from '../model/optionsGroup';
 import OrderProduct from '../model/orderProduct';
 import Product  from '../model/product';
 import Rating from '../model/rating';

@@ -7,7 +7,7 @@ import CompanyPaymentMethod from '../model/companyPaymentMethod';
 import CompanyUser from '../model/companyUser';
 import DeliveryArea from '../model/deliveryArea';
 import Option from '../model/option';
-import OptionsGroup from '../model/OptionsGroup';
+import OptionsGroup from '../model/optionsGroup';
 import Order from '../model/order';
 import OrderOptions from '../model/orderOptions';
 import OrderOptionsGroup from '../model/orderOptionsGroup';

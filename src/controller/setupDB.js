@@ -2,7 +2,7 @@ import CompanyType from '../model/companyType';
 import PaymentMethod  from '../model/paymentMethod';
 import Role  from '../model/role';
 import conn from '../services/connection';
-import { importDB } from './helper.js';
+import { importDB } from './helper';
 
 import companyTypes from '../data/companyTypes.json';
 import dummyData from '../data/dummy.json';

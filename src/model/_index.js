@@ -16,7 +16,7 @@ import CreditBalance from './creditBalance';
 import CreditHistory from './creditHistory';
 import DeliveryArea from './deliveryArea';
 import Options from './option';
-import OptionsGroup from './OptionsGroup';
+import OptionsGroup from './optionsGroup';
 import Order from './order';
 import OrderOptions from './orderOptions';
 import orderOptionsGroup  from './orderOptionsGroup';
