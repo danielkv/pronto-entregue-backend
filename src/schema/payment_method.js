@@ -7,6 +7,7 @@ export const typeDefs =  gql`
 		id: ID!
 		image: String!
 		type: String!
+		active: Boolean!
 		displayName: String!
 		createdAt: DateTime!
 		updatedAt: DateTime!

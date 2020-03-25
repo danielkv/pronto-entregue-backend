@@ -313,7 +313,7 @@ export const resolvers =  {
 		},
 
 		paymentMethods(parent) {
-			return parent.getPaymentMethods();
+			return parent.getPaymentMethods({ where: { active: true } });
 		},
 		deliveryAreas(parent) {
 			return parent.getDeliveryAreas();
