@@ -1,11 +1,14 @@
 import { gql }  from 'apollo-server';
 
 import PaymentMethod  from '../model/paymentMethod';
+import { sanitizeFilter } from '../utilities';
 
 export const typeDefs =  gql`
 	type PaymentMethod {
 		id: ID!
 		image: String!
+		fee: Float!
+		feeType: String!
 		type: String!
 		active: Boolean!
 		displayName: String!
@@ -14,7 +17,7 @@ export const typeDefs =  gql`
 	}
 
 	extend type Query {
-		paymentMethods(type: String!): [PaymentMethod]! @hasRole(permission: "payment_methods_read")
+		paymentMethods(filter: Filter): [PaymentMethod]! @hasRole(permission: "payment_methods_read")
 	}
 
 	extend type Mutation {
@@ -25,8 +28,10 @@ export const typeDefs =  gql`
 
 export const resolvers =  {
 	Query: {
-		paymentMethods: (_, { type }) => {
-			return PaymentMethod.findAll({ where: { type } });
+		paymentMethods: (_, { filter }) => {
+			const where = sanitizeFilter(filter);
+
+			return PaymentMethod.findAll({ where });
 		}
 	},
 	Mutation: {

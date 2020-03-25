@@ -45,7 +45,7 @@ export const typeDefs =  gql`
 		deliveryTime: Int! #minutes
 
 		deliveryAreas: [DeliveryArea]!
-		paymentMethods: [PaymentMethod]!
+		paymentMethods(filter: Filter): [PaymentMethod]!
 
 		bestSellers(filter:Filter, pagination: Pagination): [ProductBestSeller]!
 
@@ -312,8 +312,13 @@ export const resolvers =  {
 			return parent.getCompanyType();
 		},
 
-		paymentMethods(parent) {
-			return parent.getPaymentMethods({ where: { active: true } });
+		paymentMethods(parent, { filter }) {
+			const where = sanitizeFilter(filter);
+
+			return parent.getPaymentMethods({
+				where,
+				order: [['order', 'ASC'], ['displayName', 'ASC']]
+			});
 		},
 		deliveryAreas(parent) {
 			return parent.getDeliveryAreas();

@@ -40,6 +40,7 @@ const typeDefs = gql`
 		status: String
 		createdAt: String
 		search: String
+		type: String
 
 		companyId: ID
 	}

@@ -15,6 +15,21 @@ PaymentMethod.init({
 	},
 	displayName: Sequelize.STRING,
 	image: Sequelize.TEXT,
+	order: {
+		type: Sequelize.INTEGER(2),
+		defaultValue: 0,
+		allowNull: false
+	},
+	fee: {
+		type: Sequelize.DECIMAL(10, 2),
+		allowNull: false,
+		defaultValue: 0
+	},
+	feeType: {
+		type: Sequelize.ENUM('value', 'pct'),
+		allowNull: false,
+		defaultValue: 'pct'
+	},
 	active: {
 		type: Sequelize.BOOLEAN,
 		defaultValue: true,
