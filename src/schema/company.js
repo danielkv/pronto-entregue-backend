@@ -12,7 +12,7 @@ import Rating  from '../model/rating';
 import User from '../model/user';
 import conn  from '../services/connection';
 import { getSQLPagination, sanitizeFilter }  from '../utilities';
-import { whereCompanyDistance, getUserPoint } from '../utilities/address';
+import { whereCompanyDistance, pointFromCoordinates } from '../utilities/address';
 import { defaultBusinessHours } from '../utilities/company';
 
 export const typeDefs =  gql`
@@ -385,7 +385,7 @@ export const resolvers =  {
 			return rating.get('rateAvarage') || 0;
 		},
 		async distance(parent, { location }) {
-			const userPoint = getUserPoint(location.coordinates)
+			const userPoint = pointFromCoordinates(location.coordinates);
 
 			const address = await parent.getAddress({
 				attributes: [[fn('ST_Distance_Sphere', userPoint, col('location')), 'distance']]
