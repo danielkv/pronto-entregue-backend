@@ -135,7 +135,7 @@ export const resolvers =  {
 				if (!category) throw new Error('Categoria não encontrada');
 
 				// create product
-				const product = await category.createProduct(data, { transaction });
+				const product = await category.createProduct({ ...data, companyId: company.get('id') }, { transaction });
 
 				// create options groups
 				if (data.optionsGroups) await OptionsGroup.updateAll(data.optionsGroups, product, transaction);
