@@ -34,6 +34,7 @@ class User extends Sequelize.Model {
 User.init({
 	firstName: Sequelize.STRING,
 	lastName: Sequelize.STRING,
+	image: Sequelize.TEXT,
 	email: {
 		type: Sequelize.STRING,
 		unique: true,

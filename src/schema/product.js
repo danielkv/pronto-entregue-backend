@@ -177,7 +177,7 @@ export const resolvers =  {
 			if (!user) throw new Error('Usuário não encontrado');
 
 			//add favorite product
-			user.addFavoriteProduct(product);
+			await user.addFavoriteProduct(product);
 
 			return product;
 		},
@@ -190,8 +190,8 @@ export const resolvers =  {
 			const user = await User.findByPk(userId);
 			if (!user) throw new Error('Usuário não encontrado');
 
-			//add favorite product
-			user.removeFavoriteProduct(product);
+			//remove favorite product
+			await user.removeFavoriteProduct(product);
 
 			return product;
 		},

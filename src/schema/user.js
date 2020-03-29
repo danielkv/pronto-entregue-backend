@@ -2,6 +2,7 @@ import { gql }  from 'apollo-server';
 import jwt  from 'jsonwebtoken';
 import { Op }  from 'sequelize';
 
+import { upload } from '../controller/uploads';
 import balanceLoader from '../loaders/balanceLoader';
 import Company  from '../model/company';
 import User  from '../model/user';
@@ -21,17 +22,18 @@ export const typeDefs = gql`
 		fullName: String!
 		firstName: String!
 		lastName: String!
+		image: String
 		email: String!
 		role: String!
 		active: Boolean!
 		createdAt: DateTime!
 		updatedAt: DateTime!
-		image: String!
 
 		metas (type: String): [Meta]!
 		addresses: [Address]!
 		
-		orders: [Order]!
+		countOrders: Int!
+		orders(pagination: Pagination): [Order]!
 		company(companyId: ID!): Company
 
 		countCompanies(filter: Filter): Int!
@@ -70,6 +72,7 @@ export const typeDefs = gql`
 		
 		createUser (data: UserInput!): User!
 		updateUser (id: ID!, data: UserInput!): User! @hasRole(permission: "master", checkSameUser: true)
+		updateUserImage(userId: ID!, image: Upload!): User!
 
 		removeUserAddress (id: ID!): Address! @isAuthenticated
 		updateUserAddress (id: ID!, data: AddressInput!): Address! @isAuthenticated
@@ -199,6 +202,18 @@ export const resolvers = {
 				return updatedUser;
 			})
 		},
+		async updateUserImage(_, { userId, image }) {
+			//check if user exists
+			const user = await User.findByPk(userId);
+			if (!user) throw new Error('Usuário não encontrado');
+			
+			// upload file
+			const imageUrl = await upload('user-profiles', await image);
+
+			// update user data on DB
+			return await user.update({ image: imageUrl })
+
+		},
 		/*
 		* Autoriza usuário retornando o token com dados,
 		* caso autenticação falhe, 'arremessa' um erro
@@ -246,16 +261,6 @@ export const resolvers = {
 		},
 	},
 	User: {
-		image() {
-			const images = [
-				'https://www.biography.com/.image/ar_8:10%2Cc_fill%2Ccs_srgb%2Cfl_progressive%2Cg_faces:center%2Cq_auto:good%2Cw_620/MTY4MzU0MDk2NjYxNjY5MzM3/tulso-gabbard-photo-by-justin-sullivangetty-images.jpg',
-				'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Pierre-Person.jpg/682px-Pierre-Person.jpg',
-				'https://www.westernunion.com/content/dam/wu/rmt/233107497_WU.com_LP_US_Hero_Bill_Pay_640x500_1.jpg',
-				'https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500'
-			]
-
-			return images[Math.round(Math.random()*3)]
-		},
 		addresses: (parent) => {
 			return parent.getAddresses();
 		},
@@ -310,8 +315,14 @@ export const resolvers = {
 
 			return _company;
 		},
-		orders: (parent) => {
-			return parent.getOrders();
+		countOrders: (parent) => {
+			return parent.countOrders();
+		},
+		orders: (parent, { pagination }) => {
+			return parent.getOrders({
+				...getSQLPagination(pagination),
+				order: [['createdAt', 'DESC']],
+			});
 		},
 		favoriteProducts(parent, { pagination }) {
 			return parent.getFavoriteProducts({

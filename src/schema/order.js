@@ -2,6 +2,7 @@ import { gql, withFilter, PubSub }  from 'apollo-server';
 import { literal, fn, where } from 'sequelize';
 
 import Company from '../model/company';
+import Order from '../model/order';
 import OrderProduct  from '../model/orderProduct';
 import sequelize  from '../services/connection';
 import { pointFromCoordinates } from '../utilities/address';
@@ -23,6 +24,7 @@ export const typeDefs =  gql`
 		updatedAt: DateTime!
 		paymentMethod: PaymentMethod!
 		
+		company: Company!
 		address: Address!
 
 		countProducts: Int!
@@ -34,7 +36,7 @@ export const typeDefs =  gql`
 		type: String
 		status: String
 		paymentMethodId: ID
-		companyId: ID!
+		companyId: ID
 
 		paymentFee: Float
 		deliveryPrice: Float
@@ -111,8 +113,7 @@ export const resolvers =  {
 			return parent.getProducts();
 		},
 		countProducts: (parent) => {
-			return parent.getProducts()
-				.then(products=>products.length);
+			return parent.countProducts();
 		},
 		paymentMethod: (parent) => {
 			return parent.getPaymentMethod();
@@ -130,12 +131,15 @@ export const resolvers =  {
 				state: parent.get('stateAddress'),
 				location: parent.get('locationAddress'),
 			}
+		},
+		company(parent) {
+			return parent.getCompany();
 		}
 	},
 	Query: {
-		order: (_, { id }, { company }) => {
-			return company.getOrders({ where: { id } })
-				.then(([order])=>{
+		order: (_, { id }) => {
+			return Order.findByPk(id)
+				.then((order)=>{
 					if (!order) throw new Error('Pedido não encontrado');
 					return order;
 				})
@@ -222,12 +226,8 @@ export const resolvers =  {
 		},
 		updateOrder: (_, { id, data }) => {
 			return sequelize.transaction(async (transaction) => {
-				// check if company exits
-				const company = await Company.findByPk(data.companyId);
-				if (!company) throw new Error('Estabelecimento não encontrado');
-
 				// check if order exists
-				const [order] = await company.getOrders({ where: { id } });
+				const order = await Order.findByPk(id);
 				if (!order) throw new Error('Pedido não encontrado');
 
 				// sanitize address
