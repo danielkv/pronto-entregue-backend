@@ -100,12 +100,12 @@ export function salt(password, salt=null) {
 export function slugify(text) {
 	let newText = text.trim().toLowerCase();
 
-	newText = newText.replace(new RegExp('[ÁÀÂÃ][áàâã]','gi'), 'a');
-	newText = newText.replace(new RegExp('[ÉÈÊ][éèê]','gi'), 'e');
-	newText = newText.replace(new RegExp('[ÍÌÎ][íìî]','gi'), 'i');
-	newText = newText.replace(new RegExp('[ÓÒÔÕ][óòôõ]','gi'), 'o');
-	newText = newText.replace(new RegExp('[ÚÙÛ][úùû]','gi'), 'u');
-	newText = newText.replace(new RegExp('[Ç][ç]','gi'), 'c');
+	newText = newText.replace(new RegExp('[ÁÀÂÃ]|[áàâã]','gi'), 'a');
+	newText = newText.replace(new RegExp('[ÉÈÊ]|[éèê]','gi'), 'e');
+	newText = newText.replace(new RegExp('[ÍÌÎ]|[íìî]','gi'), 'i');
+	newText = newText.replace(new RegExp('[ÓÒÔÕ]|[óòôõ]','gi'), 'o');
+	newText = newText.replace(new RegExp('[ÚÙÛ]|[úùû]','gi'), 'u');
+	newText = newText.replace(new RegExp('[Çç]','gi'), 'c');
 	// eslint-disable-next-line no-useless-escape
 	newText = newText.replace(new RegExp('[\(\)]', 'g'), '');
 	

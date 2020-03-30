@@ -16,7 +16,6 @@ import { whereCompanyDistance, pointFromCoordinates } from '../utilities/address
 import { defaultBusinessHours } from '../utilities/company';
 
 export const typeDefs =  gql`
-
 	type Company {
 		id: ID!
 		name: String!
