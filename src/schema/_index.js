@@ -25,6 +25,7 @@ import { typeDefs as Product, resolvers as productResolvers }  from './product';
 import { typeDefs as Rating, resolvers as ratingResolvers }  from './rating';
 import { typeDefs as Role, resolvers as roleResolvers }  from './role';
 import { typeDefs as Sale, resolvers as saleResolvers }  from './sale';
+import { typeDefs as GoogleSocialLogin, resolvers as googleResolvers }  from './social_login';
 import { typeDefs as User, resolvers as userResolvers }  from './user';
 
 const typeDefs = gql`
@@ -95,7 +96,7 @@ const resolvers = {
 }
 
 export default makeExecutableSchema({
-	typeDefs: [typeDefs, Address, Sale, CreditHistory, CompanyType, BusinessHour, Rating, Emails, Campaign, Category, Company, Option, OptionsGroup, OrderOptions, OrderOptionsGroup, OrderProduct, Order, PaymentMethod, Product, Role, DeliveryArea, User, Phone, Meta],
-	resolvers: merge(resolvers, saleResolvers, addressResolvers, creditHistoryResolvers ,companyTypeResolvers, businessHourResolvers, ratingResolvers, emailsResolvers, campaignResolvers, categoryResolvers, companyResolvers, optionResolvers, optionsGroupResolvers, orderOptionResolvers, orderOptionsGroupResolvers, orderProductResolvers, orderResolvers, paymentMethodResolvers, productResolvers, roleResolvers, deliveryAreaResolvers, userResolvers, phoneResolvers, metaResolvers),
+	typeDefs: [typeDefs, Address, Sale, CreditHistory, CompanyType, BusinessHour, Rating, Emails, Campaign, Category, Company, Option, OptionsGroup, OrderOptions, OrderOptionsGroup, OrderProduct, Order, PaymentMethod, Product, Role, DeliveryArea, User, Phone, Meta, GoogleSocialLogin],
+	resolvers: merge(resolvers, saleResolvers, addressResolvers, creditHistoryResolvers ,companyTypeResolvers, businessHourResolvers, ratingResolvers, emailsResolvers, campaignResolvers, categoryResolvers, companyResolvers, optionResolvers, optionsGroupResolvers, orderOptionResolvers, orderOptionsGroupResolvers, orderProductResolvers, orderResolvers, paymentMethodResolvers, productResolvers, roleResolvers, deliveryAreaResolvers, userResolvers, phoneResolvers, metaResolvers, googleResolvers),
 	directiveResolvers: directives,
 })

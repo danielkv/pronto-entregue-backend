@@ -7,14 +7,14 @@ import Role from "../model/role";
  * @param {User} user model User
  */
 
-export function userCanSetRole(role, user) {
+export function userCanSetRole(role = 'customer', user) {
 	if (role !== 'customer') {
 		if (role === 'master' && !user.can('master')) throw new Error(`Você não tem premissões para cadastrar um usuário com permissão ${role}`);
 		if (!user.can('adm')) throw new Error(`Você não tem premissões para cadastrar um usuário com permissão ${role}`);
 	}
 }
 
-export async function extractRole(role) {
+export async function extractRole(role='customer') {
 	if (role === 'master' || role === 'customer') return { roleName: role, role: null };
 
 	const roleModel = await Role.findByPk(parseInt(role));

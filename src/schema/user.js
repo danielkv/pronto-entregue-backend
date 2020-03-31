@@ -138,7 +138,7 @@ export const resolvers = {
 				include: [Company]
 			});
 		},
-		createUser: async (_, { data }, { user, company }) => {
+		createUser(_, { data }, { user, company }) {
 			// if user cannot set role throw an error
 			userCanSetRole(data.role, user);
 
@@ -146,6 +146,8 @@ export const resolvers = {
 				// check if email exists in database
 				const userExists = await User.findOne({ where: { email: data.email } });
 				if (userExists) throw new Error('Esse email já está cadastrado');
+
+				//if (!data.role) data.role = 'customer';
 
 				// extract Role
 				const { roleName, role } = await extractRole(data.role);
@@ -214,12 +216,13 @@ export const resolvers = {
 			return await user.update({ image: imageUrl })
 
 		},
+
 		/*
 		* Autoriza usuário retornando o token com dados,
 		* caso autenticação falhe, 'arremessa' um erro
 		* 
 		*/
-		login: (_, { email, password }) => {
+		login(_, { email, password }) {
 			return User.findOne({
 				where: { email },
 			})
@@ -237,12 +240,9 @@ export const resolvers = {
 						email: userFound.email,
 					}, process.env.SECRET);
 					
-					//Retira campos para retornar usuário
-					const authorized = userFound.get();
-			
 					return {
 						token,
-						user: authorized,
+						user: userFound,
 					};
 				});
 		},
@@ -261,7 +261,7 @@ export const resolvers = {
 		},
 	},
 	User: {
-		addresses: (parent) => {
+		addresses(parent) {
 			return parent.getAddresses();
 		},
 		fullName: (parent) => {
