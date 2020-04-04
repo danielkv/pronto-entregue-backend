@@ -120,7 +120,7 @@ export const resolvers =  {
 			});
 		},
 		searchProducts(_, { search, exclude = [], companies }) {
-			const where = sanitizeFilter({ search }, { search: ['name', 'description', '$company.name$', '$company.displayName$'] });
+			const where = sanitizeFilter({ search }, { search: ['name', 'description', 'sku', '$company.name$', '$company.displayName$'] });
 			if (companies) where['$company.id$'] = companies;
 
 			return Product.findAll({
