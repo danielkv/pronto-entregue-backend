@@ -65,7 +65,7 @@ OptionsGroup.init({
 	},
 	priceType: {
 		type: Sequelize.ENUM('higher', 'sum'),
-		defaultValue: 'higher',
+		defaultValue: 'sum',
 		allowNull: false
 	},
 	order: {
