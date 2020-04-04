@@ -10,6 +10,7 @@ class Product extends Sequelize.Model {}
 Product.init({
 	name: Sequelize.STRING,
 	description: Sequelize.STRING,
+	sku: Sequelize.STRING(100),
 	image: Sequelize.TEXT,
 	active: {
 		type: Sequelize.BOOLEAN,
