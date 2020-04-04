@@ -12,6 +12,7 @@ export const typeDefs =  gql`
 		id: ID!
 		name: String!
 		type: String!
+		priceType: String!
 		order: Int!
 		minSelect: Int!
 		maxSelect: Int!
@@ -32,6 +33,7 @@ export const typeDefs =  gql`
 		action: String! #create | update | delete
 		name: String
 		type: String
+		priceType: String
 		order: Int
 		minSelect: Int
 		maxSelect: Int

@@ -8,8 +8,12 @@ import Option  from './option';
  */
 
 class OptionsGroup extends Sequelize.Model {
-	static updateAll (groups, product, transaction=null) {
-		return Promise.all(
+	static async updateAll (groups, product, transaction=null) {
+		const restrictingGroups = groups.filter((g) => g.maxSelectRestrain);
+		const groupsRestrictionsRel = [];
+
+		//create groups
+		const result = await Promise.all(
 			groups.map((group) => {
 				let groupModel;
 				// eslint-disable-next-line no-async-promise-executor
@@ -21,10 +25,11 @@ class OptionsGroup extends Sequelize.Model {
 							groupModel = await product.removeOptionsGroup(groupModel, { transaction });
 							return resolve(groupModel);
 						} else if (group.action === 'create') {
-							groupModel = await product.createOptionsGroup(group, { transaction });
+							groupModel = await product.createOptionsGroup(group, { transaction, fields: ['name', 'active', 'type', 'minSelect', 'maxSelect', 'order', 'priceType'] });
+							groupsRestrictionsRel.push({ tempId: group.id, id: groupModel.get('id'), model: groupModel });
 						} else if (group.id && group.action === 'update') {
 							[groupModel] = await product.getOptionsGroups({ where: { id: group.id } });
-							groupModel = await groupModel.update(group, { fields: ['name', 'active', 'type', 'minSelect', 'maxSelect', 'order', 'maxSelectRestrain'], transaction });
+							groupModel = await groupModel.update(group, { fields: ['name', 'active', 'type', 'minSelect', 'maxSelect', 'order', 'maxSelectRestrain', 'priceType'], transaction });
 						}
 						
 						if (groupModel) {
@@ -39,6 +44,15 @@ class OptionsGroup extends Sequelize.Model {
 				});
 			})
 		);
+
+		await Promise.all(restrictingGroups.map((group) => {
+			const restrainingGroup = groupsRestrictionsRel.find(g => g.tempId === group.id).model;
+			const restrainedGroupId = groupsRestrictionsRel.find(g => g.tempId === group.maxSelectRestrain).id;
+
+			return restrainingGroup.update({ maxSelectRestrain: restrainedGroupId }, { transaction });
+		}));
+
+		return result;
 	}
 }
 
@@ -47,6 +61,11 @@ OptionsGroup.init({
 	type: {
 		type: Sequelize.ENUM('single', 'multi'),
 		defaultValue: 'single',
+		allowNull: false
+	},
+	priceType: {
+		type: Sequelize.ENUM('higher', 'sum'),
+		defaultValue: 'higher',
 		allowNull: false
 	},
 	order: {
