@@ -26,10 +26,13 @@ class OptionsGroup extends Sequelize.Model {
 							return resolve(groupModel);
 						} else if (group.action === 'create') {
 							groupModel = await product.createOptionsGroup(group, { transaction, fields: ['name', 'active', 'type', 'minSelect', 'maxSelect', 'order', 'priceType'] });
+
 							groupsRestrictionsRel.push({ tempId: group.id, id: groupModel.get('id'), model: groupModel });
 						} else if (group.id && group.action === 'update') {
 							[groupModel] = await product.getOptionsGroups({ where: { id: group.id } });
 							groupModel = await groupModel.update(group, { fields: ['name', 'active', 'type', 'minSelect', 'maxSelect', 'order', 'maxSelectRestrain', 'priceType'], transaction });
+
+							groupsRestrictionsRel.push({ tempId: groupModel.get('id'), id: groupModel.get('id'), model: groupModel });
 						}
 						
 						if (groupModel) {
@@ -45,12 +48,17 @@ class OptionsGroup extends Sequelize.Model {
 			})
 		);
 
-		await Promise.all(restrictingGroups.map((group) => {
-			const restrainingGroup = groupsRestrictionsRel.find(g => g.tempId === group.id).model;
-			const restrainedGroupId = groupsRestrictionsRel.find(g => g.tempId === group.maxSelectRestrain).id;
+		if (groupsRestrictionsRel.length) {
+			await Promise.all(restrictingGroups
+				.filter(group=>groupsRestrictionsRel.find(g => g.tempId === group.id) && groupsRestrictionsRel.find(g => g.tempId === group.maxSelectRestrain))
+				.map((group) => {
+					const restrainingGroup = groupsRestrictionsRel.find(g => g.tempId === group.id).model;
+					const restrainedGroupId = groupsRestrictionsRel.find(g => g.tempId === group.maxSelectRestrain).id;
 
-			return restrainingGroup.update({ maxSelectRestrain: restrainedGroupId }, { transaction });
-		}));
+					return restrainingGroup.update({ maxSelectRestrain: restrainedGroupId }, { transaction });
+				})
+			);
+		}
 
 		return result;
 	}

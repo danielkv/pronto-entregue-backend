@@ -17,7 +17,7 @@ Sale.init({
 	active: {
 		type: Sequelize.BOOLEAN,
 		allowNull: false,
-		defaultValue: false
+		defaultValue: true
 	},
 	removed: {
 		type: Sequelize.BOOLEAN,
