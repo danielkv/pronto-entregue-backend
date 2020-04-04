@@ -23,6 +23,7 @@ export const typeDefs =  gql`
 		id: ID!
 		name: String!
 		description: String!
+		sku: String
 		image: String!
 		order: Int!
 		type: String!
@@ -53,6 +54,7 @@ export const typeDefs =  gql`
 	input ProductInput {
 		name: String
 		description: String
+		sku: String
 		file: Upload
 		type: String
 		price: Float
@@ -156,7 +158,7 @@ export const resolvers =  {
 				if (!product) throw new Error('Produto não encontrado');
 
 				// update product
-				const productUpdated = await product.update(data, { fields: ['name', 'description', 'price', 'fromPrice', 'order', 'active', 'image', 'type', 'categoryId'], transaction });
+				const productUpdated = await product.update(data, { fields: ['name', 'description', 'sku', 'price', 'fromPrice', 'order', 'active', 'image', 'type', 'categoryId'], transaction });
 
 				// create, update, remove options groups
 				if (data.optionsGroups) await OptionsGroup.updateAll(data.optionsGroups, productUpdated, transaction);
