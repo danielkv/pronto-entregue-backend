@@ -30,7 +30,7 @@ export const typeDefs =  gql`
 
 		# customization
 		image: String
-		backgroundColor: String!
+		backgroundColor: String
 
 		rankPosition(radius: Int!): Int!
 
@@ -76,6 +76,7 @@ export const typeDefs =  gql`
 	input CompanyInput {
 		name: String
 		displayName: String
+		backgroundColor: String
 		file: Upload
 		companyTypeId: ID
 		active: Boolean
@@ -158,7 +159,7 @@ export const resolvers =  {
 					companyFound.createAddress(data.address);
 
 				// update company
-				const updatedCompany = await companyFound.update(data, { fields: ['name', 'displayName', 'active', 'companyTypeId', 'image'], transaction })
+				const updatedCompany = await companyFound.update(data, { fields: ['name', 'displayName', 'active', 'companyTypeId', 'image', 'backgroundColor'], transaction })
 			
 				// check if there are metas to update
 				if (data.metas) await CompanyMeta.updateAll(data.metas, updatedCompany, transaction);
@@ -228,9 +229,9 @@ export const resolvers =  {
 
 			return parseInt(meta.value);
 		},
-		backgroundColor() {
+		/* backgroundColor() {
 			return '#FF7C03';
-		},
+		}, */
 		/* async customization(parent) {
 			//const metas = await parent.getMetas({ where: { key: ['color', 'background', 'logo'] } });
 

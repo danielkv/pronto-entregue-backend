@@ -10,6 +10,7 @@ class Company extends Sequelize.Model {}
 Company.init({
 	name: Sequelize.STRING,
 	displayName: Sequelize.STRING,
+	backgroundColor: Sequelize.STRING(10),
 	image: Sequelize.TEXT,
 	acceptTakeout: {
 		type: Sequelize.BOOLEAN,
