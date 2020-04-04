@@ -6,7 +6,7 @@ export default {
 
 		if (checkSameUser) {
 			const loggedUserId = user.get('id');
-			const requestUserId = variableValues[variableKey];
+			const requestUserId = parseInt(variableValues[variableKey]);
 
 			if (loggedUserId === requestUserId) return next();
 		}
