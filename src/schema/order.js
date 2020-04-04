@@ -89,6 +89,8 @@ export const typeDefs =  gql`
 
 		createOrder(data: OrderInput!): Order! @isAuthenticated
 		updateOrder(id: ID!, data: OrderInput!): Order! @hasRole(permission: "orders_edit")
+
+		cancelOrder(id: ID!): Order!
 	}
 `;
 
@@ -224,7 +226,7 @@ export const resolvers =  {
 				return order;
 			});
 		},
-		updateOrder: (_, { id, data }) => {
+		updateOrder(_, { id, data }) {
 			return sequelize.transaction(async (transaction) => {
 				// check if order exists
 				const order = await Order.findByPk(id);
@@ -255,6 +257,14 @@ export const resolvers =  {
 
 				return updatedOrder;
 			});
+		},
+		async cancelOrder(_, { id }, { user }) {
+			const order = await Order.findByPk(id);
+			const orderUser = await order.getUser();
+			
+			if (orderUser.get('id') !== user.get('id') && !user.can('orders_edit')) throw new Error('Você não tem permissões para cancelar esse pedido');
+
+			return await order.update({ status: 'canceled' });
 		}
 	}
 }
