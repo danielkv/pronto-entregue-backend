@@ -66,9 +66,11 @@ export const resolvers =  {
 				}
 			})
 			
-			const addresses = parseAddresses(results);
+			const [address] = parseAddresses(results);
+			
+			if (address.street === 'Unnamed Road') delete address.street;
 
-			return addresses[0];
+			return address;
 		}
 	}
 }
