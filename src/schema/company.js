@@ -27,6 +27,7 @@ export const typeDefs =  gql`
 		lastMonthRevenue: Float!
 		userRelation: CompanyRelation!
 		acceptTakeout: Boolean!
+		published: Boolean!
 
 		# customization
 		image: String
@@ -82,6 +83,7 @@ export const typeDefs =  gql`
 		active: Boolean
 		metas: [MetaInput]
 		address: AddressInput
+		published: Boolean
 	}
 
 	type CompanyCustomization {
@@ -106,6 +108,9 @@ export const typeDefs =  gql`
 
 export const resolvers =  {
 	Mutation: {
+		/**
+		 * DEVE SER USADO APENAS NO APP
+		 */
 		searchCompaniesOnApp(_, { search, location }) {
 			const where = sanitizeFilter({ search }, { search: ['name', 'displayName', '$companyType.name$'] });
 			
@@ -116,7 +121,7 @@ export const resolvers =  {
 				where: {
 					[Op.and]: [
 						whereCompanyDistance(location, 'company', 'address.location'),
-						{ ...where,	active: true }
+						{ ...where,	active: true, published: true }
 					]
 				},
 				include: [
@@ -159,7 +164,7 @@ export const resolvers =  {
 					companyFound.createAddress(data.address);
 
 				// update company
-				const updatedCompany = await companyFound.update(data, { fields: ['name', 'displayName', 'active', 'companyTypeId', 'image', 'backgroundColor'], transaction })
+				const updatedCompany = await companyFound.update(data, { fields: ['name', 'displayName', 'active', 'companyTypeId', 'image', 'backgroundColor', 'published'], transaction })
 			
 				// check if there are metas to update
 				if (data.metas) await CompanyMeta.updateAll(data.metas, updatedCompany, transaction);
@@ -229,19 +234,6 @@ export const resolvers =  {
 
 			return parseInt(meta.value);
 		},
-		/* backgroundColor() {
-			return '#FF7C03';
-		}, */
-		/* async customization(parent) {
-			//const metas = await parent.getMetas({ where: { key: ['color', 'background', 'logo'] } });
-
-			return {
-				color: metas['color'] ? metas['color'].value : '',
-				background: metas['background'] ? metas['background'].value : '',
-				logo: metas['logo'] ? metas['logo'].value : '',
-			}
-		}, */
-
 		async bestSellers(_, { filter, pagination }) {
 			const _filter = sanitizeFilter(filter, { excludeFilters: ['active'], table: 'orderproduct' });
 

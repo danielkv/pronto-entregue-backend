@@ -12,6 +12,11 @@ Company.init({
 	displayName: Sequelize.STRING,
 	backgroundColor: Sequelize.STRING(10),
 	image: Sequelize.TEXT,
+	published: {
+		type: Sequelize.BOOLEAN,
+		allowNull: false,
+		defaultValue: false,
+	},
 	acceptTakeout: {
 		type: Sequelize.BOOLEAN,
 		allowNull: false,

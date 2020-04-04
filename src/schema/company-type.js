@@ -18,8 +18,8 @@ export const typeDefs =  gql`
 		createdAt: DateTime!
 		updatedAt: DateTime!
 
-		countCompanies: Int!
-		companies(location: GeoPoint): [Company]!
+		countCompanies(onlyPublished: Boolean): Int!
+		companies(location: GeoPoint, onlyPublished: Boolean): [Company]!
 	}
 
 	input CompanyTypeInput {
@@ -92,13 +92,16 @@ export const resolvers =  {
 				...getSQLPagination(pagination),
 			})
 		},
-		// company types in the APP
+		/**
+		 * CompanyTypes on APP
+		 * DEVE SER USADO APENAS NO APP
+		 */
 		sections(_, { limit = 8, location }) {
 			return CompanyType.findAll({
 				where: whereCompanyDistance(location, 'companies'),
 				include: [{
 					model: Company,
-					where: { active: true },
+					where: { active: true, published: true },
 					required: true,
 					include: [{
 						model: Address,
@@ -111,14 +114,14 @@ export const resolvers =  {
 		}
 	},
 	CompanyType: {
-		companies(parent, { location }) {
+		companies(parent, { location, onlyPublished=true }) {
 			if (!location) return parent.getCompanies();
 
 			return parent.getCompanies({
 				where: {
 					[Op.and]: [
 						whereCompanyDistance(location, 'company', 'address.location'),
-						{ active: true }
+						{ active: true, published: onlyPublished }
 					],
 				},
 				include: [{
@@ -127,8 +130,8 @@ export const resolvers =  {
 				}]
 			});
 		},
-		countCompanies(parent) {
-			return parent.countCompanies();
+		countCompanies(parent, { onlyPublished }) {
+			return parent.countCompanies({ where: { published: onlyPublished } });
 		}
 	}
 }

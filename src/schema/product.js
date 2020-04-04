@@ -88,6 +88,9 @@ export const typeDefs =  gql`
 
 export const resolvers =  {
 	Mutation: {
+		/**
+		 * DEVE SER USADO APENAS NO APP
+		 */
 		searchProductsOnApp(_, { search, location }) {
 			const where = sanitizeFilter({ search }, { search: ['name', 'description'] });
 			
@@ -103,7 +106,7 @@ export const resolvers =  {
 				},
 				include: [{
 					model: Company,
-					where: { active: true },
+					where: { active: true, published: true },
 					required: true,
 					include: [
 						{
@@ -206,6 +209,10 @@ export const resolvers =  {
 
 			return product;
 		},
+		/**
+		 * Retorna produtos em promoção, ela não verifica se promoção está em progresso ou não
+		 * DEVE SER USADO APENAS NO APP
+		 */
 		productsOnSale(_, { limit, location }) {
 			return Product.findAll({
 				where: {
@@ -217,7 +224,7 @@ export const resolvers =  {
 				include: [
 					{
 						model: Company,
-						where: { active: true },
+						where: { active: true, published: true },
 						include: [
 							{
 								model: Address,
@@ -248,6 +255,7 @@ export const resolvers =  {
 					OrderProduct,
 					{
 						model: Company,
+						where: { published: true },
 						required: true,
 						include: [{ model: Address, required: true }]
 					}

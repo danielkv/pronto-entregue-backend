@@ -326,6 +326,11 @@ export const resolvers = {
 		},
 		favoriteProducts(parent, { pagination }) {
 			return parent.getFavoriteProducts({
+				where: { active: true },
+				include: [{
+					model: Company,
+					where: { published: true, active: true }
+				}],
 				...getSQLPagination(pagination)
 			});
 		},
