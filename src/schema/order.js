@@ -6,6 +6,7 @@ import Order from '../model/order';
 import OrderProduct  from '../model/orderProduct';
 import sequelize  from '../services/connection';
 import { pointFromCoordinates } from '../utilities/address';
+import { companyIsOpen } from '../utilities/company';
 
 const pubsub = new PubSub();
 
@@ -193,7 +194,7 @@ export const resolvers =  {
 
 			return true;
 		},
-		createOrder(_, { data }) {
+		createOrder(_, { data }, { company: selectedCompany }) {
 			return sequelize.transaction(async (transaction) => {
 				// sanitize address
 				const address = {
@@ -213,6 +214,10 @@ export const resolvers =  {
 				// check if company exits
 				const company = await Company.findByPk(data.companyId);
 				if (!company) throw new Error('Estabelecimento não encontrado');
+
+				// check if company is open
+				const isOpen = await companyIsOpen(company);
+				if (!(selectedCompany && selectedCompany.get('id') === company.get('id')) && !isOpen) throw new Error(`${company.get('displayName')} está fechado no momento`);
 
 				// create order
 				const order = await company.createOrder(data, { transaction });

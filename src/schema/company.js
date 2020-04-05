@@ -13,7 +13,7 @@ import User from '../model/user';
 import conn  from '../services/connection';
 import { getSQLPagination, sanitizeFilter }  from '../utilities';
 import { whereCompanyDistance, pointFromCoordinates } from '../utilities/address';
-import { defaultBusinessHours } from '../utilities/company';
+import { defaultBusinessHours, companyIsOpen } from '../utilities/company';
 
 export const typeDefs =  gql`
 	type Company {
@@ -28,6 +28,7 @@ export const typeDefs =  gql`
 		userRelation: CompanyRelation!
 		acceptTakeout: Boolean!
 		published: Boolean!
+		isOpen: Boolean!
 
 		# customization
 		image: String
@@ -264,6 +265,9 @@ export const resolvers =  {
 			if (!meta) return defaultBusinessHours();
 		
 			return JSON.parse(meta.value);
+		},
+		async isOpen(parent) {
+			return companyIsOpen(parent);
 		},
 
 		countProducts(parent, { filter }) {
