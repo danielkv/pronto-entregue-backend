@@ -41,7 +41,8 @@ export async function companyIsOpen(companyModel) {
 		});
 
 	const now = moment();
-	const weekDay = 1 //now.format('d');
+	
+	const weekDay = now.format('d');
 	const dayHours = businessHours[weekDay];
 
 	return dayHours.hours.some(h => {
