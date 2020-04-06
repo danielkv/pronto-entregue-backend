@@ -1,5 +1,5 @@
 import { gql }  from 'apollo-server';
-import { Op } from 'sequelize';
+import { Op, literal } from 'sequelize';
 
 import { upload }  from '../controller/uploads';
 import Address from '../model/address';
@@ -109,6 +109,7 @@ export const resolvers =  {
 					}],
 				}],
 				subQuery: false,
+				order: literal('RAND()'),
 				limit
 			})
 		}
