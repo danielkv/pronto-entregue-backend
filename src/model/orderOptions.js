@@ -26,6 +26,7 @@ OrderOptions.init({
 		autoIncrement: true
 	},
 	name: Sequelize.STRING,
+	description: Sequelize.STRING,
 	price: {
 		type: Sequelize.DECIMAL(10, 2),
 		set (val) {

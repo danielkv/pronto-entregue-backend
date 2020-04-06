@@ -50,32 +50,6 @@ export const typeDefs =  gql`
 		products: [OrderProductInput]
 	}
 
-	input OrderProductInput {
-		id: ID
-		action: String!
-		quantity: Int!
-		name: String!
-		price: Float!
-		message: String!
-		productRelatedId: ID
-		optionsGroups: [OrderOptionsGroupInput!]
-	}
-
-	input OrderOptionsGroupInput {
-		id: ID
-		name: String!
-		optionsGroupRelatedId: ID!
-		
-		options: [OrderOptionInput!]
-	}
-
-	input OrderOptionInput {
-		id: ID
-		name: String!
-		price: Float!
-		optionRelatedId: ID!
-	}
-
 	type Subscription {
 		orderCreated(companyId: ID!): Order
 	}

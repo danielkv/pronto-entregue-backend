@@ -11,6 +11,17 @@ export const typeDefs =  gql`
 		productRelated: Product!
 		optionsGroups: [OrderOptionsGroup]!
 	}
+	
+	input OrderProductInput {
+		id: ID
+		action: String!
+		quantity: Int!
+		name: String!
+		price: Float!
+		message: String!
+		productRelatedId: ID
+		optionsGroups: [OrderOptionsGroupInput!]
+	}
 `;
 
 export const resolvers =  {

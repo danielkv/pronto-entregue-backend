@@ -4,8 +4,17 @@ export const typeDefs =  gql`
 	type OrderOptions {
 		id: ID!
 		name: String!
+		description: String
 		price: Float!
 		optionRelated: Option!
+	}
+
+	input OrderOptionInput {
+		id: ID
+		name: String!
+		description: String!
+		price: Float!
+		optionRelatedId: ID!
 	}
 `;
 

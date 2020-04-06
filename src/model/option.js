@@ -17,7 +17,7 @@ class Option extends Sequelize.Model {
 					optionModel = await Option.findByPk(option.id);
 					if (optionModel) {
 						if (option.action === "remove") optionModel = groupModel.removeOption(optionModel, { transaction });
-						else if (option.action === "update") return optionModel.update({ ...option, optionsGroupId: groupModel.get('id') }, { fields: ['name', 'price', 'active', 'order', 'maxSelectRestrainOther', 'optionsGroupId'], transaction });
+						else if (option.action === "update") return optionModel.update({ ...option, optionsGroupId: groupModel.get('id') }, { fields: ['name', 'description', 'price', 'active', 'order', 'maxSelectRestrainOther', 'optionsGroupId'], transaction });
 					}
 				}
 
@@ -28,6 +28,7 @@ class Option extends Sequelize.Model {
 }
 Option.init({
 	name: Sequelize.STRING,
+	description: Sequelize.STRING,
 	order: {
 		type: Sequelize.INTEGER,
 		defaultValue: 0,

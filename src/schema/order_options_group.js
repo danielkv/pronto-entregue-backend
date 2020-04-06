@@ -7,6 +7,13 @@ export const typeDefs =  gql`
 		optionsGroupRelated: OptionsGroup!
 		options: [OrderOptions]!
 	}
+	input OrderOptionsGroupInput {
+		id: ID
+		name: String!
+		optionsGroupRelatedId: ID!
+		
+		options: [OrderOptionInput!]
+	}
 `;
 
 export const resolvers =  {
