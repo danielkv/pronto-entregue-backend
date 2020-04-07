@@ -233,6 +233,8 @@ export const resolvers = {
 					//gera token com senha recebidos e salt encontrado e verifica se token salvo é igual
 					const salted = salt(password, userFound.salt);
 					if (userFound.password != salted.password) throw new Error('Senha incorreta');
+
+					if (!userFound.get('active')) throw new Error('Usuário inativo')
 					
 					//Gera webtoken com id e email
 					const token = jwt.sign({
@@ -253,6 +255,8 @@ export const resolvers = {
 			// check if user exists
 			const userFound = await User.findOne({ where: { id, email } });
 			if (!userFound) throw new Error('Usuário não encotrado');
+
+			if (!userFound.get('active')) throw new Error('Usuário inativo')
 
 			return userFound;
 		},
