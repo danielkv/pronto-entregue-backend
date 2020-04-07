@@ -222,7 +222,7 @@ export const resolvers = {
 		* caso autenticação falhe, 'arremessa' um erro
 		* 
 		*/
-		login(_, { email, password }) {
+		login(_, { email, password }, { admOrigin }) {
 			return User.findOne({
 				where: { email },
 			})
@@ -234,7 +234,11 @@ export const resolvers = {
 					const salted = salt(password, userFound.salt);
 					if (userFound.password != salted.password) throw new Error('Senha incorreta');
 
+					// check if user is active
 					if (!userFound.get('active')) throw new Error('Usuário inativo')
+
+					// check if user is a customer trying to access adm area
+					if (admOrigin && userFound.get('role') === 'customer') throw new Error('Você não tem permissões para acessar essa página')
 					
 					//Gera webtoken com id e email
 					const token = jwt.sign({

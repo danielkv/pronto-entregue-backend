@@ -4,6 +4,8 @@ export const createContext = async ({ req, connection }) => {
 	if (connection) {
 		//console.log(connection.context)
 	} else {
+		const admOrigin = req.hostname && (req.hostname === 'localhost' || req.hostname === 'prontoentregue.com.br')
+
 		const { authorization, companyid: companyId, selectedaddress } = req.headers;
 		let user = null, company = null, address = null;
 		
@@ -14,7 +16,8 @@ export const createContext = async ({ req, connection }) => {
 		return {
 			user,
 			company,
-			address
+			address,
+			admOrigin
 		}
 	}
 }
