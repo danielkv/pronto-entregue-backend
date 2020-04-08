@@ -187,7 +187,7 @@ export const resolvers = {
 				}
 
 				// update user
-				const updatedUser = await user.update(data, { fields: ['firstName', 'lastName', 'password', 'salt', 'role', 'active'], transaction })
+				const updatedUser = await user.update(data, { fields: ['firstName', 'lastName', 'email', 'password', 'salt', 'role', 'active'], transaction })
 
 				// update user addresses
 				if (data.addresses) {
