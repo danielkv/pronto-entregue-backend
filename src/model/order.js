@@ -11,6 +11,11 @@ Order.init({
 	//Dados principais
 	paymentFee: Sequelize.DECIMAL(10,2),
 	deliveryPrice: Sequelize.STRING,
+	deliveryTime: {
+		type: Sequelize.INTEGER,
+		defaultValue: 0,
+		allowNull: false
+	},
 	type: {
 		type: Sequelize.ENUM('takeout', 'delivery'),
 		allowNull: false,

@@ -16,6 +16,7 @@ export const typeDefs =  gql`
 		user: User!
 		paymentFee: Float!
 		deliveryPrice: Float!
+		deliveryTime: Int!
 		price: Float!
 		type: String!
 		discount: Float!
@@ -41,6 +42,7 @@ export const typeDefs =  gql`
 
 		paymentFee: Float
 		deliveryPrice: Float
+		deliveryTime: Int
 		discount: Float
 		price: Float
 		message: String

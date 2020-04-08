@@ -12,7 +12,7 @@ export const typeDefs =  gql`
 	input OrderOptionInput {
 		id: ID
 		name: String!
-		description: String!
+		description: String
 		price: Float!
 		optionRelatedId: ID!
 	}
