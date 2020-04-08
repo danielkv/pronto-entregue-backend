@@ -228,6 +228,9 @@ export const resolvers =  {
 					data = { ...data, ...address };
 				}
 
+				// cannot update payment method
+				if (data.paymentMethod) delete data.paymentMethod;
+
 				// update order
 				const updatedOrder = await order.update(data, { transaction });
 
