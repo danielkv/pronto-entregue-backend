@@ -3,6 +3,7 @@ import { ApolloServer }  from 'apollo-server-express';
 import cors  from 'cors';
 import express  from 'express';
 import http  from 'http';
+import path  from 'path';
 
 import { createContext }  from './controller/apolloContext';
 import routes  from './router';
@@ -24,6 +25,9 @@ const server = new ApolloServer({
 	schema,
 	context: createContext
 });
+
+app.set('view engine', 'pug');
+app.set('views', path.resolve(__dirname, 'templates'));
 
 // configure router
 app.use(routes);

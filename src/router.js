@@ -1,9 +1,15 @@
-import { Router }  from 'express';
+import express, { Router }  from 'express';
+import path  from 'path';
 
 import { importTable, exportDB } from './controller/helper';
 import { setupDataBase } from './controller/setupDB';
 
 const route = Router();
+
+
+
+// static routes
+route.use('/assets', express.static(path.resolve(__dirname, 'assets'), { extensions: ['png'] }));
 
 // test server
 route.get('/networkTest', (req, res)=>{
@@ -25,7 +31,7 @@ route.get('/export', (req, res) => {
 })
 
 // import only one table
-route.get('/import/: able', (req, res) => {
+route.get('/import/:table', (req, res) => {
 	if (!process.env.SETUP) return res.sendStatus(404);
 
 	const table = req.params.table;
@@ -36,5 +42,12 @@ route.get('/import/: able', (req, res) => {
 			res.json(data)
 		});
 })
+
+
+// render pug test
+// static routes
+route.use('/testPug', (req, res)=>{
+	res.render('update-user');
+});
 
 export default route;
