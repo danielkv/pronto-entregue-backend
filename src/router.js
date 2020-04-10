@@ -46,7 +46,7 @@ route.get('/import/:table', (req, res) => {
 // render pug test
 // static routes
 route.get('/testPug', (req, res)=>{
-	res.render('index');
+	res.render('recover-password/html');
 });
 
 export default route;
