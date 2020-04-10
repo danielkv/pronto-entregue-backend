@@ -9,6 +9,8 @@ import { createContext }  from './controller/apolloContext';
 import routes  from './router';
 import schema  from './schema/_index';
 
+import './assets/**/*';
+
 import './model/_index'; // setup DB relations
 
 //express config

@@ -9,7 +9,7 @@ const route = Router();
 
 
 // static routes
-route.use('/assets', express.static(path.resolve(__dirname, 'assets'), { extensions: ['png'] }));
+route.use(express.static(path.resolve(__dirname, 'assets'), { extensions: ['png'] }));
 
 // test server
 route.get('/networkTest', (req, res)=>{
@@ -46,8 +46,8 @@ route.get('/import/:table', (req, res) => {
 
 // render pug test
 // static routes
-route.use('/testPug', (req, res)=>{
-	res.render('update-user');
+route.get('/testPug', (req, res)=>{
+	res.render('index');
 });
 
 export default route;

@@ -7,7 +7,8 @@
 		"preinstall": "node ./preinstall.js",
 		"start": "sucrase-node ./src/app.js",
 		"dev": "nodemon ./src/app.js",
-		"build": "sucrase ./src -d ./build --transforms imports",
+		"build": "sucrase ./src -d ./build --transforms imports && yarn copy_static",
+		"copy_static": "cpx \"src/**/*.{pug,png,jpg}\" build",
 		"lint": "eslint --cache --color --ext .jsx,.js src"
 	},
 	"dependencies": {
@@ -16,6 +17,7 @@
 		"@googlemaps/google-maps-services-js": "^2.0.2",
 		"apollo-server": "^2.9.3",
 		"cors": "^2.8.5",
+		"cpx": "^1.5.0",
 		"dataloader": "^2.0.0",
 		"dotenv": "^8.0.0",
 		"email-templates": "^6.0.0",
