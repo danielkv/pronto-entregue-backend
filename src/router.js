@@ -7,9 +7,8 @@ import { setupDataBase } from './controller/setupDB';
 const route = Router();
 
 
-
 // static routes
-route.use(express.static(path.resolve(__dirname, 'assets'), { extensions: ['png'] }));
+route.use('/assets', express.static(path.resolve(__dirname, 'assets'), { extensions: ['png', 'jpg'] }));
 
 // test server
 route.get('/networkTest', (req, res)=>{
