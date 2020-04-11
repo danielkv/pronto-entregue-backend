@@ -52,15 +52,15 @@ export const typeDefs =  gql`
 
 		businessHours: [BusinessHour]!
 
-		countOrders(filter:Filter): Int!
-		orders(filter:Filter, pagination: Pagination): [Order]!
+		countOrders(filter:Filter): Int! @hasRole(permission: "companies_read")
+		orders(filter:Filter, pagination: Pagination): [Order]! @hasRole(permission: "companies_read")
 
 		countProducts(filter:Filter): Int!
-		products(filter:Filter, pagination: Pagination): [Product]! @hasRole(permission: "products_read")
+		products(filter:Filter, pagination: Pagination): [Product]! @hasRole(permission: "companies_read")
 
-		countRatings(filter:Filter): Int! @isAuthenticated
-		ratings(filter:Filter, pagination: Pagination): [Rating]! @isAuthenticated
-		rate: Float! @isAuthenticated
+		countRatings(filter:Filter): Int!
+		ratings(filter:Filter, pagination: Pagination): [Rating]!
+		rate: Float!
 
 		countCategories(filter: Filter): Int!
 		categories(filter: Filter, pagination: Pagination): [Category]!
@@ -95,7 +95,8 @@ export const typeDefs =  gql`
 
 	extend type Mutation {
 		# Search on APP
-		searchCompaniesOnApp(search: String!, location: GeoPoint!): [Company]! @isAuthenticated
+		searchCompaniesOnApp(search: String!, location: GeoPoint!): [Company]!
+		
 		# Search on ADM
 		searchCompanies(search: String!, exclude: [ID]): [Company]! @hasRole(permission: "companies_edit")
 		createCompany(data: CompanyInput!): Company! @hasRole(permission: "companies_edit")

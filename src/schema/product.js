@@ -27,7 +27,7 @@ export const typeDefs =  gql`
 		image: String!
 		order: Int!
 		type: String!
-		listed: Boolean!
+		listed: Boolean! 
 		price: Float!
 		fromPrice: Float!
 
@@ -66,14 +66,14 @@ export const typeDefs =  gql`
 	}
 
 	extend type Query {
-		product(id: ID!): Product! @isAuthenticated
-		bestSellers(limit: Int!, location: GeoPoint!): [Product]! @isAuthenticated
-		productsOnSale(limit: Int!, location: GeoPoint!): [Product]! @isAuthenticated
+		product(id: ID!): Product!
+		bestSellers(limit: Int!, location: GeoPoint!): [Product]!
+		productsOnSale(limit: Int!, location: GeoPoint!): [Product]!
 	}
 
 	extend type Mutation {
 		# search on APP
-		searchProductsOnApp(search: String!, location: GeoPoint!): [Product]! @isAuthenticated
+		searchProductsOnApp(search: String!, location: GeoPoint!): [Product]!
 
 		# search on ADM
 		searchProducts(search: String, exclude: [ID], companies: [ID]): [Product]! @hasRole(permission: "products_edit")

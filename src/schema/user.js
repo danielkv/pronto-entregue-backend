@@ -73,6 +73,7 @@ export const typeDefs = gql`
 		createUser (data: UserInput!): User!
 		updateUser (id: ID!, data: UserInput!): User! @hasRole(permission: "master", checkSameUser: true)
 		updateUserImage(userId: ID!, image: Upload!): User!
+		recoverPassword(email: String!): Boolean!
 
 		removeUserAddress (id: ID!): Address! @isAuthenticated
 		updateUserAddress (id: ID!, data: AddressInput!): Address! @isAuthenticated
@@ -203,6 +204,12 @@ export const resolvers = {
 
 				return updatedUser;
 			})
+		},
+		async recoverPassword(_, { email }) {
+			const user = await User.findOne({ where: { email } });
+			if (!user) throw new Error('Esse email não foi encontrado');
+
+			return true;
 		},
 		async updateUserImage(_, { userId, image }) {
 			//check if user exists

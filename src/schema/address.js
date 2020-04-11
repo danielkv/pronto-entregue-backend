@@ -34,8 +34,8 @@ export const typeDefs = gql`
 	}
 
 	extend type Mutation {
-		searchAddress(search: String!): [Address]! @isAuthenticated
-		searchLocation(location: GeoPoint!): Address! @isAuthenticated
+		searchAddress(search: String!): [Address]!
+		searchLocation(location: GeoPoint!): Address!
 	}
 
 `;

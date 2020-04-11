@@ -31,11 +31,12 @@ export const typeDefs =  gql`
 	}
 
 	extend type Query {
-		companyType(id: ID): CompanyType! @isAuthenticated
+		companyType(id: ID): CompanyType!
 		countCompanyTypes(filter: Filter): Int! @hasRole(permission: "master")
 		companyTypes(filter: Filter, pagination: Pagination): [CompanyType]! @hasRole(permission: "master")
 		
-		sections(limit: Int, location: GeoPoint!): [CompanyType]! @isAuthenticated
+		#section in App
+		sections(limit: Int, location: GeoPoint!): [CompanyType]!
 	}
 
 	extend type Mutation {
