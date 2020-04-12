@@ -31,7 +31,7 @@ export const typeDefs =  gql`
 
 	extend type Query {
 		countRatings(filter: Filter): Int!
-		ratings(filter: Filter, pagination: Pagination): [Rating]! @isAuthenticated
+		ratings(filter: Filter, pagination: Pagination): [Rating]!
 		rating(id: ID!): Rating! @hasRole(permission: "adm")
 	}
 
