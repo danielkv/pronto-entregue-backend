@@ -237,7 +237,9 @@ export const resolvers =  {
 			return parseInt(meta.value);
 		},
 		async bestSellers(_, { filter, pagination }) {
-			const _filter = sanitizeFilter(filter, { excludeFilters: ['active'], table: 'orderproduct' });
+			const where = sanitizeFilter(filter, { table: 'orderproduct' });
+
+			console.log(where)
 
 			const products = await OrderProduct.findAll({
 				attributes: [
@@ -253,7 +255,7 @@ export const resolvers =  {
 					as: 'productRelated'
 				}],
 				
-				where: _filter,
+				where,
 				...getSQLPagination(pagination),
 			});
 

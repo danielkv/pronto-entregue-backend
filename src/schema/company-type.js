@@ -5,6 +5,7 @@ import { upload }  from '../controller/uploads';
 import Address from '../model/address';
 import Company from '../model/company';
 import CompanyType from '../model/companyType';
+import Product from '../model/product';
 import { sanitizeFilter, getSQLPagination } from '../utilities';
 import { whereCompanyDistance } from '../utilities/address';
 
@@ -99,15 +100,22 @@ export const resolvers =  {
 		 */
 		sections(_, { limit = 8, location }) {
 			return CompanyType.findAll({
-				where: whereCompanyDistance(location, 'companies'),
+				where: [whereCompanyDistance(location, 'companies'), { active: true }],
 				include: [{
 					model: Company,
 					where: { active: true, published: true },
 					required: true,
-					include: [{
-						model: Address,
-						required: true,
-					}],
+					include: [
+						{
+							model: Address,
+							required: true,
+						},
+						{
+							model: Product,
+							where: { active: true },
+							required: true,
+						}
+					],
 				}],
 				subQuery: false,
 				order: literal('RAND()'),

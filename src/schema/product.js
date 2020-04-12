@@ -255,7 +255,7 @@ export const resolvers =  {
 					OrderProduct,
 					{
 						model: Company,
-						where: { published: true },
+						where: { published: true, active: true },
 						required: true,
 						include: [{ model: Address, required: true }]
 					}
@@ -266,7 +266,7 @@ export const resolvers =  {
 					[conn.col('product.name'), 'ASC']
 				],
 				group: ['product.id'],
-				where: whereCompanyDistance(location, 'company'),
+				where: [whereCompanyDistance(location, 'company'), { active: true }],
 				subQuery: false,
 				limit
 			});
