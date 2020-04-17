@@ -30,6 +30,9 @@ export function sanitizeFilter(_filter = {}, _options = {}) {
 	
 	const search = filter.search || '';
 	delete filter.search;
+
+	/* if (_filter.statusNotIn) filter.status = { [Op.notIn]: _filter.statusNotIn }
+	delete filter.statusNotIn; */
 	
 	if (search) {
 		filter = {

@@ -14,11 +14,11 @@ export const typeDefs =  gql`
 	
 	input OrderProductInput {
 		id: ID
-		action: String!
-		quantity: Int!
-		name: String!
-		price: Float!
-		message: String!
+		action: String
+		quantity: Int
+		name: String
+		price: Float
+		message: String
 		productRelatedId: ID
 		optionsGroups: [OrderOptionsGroupInput!]
 	}

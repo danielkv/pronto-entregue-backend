@@ -16,6 +16,15 @@ export const typeDefs =  gql`
 		updatedAt: DateTime!
 	}
 
+	input PaymentMethodInput {
+		id: ID!
+		image: String!
+		fee: Float!
+		feeType: String!
+		type: String!
+		displayName: String!
+	}
+
 	extend type Query {
 		paymentMethods(filter: Filter): [PaymentMethod]! @hasRole(permission: "payment_methods_read")
 	}

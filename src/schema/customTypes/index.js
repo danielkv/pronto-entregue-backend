@@ -1,6 +1,11 @@
 import { GraphQLScalarType } from 'graphql';
+import GraphQLJSON, { GraphQLJSONObject } from 'graphql-type-json';
 import { Kind } from 'graphql/language';
 import { isNumber, isArray } from 'lodash';
+
+
+export const JSONObject = GraphQLJSONObject;
+export const JSON = GraphQLJSON;
 
 export const GeoPoint = new GraphQLScalarType({
 	name: 'GeoPoint',

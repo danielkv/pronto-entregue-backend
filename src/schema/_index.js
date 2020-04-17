@@ -35,6 +35,8 @@ const typeDefs = gql`
 	scalar Upload
 	scalar DateTime
 	scalar GeoPoint
+	scalar JSONObject
+	scalar JSON
 
 	input Filter {
 		showInactive: Boolean
@@ -42,6 +44,7 @@ const typeDefs = gql`
 		createdAt: String
 		search: String
 		type: String
+		statusNotIn: [String]
 
 		companyId: ID
 	}

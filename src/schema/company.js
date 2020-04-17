@@ -52,8 +52,8 @@ export const typeDefs =  gql`
 
 		businessHours: [BusinessHour]!
 
-		countOrders(filter:Filter): Int! @hasRole(permission: "companies_read")
-		orders(filter:Filter, pagination: Pagination): [Order]! @hasRole(permission: "companies_read")
+		countOrders(filter:JSON): Int! @hasRole(permission: "companies_read")
+		orders(filter:JSON, pagination: Pagination): [Order]! @hasRole(permission: "companies_read")
 
 		countProducts(filter:Filter): Int!
 		products(filter:Filter, pagination: Pagination): [Product]! @hasRole(permission: "companies_read")

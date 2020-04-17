@@ -1,6 +1,7 @@
 import { gql, withFilter, PubSub }  from 'apollo-server';
 import { literal, fn, where } from 'sequelize';
 
+import { ORDER_CREATED } from '../controller/order';
 import Company from '../model/company';
 import Order from '../model/order';
 import OrderProduct  from '../model/orderProduct';
@@ -27,7 +28,7 @@ export const typeDefs =  gql`
 		paymentMethod: PaymentMethod!
 		
 		company: Company!
-		address: Address!
+		address: Address
 
 		countProducts: Int!
 		products: [OrderProduct]!		
@@ -71,8 +72,6 @@ export const typeDefs =  gql`
 	}
 `;
 
-const ORDER_CREATED = 'ORDER_CREATED';
-
 export const resolvers =  {
 	Subscription: {
 		orderCreated: {
@@ -86,6 +85,8 @@ export const resolvers =  {
 	},
 	Order: {
 		user: (parent) => {
+			if (parent.user) return parent.user;
+
 			return parent.getUser();
 		},
 		products: (parent) => {
@@ -95,9 +96,13 @@ export const resolvers =  {
 			return parent.countProducts();
 		},
 		paymentMethod: (parent) => {
+			if (parent.paymentMethod) return parent.paymentMethod;
+
 			return parent.getPaymentMethod();
 		},
 		address(parent) {
+			if (parent.get('type') === 'takeout') return null;
+
 			return {
 				id: `_order_${parent.get('id')}`,
 				name: parent.get('nameAddress'),
@@ -173,19 +178,21 @@ export const resolvers =  {
 		createOrder(_, { data }, { company: selectedCompany }) {
 			return sequelize.transaction(async (transaction) => {
 				// sanitize address
-				const address = {
-					nameAddress: data.address.name,
-					streetAddress: data.address.street,
-					numberAddress: data.address.number,
-					complementAddress: data.address.complement,
-					zipcodeAddress: data.address.zipcode,
-					districtAddress: data.address.district,
-					cityAddress: data.address.city,
-					stateAddress: data.address.state,
-					locationAddress: data.address.location,
+				if (data.address) {
+					const address = {
+						nameAddress: data.address.name,
+						streetAddress: data.address.street,
+						numberAddress: data.address.number,
+						complementAddress: data.address.complement,
+						zipcodeAddress: data.address.zipcode,
+						districtAddress: data.address.district,
+						cityAddress: data.address.city,
+						stateAddress: data.address.state,
+						locationAddress: data.address.location,
+					}
+					delete data.address;
+					data = { ...data, ...address };
 				}
-				delete data.address;
-				data = { ...data, ...address };
 				
 				// check if company exits
 				const company = await Company.findByPk(data.companyId);
@@ -202,8 +209,9 @@ export const resolvers =  {
 				await OrderProduct.updateAll(data.products, order, transaction);
 
 				// emit event for subscriptions
+				//await pubSubPublishOrder(pubsub, order.get('id'));
 				pubsub.publish(ORDER_CREATED, { orderCreated: order });
-
+				
 				return order;
 			});
 		},

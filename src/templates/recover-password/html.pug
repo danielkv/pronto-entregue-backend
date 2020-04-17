@@ -2,12 +2,14 @@ extends ../index.pug
 
 block content
 	div
-		p #{user.firstName}, obrigado pela sua sugestão. Entraremos em contato com o estabelecimento o mais rápido possível.
-	br
-	div Estabelecimento sugerido:
-	div
-		ul
-			li Nome: #{store.name}
-			li Endereço: #{store.address.street}, n #{store.address.number} - #{store.address.city} #{store.address.state}
-			li Email: #{store.email}
-			li telefone: #{store.phone}
+		p Olá #{user.firstName}, você recebeu essa mensagem porque preencheu o formulário de <b>'esqueci minha senha'</b> no app.
+		p Caso não tenha sido você, desconsidere essa mensagem.
+	hr
+	div(style={'text-align': 'center'})
+		p(style={'margin-bottom': '25px'}) Acesse o link abaixo para criar uma nova senha
+		p
+			a.link(href=link) Criar uma nova senha
+		p(style={'max-width': '50%', margin: 'auto'})
+			small
+				small Não compartilhe o link ou código acima com ninguém. Caso alguém mal intencionado usar esse link poderá alterar sua senha e ter acesso aos seus dados
+		
