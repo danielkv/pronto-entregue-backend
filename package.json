@@ -8,7 +8,7 @@
 		"start": "sucrase-node ./src/app.js",
 		"dev": "nodemon ./src/app.js",
 		"build": "sucrase ./src -d ./build --transforms imports && yarn copy_static",
-		"copy_static": "cpx \"src/**/*.{pug,png,jpg}\" build -v",
+		"copy_static": "cpx \"src/**/*.{pug,png,jpg,css}\" build -v",
 		"lint": "eslint --cache --color --ext .jsx,.js src"
 	},
 	"dependencies": {
