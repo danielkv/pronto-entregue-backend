@@ -217,7 +217,7 @@ export const resolvers = {
 
 			const context = {
 				user,
-				link: `https//prontoentregue.com.br/nova-senha/${token}`,
+				link: `https://prontoentregue.com.br/nova-senha/${token}`,
 				expiresIn
 			}
 
@@ -244,7 +244,7 @@ export const resolvers = {
 
 			const context = {
 				user,
-				link: `https//prontoentregue.com.br/nova-senha/${token}`,
+				link: `https://prontoentregue.com.br/nova-senha/${token}`,
 				expiresIn
 			}
 
