@@ -1,15 +1,17 @@
+import Email from 'email-templates';
 import nodemailer  from 'nodemailer';
+import path  from 'path';
 
 let config;
 
-if (process.env.NODE_ENV == 'production') {
+if (process.env.NODE_ENV === 'production') {
 	config = {
 		secure: true,
-		host: 'mail.iocus.com.br',
-		port: 465,
+		host: process.env.EMAIL_HOST,
+		port: process.env.EMAIL_PORT,
 		auth: {
 			user: process.env.EMAIL_ACCOUNT,
-			pass: process.env.EMAIL_PASS,
+			pass: process.env.EMAIL_PASSWORD,
 		},
 		debug: false
 	}
@@ -25,4 +27,13 @@ if (process.env.NODE_ENV == 'production') {
 	}
 }
 
-export default nodemailer.createTransport(config, { from: `${process.env.EMAIL_NAME} ${process.env.EMAIL_ACCOUNT}` });
+const transporter = nodemailer.createTransport(config, { from: `${process.env.EMAIL_NAME} <${process.env.EMAIL_ACCOUNT}>` });
+
+export default new Email({
+	transport: transporter,
+	send: true,
+	preview: false,
+	views: {
+		root: path.resolve(__dirname, '../', 'templates')
+	}
+})

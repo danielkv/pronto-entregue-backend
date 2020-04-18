@@ -1,16 +1,15 @@
 import mailer  from '../services/mailer';
 
-function send (type, data) {
-	switch (type) {
-		case 'update-user': {
-			const context = {
-				email: data.before_update.email,
-				username: data.before_update.first_name,
-				updatedData: data.after_update
-			};
-			return mailer.sendMail('update-user', context);
-		}
-	}
+function send (type, data, context) {
+	
+	return mailer.send({
+		template: type,
+		message: data,
+		locals: context
+	})
+	//const sendEmail = mailer.templateSender();
+
+	//return sendEmail(data, context)
 }
 
 export default {

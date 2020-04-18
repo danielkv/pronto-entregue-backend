@@ -1,5 +1,5 @@
 import { gql }  from 'apollo-server';
-import jwt  from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 import { Op }  from 'sequelize';
 
 import { upload } from '../controller/uploads';
@@ -7,6 +7,7 @@ import balanceLoader from '../loaders/balanceLoader';
 import Company  from '../model/company';
 import User  from '../model/user';
 import UserMeta  from '../model/userMeta';
+import notifications from '../notifications';
 import conn  from '../services/connection';
 import { salt, getSQLPagination, sanitizeFilter }  from '../utilities';
 import { userCanSetRole, extractRole } from '../utilities/roles';
@@ -73,7 +74,10 @@ export const typeDefs = gql`
 		createUser (data: UserInput!): User!
 		updateUser (id: ID!, data: UserInput!): User! @hasRole(permission: "master", checkSameUser: true)
 		updateUserImage(userId: ID!, image: Upload!): User!
+
 		recoverPassword(email: String!): Boolean!
+		updateUserPassword(token: String!, newPassword: String!): Boolean!
+		sendNewPasswordEmail(userId: ID!): Boolean!
 
 		removeUserAddress (id: ID!): Address! @isAuthenticated
 		updateUserAddress (id: ID!, data: AddressInput!): Address! @isAuthenticated
@@ -117,17 +121,7 @@ export const resolvers = {
 			if (!user) throw new Error('Usuário não encontrada');
 			return user;
 		},
-		/* userAddress: (_, { id }, ctx) => {
-			return ctx.user.getMetas({ where: { id } })
-				.then(([address]) => {
-					if (!address) throw new Error('Endereço não encontrado');
-
-					return {
-						id: address.id,
-						...JSON.parse(address.value)
-					};
-				})
-		}, */
+		
 	},
 	Mutation: {
 		searchUsers(_, { search, exclude = [], companies }) {
@@ -209,8 +203,77 @@ export const resolvers = {
 			const user = await User.findOne({ where: { email } });
 			if (!user) throw new Error('Esse email não foi encontrado');
 
+			const expiresIn = 10;
+
+			const token = jwt.sign({
+				id: user.get('id'),
+				email: user.get('email'),
+				salt: user.get('salt')
+			}, process.env.SECRET_RECOVERY, { expiresIn: `${expiresIn}h` });
+
+			const data = {
+				to: user.get('email'),
+			}
+
+			const context = {
+				user,
+				link: `https//prontoentregue.com.br/nova-senha/${token}`,
+				expiresIn
+			}
+
+			await notifications.send('recover-password', data, context);
+
 			return true;
 		},
+
+		async sendNewPasswordEmail(_, { userId }) {
+			const user = await User.findByPk(userId);
+			if (!user) throw new Error('Usuário não foi encontrado');
+
+			const expiresIn = 2;
+
+			const token = jwt.sign({
+				id: user.get('id'),
+				email: user.get('email'),
+				salt: user.get('salt')
+			}, process.env.SECRET_RECOVERY, { expiresIn: `${expiresIn}h` });
+
+			const data = {
+				to: user.get('email'),
+			}
+
+			const context = {
+				user,
+				link: `https//prontoentregue.com.br/nova-senha/${token}`,
+				expiresIn
+			}
+
+			await notifications.send('new-password', data, context);
+
+			return true;
+		},
+		
+		async updateUserPassword(_, { token, newPassword }) {
+			try {
+				const data = jwt.verify(token, process.env.SECRET_RECOVERY);
+
+				const user = await User.findByPk(data.id);
+				if (!user) throw new Error('Usuário não encontrado');
+
+				if (user.get('salt') !== data.salt) throw new Error('Esse token já foi utilizado')
+
+				await user.update({ password: newPassword });
+				
+				return true;
+			} catch(err) {
+				switch (err.name) {
+					case 'TokenExpiredError': throw new Error('O token já expirou');
+					case 'JsonWebTokenError': throw new Error('O token é inválido');
+					default: throw err;
+				}
+			}
+		},
+
 		async updateUserImage(_, { userId, image }) {
 			//check if user exists
 			const user = await User.findByPk(userId);
