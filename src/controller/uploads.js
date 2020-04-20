@@ -35,10 +35,6 @@ const newFileName = (fileName, bytes=16) => {
 	return newName;
 }
 
-const imageResizer = sharp()
-	.resize({ width: 1080, fit: 'inside', withoutEnlargement: true })
-	.jpeg({ quality: 93 });
-
 const startUpload = async (bucket, file) => {
 	return new Promise((resolve, reject)=>{
 		const { filename, createReadStream, mimetype } = file;
@@ -52,6 +48,10 @@ const startUpload = async (bucket, file) => {
 				contentType: mimetype
 			}
 		})
+
+		const imageResizer = sharp()
+			.resize({ width: 1080, fit: 'inside', withoutEnlargement: true })
+			.jpeg({ quality: 93 });
 		
 		createReadStream()
 			.pipe(imageResizer)
