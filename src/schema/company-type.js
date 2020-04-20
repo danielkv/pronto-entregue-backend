@@ -55,7 +55,9 @@ export const resolvers =  {
 				data.image = await upload('company_types', await data.file);
 			}
 
-			return CompanyType.create(data);
+			const createdType = await CompanyType.create(data);
+
+			return createdType;
 		},
 		async updateCompanyType(_, { id, data }) {
 			if (data.file) {
@@ -66,7 +68,9 @@ export const resolvers =  {
 			const type = await CompanyType.findByPk(id);
 			if (!type) throw new Error('Tipo não encontrado');
 
-			return type.update(data, { fields: ['name', 'description', 'image', 'active'] });
+			const updatedType = await type.update(data, { fields: ['name', 'description', 'image', 'active'] });
+
+			return updatedType
 		},
 		searchCompanyTypes(_, { search }) {
 			const where = sanitizeFilter({ search }, { search: ['name', 'description'] });
@@ -104,6 +108,7 @@ export const resolvers =  {
 				include: [{
 					model: Company,
 					where: { active: true, published: true },
+					subQuery: true,
 					required: true,
 					include: [
 						{
@@ -119,6 +124,7 @@ export const resolvers =  {
 				}],
 				subQuery: false,
 				order: literal('RAND()'),
+				group: 'companyType.id',
 				limit
 			})
 		}
@@ -127,11 +133,14 @@ export const resolvers =  {
 		companies(parent, { location, onlyPublished=true }) {
 			if (!location) return parent.getCompanies();
 
+			const where = { active: true }
+			if (onlyPublished === true) where.published = true;
+
 			return parent.getCompanies({
 				where: {
 					[Op.and]: [
 						whereCompanyDistance(location, 'company', 'address.location'),
-						{ active: true, published: onlyPublished }
+						where
 					],
 				},
 				include: [{
@@ -140,8 +149,11 @@ export const resolvers =  {
 				}]
 			});
 		},
-		countCompanies(parent, { onlyPublished }) {
-			return parent.countCompanies({ where: { published: onlyPublished } });
+		countCompanies(parent, { onlyPublished=true }) {
+			const where = { active: true }
+			if (onlyPublished === true) where.published = true;
+
+			return parent.countCompanies({ where });
 		}
 	}
 }
