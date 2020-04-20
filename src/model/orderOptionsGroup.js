@@ -42,6 +42,11 @@ class OrderOptionsGroup extends Sequelize.Model {
 }
 OrderOptionsGroup.init({
 	name: Sequelize.STRING,
+	priceType: {
+		type: Sequelize.ENUM('higher', 'sum'),
+		defaultValue: 'sum',
+		allowNull: false
+	},
 }, {
 	modelName: 'orderOptionsGroup',
 	tableName: 'order_option_groups',

@@ -4,12 +4,14 @@ export const typeDefs =  gql`
 	type OrderOptionsGroup {
 		id: ID!
 		name: String!
+		priceType: String!
 		optionsGroupRelated: OptionsGroup!
 		options: [OrderOptions]!
 	}
 	input OrderOptionsGroupInput {
 		id: ID
 		name: String!
+		priceType: String
 		optionsGroupRelatedId: ID!
 		
 		options: [OrderOptionInput!]
