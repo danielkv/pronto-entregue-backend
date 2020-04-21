@@ -4,8 +4,8 @@ export default new Sequelize(process.env.MYSQL_DB, process.env.MYSQL_USER, proce
 	host: process.env.MYSQL_HOST,
 	dialect: 'mysql',
 	pool: {
-		max: 100,
+		max: process.env.NODE_ENV === 'production' ? 500 : 50,
 		min: 0,
-		idle: 500
+		idle: 2000
 	},
 });
