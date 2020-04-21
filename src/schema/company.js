@@ -239,8 +239,6 @@ export const resolvers =  {
 		async bestSellers(_, { filter, pagination }) {
 			const where = sanitizeFilter(filter, { table: 'orderproduct' });
 
-			console.log(where)
-
 			const products = await OrderProduct.findAll({
 				attributes: [
 					[conn.col('productId'), 'id'],
