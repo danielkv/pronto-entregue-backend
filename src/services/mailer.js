@@ -6,11 +6,11 @@ let config;
 
 if (process.env.NODE_ENV === 'production') {
 	config = {
-		secure: true,
+		secure: false,
 		host: process.env.EMAIL_HOST,
 		port: process.env.EMAIL_PORT,
 		auth: {
-			user: process.env.EMAIL_ACCOUNT,
+			user: process.env.EMAIL_USERNAME,
 			pass: process.env.EMAIL_PASSWORD,
 		},
 		debug: false
@@ -27,7 +27,7 @@ if (process.env.NODE_ENV === 'production') {
 	}
 }
 
-const transporter = nodemailer.createTransport(config, { from: `${process.env.EMAIL_NAME} <${process.env.EMAIL_ACCOUNT}>` });
+export const transporter = nodemailer.createTransport(config, { from: `${process.env.EMAIL_NAME} <${process.env.EMAIL_ACCOUNT}>` });
 
 export default new Email({
 	transport: transporter,
