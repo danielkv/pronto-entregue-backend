@@ -3,6 +3,7 @@ import path  from 'path';
 
 import { importTable, exportDB } from './controller/helper';
 import { setupDataBase } from './controller/setupDB';
+import { transporter } from './services/mailer';
 
 const route = Router();
 
@@ -44,9 +45,25 @@ route.get('/import/:table', (req, res) => {
 
 
 // render pug test
-// static routes
 route.get('/testPug', (req, res)=>{
 	res.render('recover-password/html', { user: { firstName: 'Daniel' }, expiresIn: 10, link: 'test' });
+});
+
+route.get('/testEmail', async (req, res)=>{
+	if (!process.env.SETUP) return res.sendStatus(404);
+
+	try {
+		const response = await transporter.sendMail({
+			to: 'daniel_kv@hotmail.com',
+			html: '<p><b>Teste HTML</b></p><p><a href="https://prontoentregue.com.br">Click</a></p>',
+			subject: 'Email de teste MailJet'
+		})
+		return res.json(response)
+	} catch (err) {
+		return res.json(err.message)
+	}
+	
+	
 });
 
 export default route;
