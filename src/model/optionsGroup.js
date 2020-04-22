@@ -1,5 +1,6 @@
 import Sequelize  from 'sequelize';
 
+import { withCache } from '../cache';
 import conn from '../services/connection';
 import Option  from './option';
 
@@ -104,4 +105,4 @@ OptionsGroup.init({
 	sequelize: conn
 });
 
-export default OptionsGroup;
+export default withCache(OptionsGroup);
