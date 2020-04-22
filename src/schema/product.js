@@ -1,6 +1,8 @@
 import { gql }  from 'apollo-server';
 import { Op, fn, literal, col } from 'sequelize';
 
+import { cleanKeys } from '../cache';
+import { companyKey, optionsGroupsKey, categoryKey, categoryProductsKey } from '../cache/keys';
 import { upload }  from '../controller/uploads';
 import Address from '../model/address';
 import Campaign from '../model/campaign';
@@ -142,7 +144,8 @@ export const resolvers =  {
 				if (!category) throw new Error('Categoria não encontrada');
 
 				// create product
-				const product = await category.createProduct({ ...data, companyId: company.get('id') }, { transaction });
+				//const product = await category.createProduct({ ...data, companyId: company.get('id') }, { transaction });
+				const product = await Product.cache().create({ ...data, companyId: company.get('id') }, { transaction })
 
 				// create options groups
 				if (data.optionsGroups) await OptionsGroup.updateAll(data.optionsGroups, product, transaction);
@@ -162,15 +165,23 @@ export const resolvers =  {
 				const product = await Product.findByPk(id);
 				if (!product) throw new Error('Produto não encontrado');
 
+				// get old and new categoryId before update to clean cache
+				const oldCategoryId = product.get('categoryId');
+				const newCategoryId = data.categoryId;
+
 				// update product
-				const productUpdated = await product.update(data, { fields: ['name', 'description', 'sku', 'price', 'fromPrice', 'order', 'active', 'image', 'type', 'categoryId'], transaction });
+				const productUpdated = await product.cache().update(data, { fields: ['name', 'description', 'sku', 'price', 'fromPrice', 'order', 'active', 'image', 'type', 'categoryId'], transaction });
 
 				// create, update, remove options groups
 				if (data.optionsGroups) await OptionsGroup.updateAll(data.optionsGroups, productUpdated, transaction);
 
 				// sales
 				if (data.sale) await productUpdated.createSale(data.sale, { transaction });
-			
+
+				//Product.cache(categoryProductsKey(id)).clear();
+				await cleanKeys(`*${categoryProductsKey(oldCategoryId)}*`)
+				await cleanKeys(`*${categoryProductsKey(newCategoryId)}*`)
+
 				return productUpdated;
 			})
 		},
@@ -236,7 +247,7 @@ export const resolvers =  {
 		},
 		async product(_, { id }) {
 			// check if product exists
-			const product = await Product.findByPk(id);
+			const product = await Product.cache().findByPk(id);
 			if (!product) throw new Error('Produto não encontrada');
 
 			return product;
@@ -319,15 +330,27 @@ export const resolvers =  {
 		},
 		optionsGroups(parent, { filter }) {
 			if (parent.optionsGroups) return parent.optionsGroups;
+			const productId = parent.get('id');
 			
 			let where = { active: true };
 			if (filter && filter.showInactive) delete where.active;
-			return parent.getOptionsGroups({ where, order: [['order', 'ASC']] });
+			//return parent.getOptionsGroups({ where, order: [['order', 'ASC']] });
+			
+			return OptionsGroup.cache(optionsGroupsKey(`${productId}:${JSON.stringify(filter)}`))
+				.findAll({
+					where: [where, { productId }],
+					order: [['order', 'ASC']]
+				})
 		},
 		category(parent) {
 			if (parent.category) return parent.get('category');
-
-			return parent.getCategory();
+			
+			const categoryId = parent.get('categoryId');
+			//return parent.getCategory();
+			return Category.cache(categoryKey(categoryId))
+				.findOne({
+					where: { id: categoryId }
+				})
 		},
 		countFavoritedBy(parent) {
 			return parent.countFavoritedBy();
@@ -340,7 +363,8 @@ export const resolvers =  {
 		company (parent) {
 			if (parent.company) return parent.company;
 
-			return parent.getCompany();
+			return Company.cache(companyKey(parent.get('companyId')))
+				.findOne({ where: { id: parent.get('companyId') } })
 		},
 		countCampaigns(parent, { notIn = {} }) {
 			// count all realted campaigns

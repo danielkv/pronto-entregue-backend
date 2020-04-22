@@ -1,9 +1,11 @@
 import { gql }  from 'apollo-server';
 import { Op } from 'sequelize';
 
+import { optionsKey } from '../cache/keys';
+import Option  from '../model/option';
 import OptionsGroup  from '../model/optionsGroup';
 import Products  from '../model/product';
-
+import { sanitizeFilter } from '../utilities';
 
 
 export const typeDefs =  gql`
@@ -19,7 +21,6 @@ export const typeDefs =  gql`
 		active: Boolean!
 		createdAt: DateTime!
 		updatedAt: DateTime!
-		product: Product!
 
 		groupRestrained: OptionsGroup
 		restrainedBy: OptionsGroup
@@ -66,31 +67,35 @@ export const resolvers =  {
 	OptionsGroup: {
 		options: (parent, { filter }) => {
 			if (parent.options) return parent.options;
+			
+			const optionsGroupId = parent.get('id');
+			const where = sanitizeFilter(filter);
 
-			let where = { active: true };
-			if (filter && filter.showInactive) delete where.active;
-
-			return parent.getOptions({ where, order: [['order', 'ASC']] });
-		},
-		countOptions: (parent, { filter }) => {
-			if (parent.options) return parent.get('options').length;
-
-			let where = { active: true };
-			if (filter && filter.showInactive) delete where.active;
-
-			return parent.getOptions({ where })
-				.then(options=>{
-					return options.length;
+			//return parent.getOptions({ where, order: [['order', 'ASC']] });
+			return Option.cache(optionsKey(`${optionsGroupId}:${JSON.parse(filter)}`))
+				.findAll({
+					where: [where, { optionsGroupId }]
 				})
+		},
+		async countOptions(parent, { filter }) {
+			if (parent.options) return parent.get('options').length;
+			
+			const optionsGroupId = parent.get('id');
+			const where = sanitizeFilter(filter);
+
+			//return parent.getOptions({ where, order: [['order', 'ASC']] });
+			const options = await Option.cache(optionsKey(`${optionsGroupId}:${JSON.parse(filter)}`))
+				.findAll({
+					where: [where, { optionsGroupId }]
+				})
+
+			return options.length;
 		},
 		groupRestrained: (parent) => {
 			return parent.getGroupRestrained();
 		},
 		restrainedBy: (parent) => {
 			return parent.getRestrainedBy();
-		},
-		product: (parent) => {
-			return parent.getProduct();
-		},
+		}
 	}
 }

@@ -1,5 +1,6 @@
 import { gql }  from 'apollo-server';
 
+import { categoryProductsKey } from '../cache/keys';
 import { upload }  from '../controller/uploads';
 import Category  from '../model/category';
 import Company from '../model/company';
@@ -122,19 +123,30 @@ export const resolvers =  {
 		},
 	},
 	Category: {
-		products(parent, { filter }) {
+		async products(parent, { filter }) {
 			if (parent.products) return parent.products;
+			
+			const categoryId = parent.get('id');
+			const where = sanitizeFilter(filter, { search: ['name'] });
 
-			const where = sanitizeFilter(filter);
-
-			return parent.getProducts({ where });
+			//return parent.getProducts({ where });
+			return await Product.cache(categoryProductsKey(`${categoryId}:${JSON.stringify(filter)}`)).findAll({
+				where: [where, { categoryId }],
+				order: [['name', 'ASC']]
+			})
 		},
-		countProducts(parent, { filter }) {
+		async countProducts(parent, { filter }) {
 			if (parent.products) return parent.get('products').length;
 
-			const where = sanitizeFilter(filter);
+			const categoryId = parent.get('id');
+			const where = sanitizeFilter(filter, { search: ['name'] });
 
-			return parent.countProducts({ where });
+			const products = await Product.cache(categoryProductsKey(`${categoryId}:${JSON.stringify(filter)}`)).findAll({
+				where: [where, { categoryId }],
+				order: [['name', 'ASC']]
+			})
+
+			return products.length;
 		}
 	}
 }

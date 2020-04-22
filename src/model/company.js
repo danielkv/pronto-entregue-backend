@@ -1,5 +1,6 @@
 import Sequelize  from 'sequelize';
 
+import cache from '../cache';
 import conn from '../services/connection';
 
 /*
@@ -32,4 +33,4 @@ Company.init({
 	sequelize: conn
 });
 
-export default Company;
+export default cache.withCache(Company);

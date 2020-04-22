@@ -1,5 +1,6 @@
 import Sequelize from 'sequelize';
 
+import cache from '../cache';
 import conn from '../services/connection';
 
 class Rating extends Sequelize.Model {}
@@ -17,4 +18,4 @@ Rating.init({
 	sequelize: conn,
 });
 
-export default Rating;
+export default cache.withCache(Rating);

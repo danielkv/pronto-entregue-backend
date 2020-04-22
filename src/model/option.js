@@ -1,6 +1,6 @@
 import Sequelize  from 'sequelize';
 
-import { withCache } from '../cache';
+import cache from '../cache';
 import conn from '../services/connection';
 
 /*
@@ -63,4 +63,4 @@ Option.init({
 	name: { singular: 'option', plural: 'options' }
 });
 
-export default withCache(Option);
+export default cache.withCache(Option);

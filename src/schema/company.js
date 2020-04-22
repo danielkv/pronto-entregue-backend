@@ -1,6 +1,7 @@
 import { gql }  from 'apollo-server';
 import { Op, fn, col, where, literal } from 'sequelize';
 
+import { companyRateKey } from '../cache/keys';
 import { upload } from '../controller/uploads';
 import { deliveryTimeLoader } from '../loaders/loader';
 import Address from '../model/address';
@@ -407,9 +408,16 @@ export const resolvers =  {
 			});
 		},
 		async rate(parent) {
-			const [rating] = await parent.getRatings({
+			const companyId = parent.get('id');
+			const rating = await Rating.cache(companyRateKey(companyId))
+				.findOne({
+					attributes: [[fn('AVG', col('rate')), 'rateAvarage']],
+					where: { companyId }
+				});
+
+			/* const [rating] = await parent.getRatings({
 				attributes: [[fn('AVG', col('rate')), 'rateAvarage']]
-			})
+			}) */
 
 			return rating.get('rateAvarage') || 0;
 		},

@@ -1,6 +1,6 @@
 import Sequelize  from 'sequelize';
 
-import { withCache } from '../cache';
+import cache from '../cache';
 import conn from '../services/connection';
 
 /*
@@ -66,4 +66,4 @@ Product.init({
 	sequelize: conn
 });
 
-export default withCache(Product);
+export default cache.withCache(Product);

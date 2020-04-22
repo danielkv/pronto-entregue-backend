@@ -1,5 +1,6 @@
 import Sequelize from 'sequelize';
 
+import cache from '../cache';
 import conn from '../services/connection';
 
 /*
@@ -30,4 +31,4 @@ Category.init({
 	sequelize: conn
 });
 
-export default Category;
+export default cache.withCache(Category);
