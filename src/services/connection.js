@@ -6,7 +6,11 @@ export default new Sequelize(process.env.MYSQL_DB, process.env.MYSQL_USER, proce
 	pool: {
 		max: parseInt(process.env.MYSQL_MAX_USER_CONNECTIONS),
 		min: 0,
-		idle: 2000
+		idle: 5000
+	},
+	retry: {
+		max: 5,
+		match: [/max_user_connections/g]
 	},
 	//
 	timezone: '-03:00'
