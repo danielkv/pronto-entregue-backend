@@ -2,7 +2,7 @@ import { gql }  from 'apollo-server';
 import { Op, fn, literal, col } from 'sequelize';
 
 import { cleanKeys } from '../cache';
-import { companyKey, optionsGroupsKey, categoryKey, categoryProductsKey } from '../cache/keys';
+import { companyKey, optionsGroupsKey, categoryKey, categoryProductsKey, loadProductKey } from '../cache/keys';
 import { upload }  from '../controller/uploads';
 import Address from '../model/address';
 import Campaign from '../model/campaign';
@@ -215,32 +215,16 @@ export const resolvers =  {
 		},
 	},
 	Query: {
-		loadProduct(_, { id }, __, info) {
-			const optionsGroupsWhere = sanitizeFilter(info.variableValues.filter);
+		loadProduct(_, { id }) {
+			//const optionsGroupsWhere = sanitizeFilter(info.variableValues.filter);
 
-			return Product.findOne({
+			return Product.cache(loadProductKey(id)).findOne({
 				where: { id },
 				include: [
 					Category,
 					{
 						model: Sale,
 						...getSaleSelection()
-					},
-					{
-						model: OptionsGroup,
-						required: false,
-						where: optionsGroupsWhere,
-						include: [
-							Option,
-							{
-								model: OptionsGroup,
-								as: 'groupRestrained',
-							},
-							{
-								model: OptionsGroup,
-								as: 'restrainedBy',
-							}
-						]
 					}
 				]
 			})

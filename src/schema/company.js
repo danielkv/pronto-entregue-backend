@@ -8,13 +8,12 @@ import Address from '../model/address';
 import Company  from '../model/company';
 import CompanyMeta  from '../model/companyMeta';
 import CompanyType from '../model/companyType';
-import OptionsGroup from '../model/optionsGroup';
 import OrderProduct from '../model/orderProduct';
 import Product from '../model/product';
 import Rating  from '../model/rating';
 import User from '../model/user';
 import conn  from '../services/connection';
-import { getSQLPagination, sanitizeFilter, doesPathExist }  from '../utilities';
+import { getSQLPagination, sanitizeFilter }  from '../utilities';
 import { whereCompanyDistance, pointFromCoordinates } from '../utilities/address';
 import { defaultBusinessHours, companyIsOpen } from '../utilities/company';
 
@@ -192,39 +191,9 @@ export const resolvers =  {
 				...getSQLPagination(pagination),
 			});
 		},
-		async company(_, { id }, __, info) {
-			const include = []
-			const hasProductPath = doesPathExist(info.fieldNodes, ['company', 'products']);
-
-			if (hasProductPath) {
-				const where = sanitizeFilter(info.variableValues.filter || {});
-				const pagination = getSQLPagination(info.variableValues.pagination || {});
-				const productInclude = []
-
-				const hasOptionsGroupsPath = doesPathExist(hasProductPath.selectionSet.selections, ['products', 'optionsGroups']);
-				if (hasOptionsGroupsPath) {
-					const optionsGroupsFilters = hasOptionsGroupsPath.arguments.map(arg => arg.name.value);
-					const optionsGroupswhere = sanitizeFilter(optionsGroupsFilters.includes('filter') ? (info.variableValues.filter || {}) : {});
-
-					productInclude.push({
-						model: OptionsGroup,
-						where: optionsGroupswhere
-					})
-				}
-
-				include.push({
-					where,
-					model: Product,
-					...pagination,
-					include: productInclude
-				})
-			}
-
+		async company(_, { id }) {
 			// check if company exists
-			const company = await Company.findOne({
-				where: { id },
-				include,
-			});
+			const company = await Company.findByPk(id);
 			if (!company) throw new Error('Empresa não encontrada');
 
 			return company;

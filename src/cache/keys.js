@@ -3,6 +3,7 @@ export const namespace = 'model';
 export const companyKey = (id)=>`${namespace}:company:${id}`;
 export const companyRateKey = (companyId)=>`${namespace}:companyRate:${companyId}`;
 
+export const loadProductKey = (id)=>`${namespace}:loadProduct:${id}`;
 export const productKey = (id)=>`${namespace}:product:${id}`;
 export const optionsGroupsKey = (productId)=>`${namespace}:productOptionsGroups:${productId}`;
 
