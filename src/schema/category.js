@@ -90,6 +90,7 @@ export const resolvers =  {
 					include: [
 						{
 							model: OptionsGroup,
+							required: false,
 							where: { active: true },
 							include: [{
 								model: Option,
