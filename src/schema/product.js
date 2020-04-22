@@ -204,8 +204,8 @@ export const resolvers =  {
 		},
 	},
 	Query: {
-		loadProduct(_, { id, filter: optionsGroupsFilter }) {
-			const optionsGroupsWhere = sanitizeFilter(optionsGroupsFilter);
+		loadProduct(_, { id }, __, info) {
+			const optionsGroupsWhere = sanitizeFilter(info.variableValues.filter);
 
 			return Product.findOne({
 				where: { id },
@@ -217,6 +217,7 @@ export const resolvers =  {
 					},
 					{
 						model: OptionsGroup,
+						required: false,
 						where: optionsGroupsWhere,
 						include: [
 							Option,
