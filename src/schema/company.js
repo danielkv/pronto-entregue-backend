@@ -264,7 +264,7 @@ export const resolvers =  {
 		async deliveryTime(parent) {
 			const meta = await deliveryTimeLoader.load(parent.get('id'));
 			
-			return parseInt(meta.value);
+			return meta;
 		},
 		async bestSellers(_, { filter, pagination }) {
 			const where = sanitizeFilter(filter, { table: 'orderproduct' });

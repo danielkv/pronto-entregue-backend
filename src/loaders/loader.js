@@ -19,9 +19,15 @@ export const deliveryTimeLoader = new DataLoader(async keys => {
 			companyId: keys,
 			key: 'deliveryTime'
 		},
-		order: [[literal(`FIELD(companyId, ${keys.join(', ')})`)]]
+		//order: [[literal(`FIELD(companyId, ${keys.join(', ')})`)]]
 	});
-	
 
-	return metas;
+	// return metas;
+	
+	return keys.map(key => {
+		const meta = metas.find(m => m.companyId === key)
+		if (meta) return parseInt(meta.value);
+
+		return 0;
+	})
 })
