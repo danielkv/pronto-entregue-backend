@@ -65,12 +65,16 @@ export const resolvers =  {
 	},
 	OptionsGroup: {
 		options: (parent, { filter }) => {
+			if (parent.options) return parent.options;
+
 			let where = { active: true };
 			if (filter && filter.showInactive) delete where.active;
 
 			return parent.getOptions({ where, order: [['order', 'ASC']] });
 		},
 		countOptions: (parent, { filter }) => {
+			if (parent.options) return parent.get('options').length;
+
 			let where = { active: true };
 			if (filter && filter.showInactive) delete where.active;
 

@@ -2,16 +2,18 @@ import { gql }  from 'apollo-server';
 import { Op, fn, col, where, literal } from 'sequelize';
 
 import { upload } from '../controller/uploads';
+import { deliveryTimeLoader } from '../loaders/loader';
 import Address from '../model/address';
 import Company  from '../model/company';
 import CompanyMeta  from '../model/companyMeta';
 import CompanyType from '../model/companyType';
+import OptionsGroup from '../model/optionsGroup';
 import OrderProduct from '../model/orderProduct';
 import Product from '../model/product';
 import Rating  from '../model/rating';
 import User from '../model/user';
 import conn  from '../services/connection';
-import { getSQLPagination, sanitizeFilter }  from '../utilities';
+import { getSQLPagination, sanitizeFilter, doesPathExist }  from '../utilities';
 import { whereCompanyDistance, pointFromCoordinates } from '../utilities/address';
 import { defaultBusinessHours, companyIsOpen } from '../utilities/company';
 
@@ -189,9 +191,39 @@ export const resolvers =  {
 				...getSQLPagination(pagination),
 			});
 		},
-		async company(_, { id }) {
+		async company(_, { id }, __, info) {
+			const include = []
+			const hasProductPath = doesPathExist(info.fieldNodes, ['company', 'products']);
+
+			if (hasProductPath) {
+				const where = sanitizeFilter(info.variableValues.filter || {});
+				const pagination = getSQLPagination(info.variableValues.pagination || {});
+				const productInclude = []
+
+				const hasOptionsGroupsPath = doesPathExist(hasProductPath.selectionSet.selections, ['products', 'optionsGroups']);
+				if (hasOptionsGroupsPath) {
+					const optionsGroupsFilters = hasOptionsGroupsPath.arguments.map(arg => arg.name.value);
+					const optionsGroupswhere = sanitizeFilter(optionsGroupsFilters.includes('filter') ? (info.variableValues.filter || {}) : {});
+
+					productInclude.push({
+						model: OptionsGroup,
+						where: optionsGroupswhere
+					})
+				}
+
+				include.push({
+					where,
+					model: Product,
+					...pagination,
+					include: productInclude
+				})
+			}
+
 			// check if company exists
-			const company = await Company.findByPk(id);
+			const company = await Company.findOne({
+				where: { id },
+				include,
+			});
 			if (!company) throw new Error('Empresa não encontrada');
 
 			return company;
@@ -230,10 +262,8 @@ export const resolvers =  {
 			return 0;
 		},
 		async deliveryTime(parent) {
-			// check if metadata exists
-			const [meta] = await parent.getMetas({ where: { key: 'deliveryTime' } });
-			if (!meta) return 0;
-
+			const meta = await deliveryTimeLoader.load(parent.get('id'));
+			
 			return parseInt(meta.value);
 		},
 		async bestSellers(_, { filter, pagination }) {
@@ -277,11 +307,13 @@ export const resolvers =  {
 			// find and count products
 			return parent.countProducts({ where: _filter });
 		},
-		products: (parent, { filter, pagination }) => {
-			const _filter = sanitizeFilter(filter);
+		products (parent, { filter, pagination }) {
+			if (parent.products) return parent.products;
+
+			const where = sanitizeFilter(filter);
 
 			return parent.getProducts({
-				where: _filter,
+				where,
 				order: [['name', 'ASC']],
 				...getSQLPagination(pagination),
 			})

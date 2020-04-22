@@ -17,6 +17,7 @@ import conn  from '../services/connection';
 import { getSQLPagination, sanitizeFilter } from '../utilities';
 import { whereCompanyDistance } from '../utilities/address';
 import { campaignProductWhere } from '../utilities/campaign';
+import { getSaleSelection } from '../utilities/product';
 
 export const typeDefs =  gql`
 	type Product {
@@ -69,6 +70,7 @@ export const typeDefs =  gql`
 		product(id: ID!): Product!
 		bestSellers(limit: Int!, location: GeoPoint!): [Product]!
 		productsOnSale(limit: Int!, location: GeoPoint!): [Product]!
+		loadProduct(id: ID!, filter: JSON): Product!
 	}
 
 	extend type Mutation {
@@ -202,6 +204,35 @@ export const resolvers =  {
 		},
 	},
 	Query: {
+		loadProduct(_, { id, filter: optionsGroupsFilter }) {
+			const optionsGroupsWhere = sanitizeFilter(optionsGroupsFilter);
+
+			return Product.findOne({
+				where: { id },
+				include: [
+					Category,
+					{
+						model: Sale,
+						...getSaleSelection()
+					},
+					{
+						model: OptionsGroup,
+						where: optionsGroupsWhere,
+						include: [
+							Option,
+							{
+								model: OptionsGroup,
+								as: 'groupRestrained',
+							},
+							{
+								model: OptionsGroup,
+								as: 'restrainedBy',
+							}
+						]
+					}
+				]
+			})
+		},
 		async product(_, { id }) {
 			// check if product exists
 			const product = await Product.findByPk(id);
@@ -254,6 +285,10 @@ export const resolvers =  {
 				include: [
 					OrderProduct,
 					{
+						model: Sale,
+						...getSaleSelection()
+					},
+					{
 						model: Company,
 						where: { published: true, active: true },
 						required: true,
@@ -282,6 +317,8 @@ export const resolvers =  {
 			return Option.count({ where, include: [{ model: OptionsGroup, where: { productId: parent.get('id') } }] });
 		},
 		optionsGroups(parent, { filter }) {
+			if (parent.optionsGroups) return parent.optionsGroups;
+			
 			let where = { active: true };
 			if (filter && filter.showInactive) delete where.active;
 			return parent.getOptionsGroups({ where, order: [['order', 'ASC']] });
@@ -300,7 +337,7 @@ export const resolvers =  {
 			});
 		},
 		company (parent) {
-			if (parent.company) return parent.get('company');
+			if (parent.company) return parent.company;
 
 			return parent.getCompany();
 		},
@@ -326,6 +363,8 @@ export const resolvers =  {
 		},
 
 		async sale(parent) {
+			if (parent.sales) return parent.sales[0];
+
 			const [sale] = await parent.getSales({
 				attributes: {
 					include: [[literal('IF(startsAt <= NOW() AND expiresAt >= NOW() AND active, true, false)'), 'progress']]

@@ -2,6 +2,10 @@ import { gql }  from 'apollo-server';
 
 import { upload }  from '../controller/uploads';
 import Category  from '../model/category';
+import Company from '../model/company';
+import Option from '../model/option';
+import OptionsGroup from '../model/optionsGroup';
+import Product from '../model/product';
 import sequelize  from '../services/connection';
 import { sanitizeFilter, getSQLPagination } from '../utilities'
 
@@ -32,6 +36,7 @@ export const typeDefs =  gql`
 	extend type Query {
 		category(id: ID!): Category!
 		categories(filter: Filter, pagination: Pagination): [Category]!
+		loadCompanyCategories(filter: JSON): [Category]!
 	}
 
 	extend type Mutation {
@@ -74,6 +79,31 @@ export const resolvers =  {
 		}
 	},
 	Query: {
+		loadCompanyCategories(_, { filter }) {
+			const where = sanitizeFilter(filter, { search: ['name'] });
+
+			return Category.findAll({
+				where,
+				include: [{
+					model: Product,
+					where: { active: true },
+					include: [
+						{
+							model: OptionsGroup,
+							where: { active: true },
+							include: [{
+								model: Option,
+								where: { active: true }
+							}]
+						},
+						{
+							model: Company
+						}
+					]
+				}]
+			})
+		},
+
 		categories(_, { filter, pagination }) {
 			const where = sanitizeFilter(filter, { search: ['name'] });
 
@@ -92,11 +122,15 @@ export const resolvers =  {
 	},
 	Category: {
 		products(parent, { filter }) {
+			if (parent.products) return parent.products;
+
 			const where = sanitizeFilter(filter);
 
 			return parent.getProducts({ where });
 		},
 		countProducts(parent, { filter }) {
+			if (parent.products) return parent.get('products').length;
+
 			const where = sanitizeFilter(filter);
 
 			return parent.countProducts({ where });

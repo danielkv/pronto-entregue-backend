@@ -1,6 +1,24 @@
 import crypto  from 'crypto';
 import { Op, col, fn, where }  from 'sequelize';
 
+export function doesPathExist(nodes, path) {
+	if (!nodes) {
+		return false;
+	}
+	
+	const node = nodes.find(x => x.name.value === path[0]);
+	
+	if (!node) {
+		return false;
+	}
+	
+	if (path.length === 1) {
+		return node; //.arguments.map(arg => arg.name.value);
+	}
+	
+	return doesPathExist(node.selectionSet.selections, path.slice(1));
+}
+
 export function sanitizeFilter(_filter = {}, _options = {}) {
 	let options = {
 		search: ['name', 'description'],
@@ -8,15 +26,15 @@ export function sanitizeFilter(_filter = {}, _options = {}) {
 		table: '',
 		..._options,
 	}
-
+	
 	let filter = {
 		active: true,
 		showInactive: false,
 		search: '',
-
+		
 		..._filter,
 	}
-
+	
 	//verify if user sent showInactive
 	if (filter.showInactive === true) delete filter.active;
 	delete filter.showInactive;
@@ -30,7 +48,7 @@ export function sanitizeFilter(_filter = {}, _options = {}) {
 	
 	const search = filter.search || '';
 	delete filter.search;
-
+	
 	/* if (_filter.statusNotIn) filter.status = { [Op.notIn]: _filter.statusNotIn }
 	delete filter.statusNotIn; */
 	
@@ -48,7 +66,7 @@ export function sanitizeFilter(_filter = {}, _options = {}) {
 	if (filter.createdAt) {
 		const createdAt = filter.createdAt;
 		delete filter.createdAt;
-		
+			
 		filter = {
 			[Op.and]: [
 				filter,
@@ -56,33 +74,33 @@ export function sanitizeFilter(_filter = {}, _options = {}) {
 			]
 		}
 	}
-	
+		
 	return filter;
 }
-
+	
 export function getSQLPagination({ page=null, rowsPerPage=null } = {}) {
 	return {
 		offset: page && rowsPerPage ? page * rowsPerPage : null,
 		limit: rowsPerPage || null,
 	}
 }
-
-
+	
+	
 /*
- * Adiciona ao prototype Object a função filter
- *
- */
-
+	* Adiciona ao prototype Object a função filter
+	*
+	*/
+	
 Object.filter = (obj, predicate) =>
 	Object.keys(obj)
 		.filter( key => predicate(obj[key], key) )
 		.reduce( (res, key) => (res[key] = obj[key], res), {} );
-
+	
 /*
- * Cria o salt para ser adicionado/verificar senha do usuário
- *
- */
-
+	* Cria o salt para ser adicionado/verificar senha do usuário
+	*
+	*/
+	
 export function salt(password, salt=null) {
 	const _salt = salt || crypto.randomBytes(16).toString('hex');
 	var hash = crypto.createHmac('sha512', _salt);
@@ -93,16 +111,16 @@ export function salt(password, salt=null) {
 		salt: _salt,
 	}
 }
-
+	
 /*
- * Retira todos acentos, converte espaços em hífens e
- * transforma texto em minúsculo
- * 
- */
-
+	* Retira todos acentos, converte espaços em hífens e
+	* transforma texto em minúsculo
+	* 
+	*/
+	
 export function slugify(text) {
 	let newText = text.trim().toLowerCase();
-
+		
 	newText = newText.replace(new RegExp('[ÁÀÂÃ]|[áàâã]','gi'), 'a');
 	newText = newText.replace(new RegExp('[ÉÈÊ]|[éèê]','gi'), 'e');
 	newText = newText.replace(new RegExp('[ÍÌÎ]|[íìî]','gi'), 'i');
@@ -111,7 +129,7 @@ export function slugify(text) {
 	newText = newText.replace(new RegExp('[Çç]','gi'), 'c');
 	// eslint-disable-next-line no-useless-escape
 	newText = newText.replace(new RegExp('[\(\)]', 'g'), '');
-	
+		
 	newText = newText.replace(new RegExp(' - | ', 'g'), '-');
 	return newText;
 }

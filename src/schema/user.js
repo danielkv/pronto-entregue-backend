@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import { Op }  from 'sequelize';
 
 import { upload } from '../controller/uploads';
-import balanceLoader from '../loaders/balanceLoader';
+import { balanceLoader } from '../loaders/loader';
 import Company  from '../model/company';
 import User  from '../model/user';
 import UserMeta  from '../model/userMeta';
