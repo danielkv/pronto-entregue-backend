@@ -1,6 +1,7 @@
 import Sequelize  from 'sequelize';
 
 import conn from '../services/connection';
+import { deliveryTimeLoader } from '../loaders/loader';
 
 /*
  * Define modelo (tabela) de relação entre produtos e filiais / empresas
@@ -18,9 +19,20 @@ class CompanyMeta extends Sequelize.Model {
 		const metasRemove = metas.filter(row=>row.id && row.action==='delete');
 		
 		const [removed, created, updated] = await Promise.all([
-			CompanyMeta.destroy({ where: { id: metasRemove.map(r => r.id) }, transaction }).then(() => metasRemove),
+			// removed
+			CompanyMeta.destroy({ where: { id: metasRemove.map(r => r.id) }, transaction }).then(() => {
+				metasRemove.forEach(r => deliveryTimeLoader.clear(r.id)) ;
+				return metasRemove;
+			}),
+			// created
 			Promise.all(metasCreate.map(row => modelInstance.createMeta(row, { transaction }))),
-			Promise.all(metasUpdate.map(row => modelInstance.getMetas({ where: { id: row.id } }).then(([meta]) => {if (!meta) throw new Error('Esse metadado não pertence a essa empresa'); return meta.update(row, { fields: ['value'], transaction })})))
+			// updated
+			Promise.all(metasUpdate.map(row => modelInstance.getMetas({ where: { id: row.id } }).then(([meta]) => {
+				if (!meta) throw new Error('Esse metadado não pertence a essa empresa');
+
+				deliveryTimeLoader.clear(row.id);
+				return meta.update(row, { fields: ['value'], transaction })
+			})))
 		]);
 
 		return {

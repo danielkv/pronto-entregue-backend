@@ -30,4 +30,4 @@ export const deliveryTimeLoader = new DataLoader(async keys => {
 
 		return 0;
 	})
-})
+}, { cache: false })

@@ -168,7 +168,7 @@ export const resolvers =  {
 					companyFound.createAddress(data.address);
 
 				// update company
-				const updatedCompany = await companyFound.update(data, { fields: ['name', 'displayName', 'active', 'companyTypeId', 'image', 'backgroundColor', 'published'], transaction })
+				const updatedCompany = await companyFound.cache().update(data, { fields: ['name', 'displayName', 'active', 'companyTypeId', 'image', 'backgroundColor', 'published'], transaction })
 			
 				// check if there are metas to update
 				if (data.metas) await CompanyMeta.updateAll(data.metas, updatedCompany, transaction);

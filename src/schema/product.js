@@ -344,11 +344,10 @@ export const resolvers =  {
 				...getSQLPagination(pagination)
 			});
 		},
-		company (parent) {
+		company(parent) {
 			if (parent.company) return parent.company;
 
-			return Company.cache(companyKey(parent.get('companyId')))
-				.findOne({ where: { id: parent.get('companyId') } })
+			return Company.cache().findByPk(parent.get('companyId'));
 		},
 		countCampaigns(parent, { notIn = {} }) {
 			// count all realted campaigns
