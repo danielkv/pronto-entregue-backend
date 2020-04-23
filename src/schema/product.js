@@ -320,7 +320,7 @@ export const resolvers =  {
 			if (filter && filter.showInactive) delete where.active;
 			//return parent.getOptionsGroups({ where, order: [['order', 'ASC']] });
 			
-			return OptionsGroup.cache(optionsGroupsKey(`${productId}:${JSON.stringify(filter)}`))
+			return OptionsGroup.cache(optionsGroupsKey(`${productId}:${JSON.stringify(filter)}`)) //
 				.findAll({
 					where: [where, { productId }],
 					order: [['order', 'ASC']]

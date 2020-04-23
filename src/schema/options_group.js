@@ -72,7 +72,7 @@ export const resolvers =  {
 			const where = sanitizeFilter(filter);
 
 			//return parent.getOptions({ where, order: [['order', 'ASC']] });
-			return Option.cache(optionsKey(`${optionsGroupId}:${JSON.parse(filter)}`))
+			return Option.cache(optionsKey(`${optionsGroupId}:${JSON.stringify(filter)}`))
 				.findAll({
 					where: [where, { optionsGroupId }]
 				})
@@ -84,7 +84,7 @@ export const resolvers =  {
 			const where = sanitizeFilter(filter);
 
 			//return parent.getOptions({ where, order: [['order', 'ASC']] });
-			const options = await Option.cache(optionsKey(`${optionsGroupId}:${JSON.parse(filter)}`))
+			const options = await Option.cache(optionsKey(`${optionsGroupId}:${JSON.stringify(filter)}`))
 				.findAll({
 					where: [where, { optionsGroupId }]
 				})
