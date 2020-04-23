@@ -7,7 +7,7 @@ import { namespace } from './keys';
 const adaptor = new RedisAdaptor({
 	client: redis,
 	namespace, // optional
-	lifetime: 60*3   // optional
+	lifetime: 60*15    // optional - 15 minutos
 })
 
 export default sequelizeCache(adaptor);
