@@ -1,10 +1,10 @@
 import { gql }  from 'apollo-server';
 import { Op } from 'sequelize';
 
-import { optionsKey } from '../cache/keys';
+import { optionsKey, optionsGroupProductKey } from '../cache/keys';
 import Option  from '../model/option';
 import OptionsGroup  from '../model/optionsGroup';
-import Products  from '../model/product';
+import Product  from '../model/product';
 import { sanitizeFilter } from '../utilities';
 
 
@@ -21,6 +21,8 @@ export const typeDefs =  gql`
 		active: Boolean!
 		createdAt: DateTime!
 		updatedAt: DateTime!
+
+		product: Product!
 
 		groupRestrained: OptionsGroup
 		restrainedBy: OptionsGroup
@@ -56,7 +58,7 @@ export const resolvers =  {
 			return OptionsGroup.findAll({
 				where: { name: { [Op.like]: `%${search}%` }, [`$product.companyId$`]: company.get('id') },
 				include: [{
-					model: Products,
+					model: Product,
 				}]
 			});
 		},
@@ -96,6 +98,17 @@ export const resolvers =  {
 		},
 		restrainedBy: (parent) => {
 			return parent.getRestrainedBy();
+		},
+
+		/**
+		 * references
+		 * - ADM - graphql/products.js
+		 */
+		product(parent) {
+			const optionsGroupId = parent.get('id');
+
+			return Product.cache(optionsGroupProductKey(optionsGroupId))
+				.findOne({ where: { id: parent.get('productId') } })
 		}
 	}
 }
