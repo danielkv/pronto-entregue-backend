@@ -10,9 +10,16 @@ import User from '../model/user';
  * @param {string} authorization Token de autenciação
  */
 
-export function authenticate (authorization) {
-	if (authorization.split(' ')[0] !== 'Bearer') throw new AuthenticationError('Autorização desconhecida');
-	const { id, email } = jwt.verify(authorization.split(' ')[1], process.env.SECRET, { ignoreExpiration: true });
+export function authenticate (authorization, checkBearer=true) {
+	let authorizationToken = '';
+
+	if (checkBearer) {
+		if (authorization.split(' ')[0] !== 'Bearer') throw new AuthenticationError('Autorização desconhecida');
+		authorizationToken = authorization.split(' ')[1];
+	} else
+		authorizationToken = authorization;
+
+	const { id, email } = jwt.verify(authorizationToken, process.env.SECRET, { ignoreExpiration: true });
 
 	return User.findOne({
 		where: { id, email },
