@@ -4,11 +4,9 @@ import path  from 'path';
 import { authenticate } from './controller/authentication';
 import { importTable, exportDB } from './controller/helper';
 import { setupDataBase } from './controller/setupDB';
-import { transporter } from './services/mailer';
 import redis from './services/redis';
 
 const route = Router();
-
 
 // static routes
 route.use('/assets', express.static(path.resolve(__dirname, 'assets'), { extensions: ['png', 'jpg'] }));
@@ -45,8 +43,7 @@ route.get('/import/:table', (req, res) => {
 		});
 })
 
-
-// render pug test
+// reset Redis Cache
 route.get('/resetCache/:auth', async (req, res)=>{
 	try {
 		const authorization = req.params.auth;
@@ -61,23 +58,6 @@ route.get('/resetCache/:auth', async (req, res)=>{
 	} catch(err) {
 		res.send(err.message).status(403);
 	}
-});
-
-route.get('/testEmail', async (req, res)=>{
-	if (!process.env.SETUP) return res.sendStatus(404);
-
-	try {
-		const response = await transporter.sendMail({
-			to: 'daniel_kv@hotmail.com',
-			html: '<p><b>Teste HTML</b></p><p><a href="https://prontoentregue.com.br">Click</a></p>',
-			subject: 'Email de teste MailJet'
-		})
-		return res.json(response)
-	} catch (err) {
-		return res.json(err.message)
-	}
-	
-	
 });
 
 export default route;
