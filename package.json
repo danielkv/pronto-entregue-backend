@@ -8,7 +8,7 @@
 	},
 	"scripts": {
 		"preinstall": "node ./preinstall.js",
-		"start": "sucrase-node ./src/app.js",
+		"start": "node ./src/app.js",
 		"dev": "nodemon ./src/app.js",
 		"build": "sucrase ./src -d ./build --transforms imports && yarn copy_static",
 		"copy_static": "cpx \"src/**/*.{pug,png,jpg,css}\" build -v",
