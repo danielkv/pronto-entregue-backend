@@ -7,7 +7,7 @@ import Order from '../model/order';
 import OrderProduct  from '../model/orderProduct';
 import sequelize  from '../services/connection';
 import { pointFromCoordinates } from '../utilities/address';
-import { companyIsOpen } from '../utilities/company';
+import { companyIsOpen, defaultBusinessHours } from '../utilities/company';
 
 const pubsub = new PubSub();
 
@@ -199,7 +199,8 @@ export const resolvers =  {
 				if (!company) throw new Error('Estabelecimento não encontrado');
 
 				// check if company is open
-				const isOpen = await companyIsOpen(company);
+				const businessHours = await company.getMetas({ where: { key: 'businessHours' } }).then(([meta]) => {if (meta) return JSON.parse(meta.get('value')); else return defaultBusinessHours()});
+				const isOpen = companyIsOpen(businessHours);
 				if (!(selectedCompany && selectedCompany.get('id') === company.get('id')) && !isOpen) throw new Error(`${company.get('displayName')} está fechado no momento`);
 
 				// create order
