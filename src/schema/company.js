@@ -3,7 +3,7 @@ import { Op, fn, col, where, literal } from 'sequelize';
 
 import { companyRateKey } from '../cache/keys';
 import { upload } from '../controller/uploads';
-import { deliveryTimeLoader } from '../loaders/loader';
+import { deliveryTimeLoader, businessHoursLoader } from '../loaders';
 import Address from '../model/address';
 import Company  from '../model/company';
 import CompanyMeta  from '../model/companyMeta';
@@ -260,15 +260,13 @@ export const resolvers =  {
 			return products.map(row => row.get());
 		},
 
-		async businessHours(parent) {
-			// check if meta exists
-			const [meta] = await parent.getMetas({ where: { key: 'businessHours' } })
-			if (!meta) return defaultBusinessHours();
-		
-			return JSON.parse(meta.value);
+		businessHours(parent) {
+			return businessHoursLoader.load(parent.get('id'));
 		},
 		async isOpen(parent) {
-			return companyIsOpen(parent);
+			const businessHours = await businessHoursLoader.load(parent.get('id'));
+			
+			return companyIsOpen(businessHours);
 		},
 
 		countProducts(parent, { filter }) {

@@ -12,6 +12,9 @@ export default new Sequelize(process.env.MYSQL_DB, process.env.MYSQL_USER, proce
 		max: 5,
 		match: [/max_user_connections/g]
 	},
+	logging(str, object) {
+		console.log(object.type, object.where);
+	},
 	//
 	timezone: '-03:00'
 });

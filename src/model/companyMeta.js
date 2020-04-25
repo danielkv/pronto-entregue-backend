@@ -1,7 +1,7 @@
 import Sequelize  from 'sequelize';
 
+import { deliveryTimeLoader } from '../loaders';
 import conn from '../services/connection';
-import { deliveryTimeLoader } from '../loaders/loader';
 
 /*
  * Define modelo (tabela) de relação entre produtos e filiais / empresas

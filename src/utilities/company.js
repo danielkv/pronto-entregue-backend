@@ -33,13 +33,7 @@ export function defaultBusinessHours() {
 	]
 }
 
-export async function companyIsOpen(companyModel) {
-	let businessHours = await companyModel.getMetas({ where: { key: 'businessHours' } })
-		.then(([meta])=>{
-			if (!meta) return defaultBusinessHours();
-			return JSON.parse(meta.value);
-		});
-
+export function companyIsOpen(businessHours) {
 	const now = moment();
 	
 	const weekDay = now.format('d');

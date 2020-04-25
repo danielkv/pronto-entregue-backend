@@ -1,5 +1,6 @@
 import { gql }  from 'apollo-server';
 
+import { ratingUserLoader } from '../loaders';
 import Rating from '../model/rating';
 import User from '../model/user';
 import { sanitizeFilter, getSQLPagination } from '../utilities';
@@ -89,7 +90,8 @@ export const resolvers = {
 			return parent.getCompanies();
 		},
 		user(parent) {
-			return parent.getUser();
+			//return parent.getUser();
+			return ratingUserLoader.load(parent.get('userId'));
 		},
 		order(parent) {
 			return parent.getOrder();

@@ -2,6 +2,7 @@ import { gql }  from 'apollo-server';
 import { Op } from 'sequelize';
 
 import { optionsKey, optionsGroupProductKey } from '../cache/keys';
+import { restrainedByLoader, groupRestrainedLoader } from '../loaders';
 import Option  from '../model/option';
 import OptionsGroup  from '../model/optionsGroup';
 import Product  from '../model/product';
@@ -93,11 +94,11 @@ export const resolvers =  {
 
 			return options.length;
 		},
-		groupRestrained: (parent) => {
-			return parent.getGroupRestrained();
+		groupRestrained(parent) {
+			return groupRestrainedLoader.load(parent.get('id'));
 		},
 		restrainedBy: (parent) => {
-			return parent.getRestrainedBy();
+			return restrainedByLoader.load(parent.get('id'));
 		},
 
 		/**
@@ -109,6 +110,7 @@ export const resolvers =  {
 
 			return Product.cache(optionsGroupProductKey(optionsGroupId))
 				.findOne({ where: { id: parent.get('productId') } })
+
 		}
 	}
 }

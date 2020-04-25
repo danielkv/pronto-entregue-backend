@@ -1,9 +1,10 @@
 import { gql }  from 'apollo-server';
 import { Op, fn, literal, col } from 'sequelize';
 
-import { cleanKeys } from '../cache';
-import { companyKey, optionsGroupsKey, categoryKey, categoryProductsKey, loadProductKey } from '../cache/keys';
+import { cacheAdaptor } from '../cache';
+import { optionsGroupsKey, categoryKey, categoryProductsKey, loadProductKey } from '../cache/keys';
 import { upload }  from '../controller/uploads';
+import { productSaleLoader } from '../loaders';
 import Address from '../model/address';
 import Campaign from '../model/campaign';
 import Category from '../model/category';
@@ -179,8 +180,8 @@ export const resolvers =  {
 				if (data.sale) await productUpdated.createSale(data.sale, { transaction });
 
 				//Product.cache(categoryProductsKey(id)).clear();
-				await cleanKeys(`*${categoryProductsKey(oldCategoryId)}*`)
-				await cleanKeys(`*${categoryProductsKey(newCategoryId)}*`)
+				cacheAdaptor.deleteMatch(`/${categoryProductsKey(oldCategoryId)}/g`)
+				cacheAdaptor.deleteMatch(`/${categoryProductsKey(newCategoryId)}/g`)
 
 				return productUpdated;
 			})
@@ -373,7 +374,9 @@ export const resolvers =  {
 		async sale(parent) {
 			if (parent.sales) return parent.sales[0];
 
-			const [sale] = await parent.getSales({
+			return productSaleLoader.load(parent.get('id'));
+
+			/* const [sale] = await parent.getSales({
 				attributes: {
 					include: [[literal('IF(startsAt <= NOW() AND expiresAt >= NOW() AND active, true, false)'), 'progress']]
 				},
@@ -390,7 +393,7 @@ export const resolvers =  {
 				limit: 1
 			})
 			
-			return sale;
+			return sale; */
 		}
 	}
 }

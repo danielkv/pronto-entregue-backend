@@ -1,8 +1,11 @@
 {
 	"name": "pronto-entregue-backend",
-	"version": "1.1.0",
+	"version": "1.1.2",
 	"main": "src/app.js",
 	"license": "MIT",
+	"engines": {
+		"node": "12.14.0"
+	},
 	"scripts": {
 		"preinstall": "node ./preinstall.js",
 		"start": "sucrase-node ./src/app.js",
@@ -30,6 +33,7 @@
 		"lodash": "^4.17.15",
 		"moment": "^2.24.0",
 		"mysql2": "^1.6.5",
+		"node-cache": "^5.1.0",
 		"nodemailer": "^6.3.0",
 		"pug": "^2.0.4",
 		"sequelize": "^5.13.0",
