@@ -15,7 +15,7 @@ import User from '../model/user';
 import conn  from '../services/connection';
 import { getSQLPagination, sanitizeFilter }  from '../utilities';
 import { whereCompanyDistance, pointFromCoordinates } from '../utilities/address';
-import { defaultBusinessHours, companyIsOpen } from '../utilities/company';
+import { companyIsOpen } from '../utilities/company';
 
 export const typeDefs =  gql`
 	type Company {
