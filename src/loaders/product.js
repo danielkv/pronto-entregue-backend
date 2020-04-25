@@ -2,7 +2,6 @@ import DataLoader from 'dataloader';
 import { literal, Op, fn } from 'sequelize';
 
 import OptionsGroup from '../model/optionsGroup';
-import Product from '../model/product';
 import Sale from '../model/sale';
 
 export const restrainedByLoader = new DataLoader(async keys => {

@@ -95,7 +95,10 @@ export const resolvers =  {
 			return options.length;
 		},
 		groupRestrained(parent) {
-			return groupRestrainedLoader.load(parent.get('id'));
+			const maxSelectRestrain = parent.get('maxSelectRestrain');
+			if (!maxSelectRestrain) return null;
+			
+			return groupRestrainedLoader.load(maxSelectRestrain);
 		},
 		restrainedBy: (parent) => {
 			return restrainedByLoader.load(parent.get('id'));
