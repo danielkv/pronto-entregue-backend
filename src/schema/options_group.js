@@ -2,7 +2,7 @@ import { gql }  from 'apollo-server';
 import { Op } from 'sequelize';
 
 import { optionsKey, optionsGroupProductKey } from '../cache/keys';
-import { restrainedByLoader, groupRestrainedLoader } from '../loaders';
+import { restrainedByLoader, groupRestrainedLoader, optionsLoader } from '../loaders';
 import Option  from '../model/option';
 import OptionsGroup  from '../model/optionsGroup';
 import Product  from '../model/product';
@@ -68,17 +68,24 @@ export const resolvers =  {
 		},
 	},
 	OptionsGroup: {
-		options: (parent, { filter }) => {
+		async options (parent, { filter }) {
 			if (parent.options) return parent.options;
-			
 			const optionsGroupId = parent.get('id');
-			const where = sanitizeFilter(filter);
+			let options = [];
 
-			//return parent.getOptions({ where, order: [['order', 'ASC']] });
-			return Option.cache(optionsKey(`${optionsGroupId}:${JSON.stringify(filter)}`))
-				.findAll({
-					where: [where, { optionsGroupId }]
-				})
+			if (!filter)
+				options = await optionsLoader.load(optionsGroupId)
+			else {
+				const where = sanitizeFilter(filter);
+
+				//return parent.getOptions({ where, order: [['order', 'ASC']] });
+				options = await Option.cache(optionsKey(`${optionsGroupId}:${JSON.stringify(filter)}`))
+					.findAll({
+						where: [where, { optionsGroupId }]
+					})
+			}
+
+			return options;
 		},
 		async countOptions(parent, { filter }) {
 			if (parent.options) return parent.get('options').length;

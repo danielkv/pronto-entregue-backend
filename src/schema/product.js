@@ -4,7 +4,7 @@ import { Op, fn, literal, col } from 'sequelize';
 import { cacheAdaptor } from '../cache';
 import { optionsGroupsKey, categoryKey, categoryProductsKey, loadProductKey } from '../cache/keys';
 import { upload }  from '../controller/uploads';
-import { productSaleLoader } from '../loaders';
+import { productSaleLoader, optionsGroupsLoader } from '../loaders';
 import Address from '../model/address';
 import Campaign from '../model/campaign';
 import Category from '../model/category';
@@ -313,19 +313,25 @@ export const resolvers =  {
 
 			return Option.count({ where, include: [{ model: OptionsGroup, where: { productId: parent.get('id') } }] });
 		},
-		optionsGroups(parent, { filter }) {
+		async optionsGroups(parent, { filter }) {
 			if (parent.optionsGroups) return parent.optionsGroups;
 			const productId = parent.get('id');
+			let groups = []
+
+			if (!filter)
+				groups = await optionsGroupsLoader.load(productId);
+			else {
 			
-			let where = { active: true };
-			if (filter && filter.showInactive) delete where.active;
-			//return parent.getOptionsGroups({ where, order: [['order', 'ASC']] });
+				const where = sanitizeFilter(filter);
 			
-			return OptionsGroup.cache(optionsGroupsKey(`${productId}:${JSON.stringify(filter)}`)) //
-				.findAll({
-					where: [where, { productId }],
-					order: [['order', 'ASC']]
-				})
+				groups = await OptionsGroup.cache(optionsGroupsKey(`${productId}:${JSON.stringify(filter)}`)) //
+					.findAll({
+						where: [where, { productId }],
+						order: [['order', 'ASC']]
+					})
+			}
+
+			return groups;
 		},
 		category(parent) {
 			if (parent.category) return parent.get('category');

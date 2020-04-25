@@ -1,5 +1,6 @@
 import Sequelize from 'sequelize';
 
+import cache from '../cache';
 import conn from '../services/connection';
 
 class Address extends Sequelize.Model {}
@@ -22,4 +23,4 @@ Address.init({
 	sequelize: conn,
 });
 
-export default Address;
+export default cache.withCache(Address);

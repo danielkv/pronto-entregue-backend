@@ -43,3 +43,23 @@ export function whereCompanyDistance({ coordinates }, companyTableStr='company',
 export function pointFromCoordinates(coordinates) {
 	return fn('ST_GeomFromText', literal(`'POINT(${coordinates[0]} ${coordinates[1]})'`));
 }
+
+export function calculateDistance({ latitude: lat1, longitude: lon1 }, { latitude: lat2, longitude: lon2 }) {
+	const R = 6371; // km
+	const dLat = toRad(lat2-lat1);
+	const dLon = toRad(lon2-lon1);
+	const calcLat1 = toRad(lat1);
+	const calcLat2 = toRad(lat2);
+
+	const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+        Math.sin(dLon/2) * Math.sin(dLon/2) * Math.cos(calcLat1) * Math.cos(calcLat2);
+	const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+	const d = R * c;
+
+	return d * 1000;
+}
+// Converts numeric degrees to radians
+function toRad(Value)
+{
+	return Value * Math.PI / 180;
+}

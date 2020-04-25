@@ -1,8 +1,37 @@
 import DataLoader from 'dataloader';
 import { literal, Op, fn } from 'sequelize';
 
+import Option from '../model/option';
 import OptionsGroup from '../model/optionsGroup';
 import Sale from '../model/sale';
+
+export const optionsGroupsLoader = new DataLoader(async keys => {
+	const allGroups = await OptionsGroup.findAll({
+		where: { productId: keys, active: true },
+		order: [['productId', 'ASC'], ['order', 'ASC']]
+	});
+	
+	return keys.map(key => {
+		const productGroups = allGroups.filter(m => m.productId === key)
+		return productGroups;
+
+		//return [];
+	})
+}, { cache: false })
+
+export const optionsLoader = new DataLoader(async keys => {
+	const allOptions = await Option.findAll({
+		where: { optionsGroupId: keys, active: true },
+		order: [['optionsGroupId', 'ASC'], ['order', 'ASC']]
+	});
+	
+	return keys.map(key => {
+		const groupOptions = allOptions.filter(m => m.optionsGroupId === key)
+		return groupOptions;
+
+		//return [];
+	})
+}, { cache: false })
 
 export const restrainedByLoader = new DataLoader(async keys => {
 	const optionGroups = await OptionsGroup.findAll({
@@ -17,6 +46,7 @@ export const restrainedByLoader = new DataLoader(async keys => {
 		return null;
 	})
 }, { cache: false })
+
 
 export const groupRestrainedLoader = new DataLoader(async keys => {
 	const optionsGroups = await OptionsGroup.findAll({

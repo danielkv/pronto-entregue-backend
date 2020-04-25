@@ -15,7 +15,8 @@ import Rating  from '../model/rating';
 import User from '../model/user';
 import conn  from '../services/connection';
 import { getSQLPagination, sanitizeFilter }  from '../utilities';
-import { whereCompanyDistance, pointFromCoordinates } from '../utilities/address';
+import { whereCompanyDistance } from '../utilities/address';
+import { calculateDistance } from '../utilities/address'
 import { companyIsOpen } from '../utilities/company';
 
 export const typeDefs =  gql`
@@ -166,7 +167,7 @@ export const resolvers =  {
 				// update company address
 				const address = await companyFound.getAddress();
 				if (address)
-					address.update(data.address);
+					address.cache().update(data.address);
 				else
 					companyFound.createAddress(data.address);
 
@@ -199,7 +200,7 @@ export const resolvers =  {
 		},
 		async company(_, { id }) {
 			// check if company exists
-			const company = await Company.findByPk(id);
+			const company = await Company.cache().findByPk(id);
 			if (!company) throw new Error('Empresa não encontrada');
 
 			return company;
@@ -395,13 +396,13 @@ export const resolvers =  {
 			return rating.get('rateAvarage') || 0;
 		},
 		async distance(parent, { location }) {
-			const userPoint = pointFromCoordinates(location.coordinates);
+			const companyAddress = await Address.cache().findByPk(parent.get('addressId'));
 
-			const address = await parent.getAddress({
-				attributes: [[fn('ST_Distance_Sphere', userPoint, col('location')), 'distance']]
-			});
-			
-			return (address.get('distance') / 1000).toFixed(1);
+			return (calculateDistance({
+				latitude: location.coordinates[0], longitude: location.coordinates[1]
+			},{
+				latitude: companyAddress.location.coordinates[0], longitude: companyAddress.location.coordinates[1]
+			}) / 1000).toFixed(2);
 		}
 	}
 }
