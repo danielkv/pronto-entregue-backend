@@ -2,6 +2,7 @@ import { gql }  from 'apollo-server';
 import { Op, fn, col, where, literal } from 'sequelize';
 
 import { companyRateKey } from '../cache/keys';
+import { getOrderStatusQty } from '../controller/order';
 import { upload } from '../controller/uploads';
 import { deliveryTimeLoader, businessHoursLoader } from '../loaders';
 import Address from '../model/address';
@@ -107,6 +108,8 @@ export const typeDefs =  gql`
 
 	extend type Query {
 		company(id: ID!): Company!
+
+		ordersStatusQty(companyId: ID!): JSON!
 	}
 `;
 
@@ -178,6 +181,9 @@ export const resolvers =  {
 		}
 	},
 	Query: {
+		ordersStatusQty(_, { companyId }) {
+			return getOrderStatusQty(companyId);
+		},
 		countCompanies: (_, { filter }) => {
 			const where = sanitizeFilter(filter, { search: ['name', 'displayName'], table: 'company' });
 

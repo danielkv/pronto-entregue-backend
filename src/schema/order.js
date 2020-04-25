@@ -1,7 +1,7 @@
 import { gql, withFilter, PubSub }  from 'apollo-server';
 import { literal, fn, where } from 'sequelize';
 
-import { ORDER_CREATED } from '../controller/order';
+import { ORDER_CREATED, ORDER_STATUS_UPDATED, getOrderStatusQty } from '../controller/order';
 import Company from '../model/company';
 import Order from '../model/order';
 import OrderProduct  from '../model/orderProduct';
@@ -55,6 +55,8 @@ export const typeDefs =  gql`
 
 	type Subscription {
 		orderCreated(companyId: ID!): Order
+
+		updateOrderStatus(companyId: ID!): JSON!
 	}
 
 	extend type Query {
@@ -79,6 +81,14 @@ export const resolvers =  {
 				()=> pubsub.asyncIterator([ORDER_CREATED]),
 				(payload, variables) => {
 					return payload.orderCreated.get('companyId') == variables.companyId;
+				}
+			)
+		},
+		updateOrderStatus: {
+			subscribe: withFilter (
+				()=> pubsub.asyncIterator([ORDER_STATUS_UPDATED]),
+				(payload, variables) => {
+					return payload.updateOrderStatus.companyId == variables.companyId;
 				}
 			)
 		}
@@ -210,17 +220,22 @@ export const resolvers =  {
 				await OrderProduct.updateAll(data.products, order, transaction);
 
 				// emit event for subscriptions
-				//await pubSubPublishOrder(pubsub, order.get('id'));
 				pubsub.publish(ORDER_CREATED, { orderCreated: order });
 				
 				return order;
 			});
 		},
-		updateOrder(_, { id, data }) {
-			return sequelize.transaction(async (transaction) => {
+		async updateOrder(_, { id, data }) {
+			// GET old order status
+			let oldOrderStatus = null;
+			let newOrderStatus =  data.status;
+
+			const updatedOrder = await sequelize.transaction(async (transaction) => {
 				// check if order exists
 				const order = await Order.findByPk(id);
 				if (!order) throw new Error('Pedido não encontrado');
+
+				oldOrderStatus = order.get('status');
 
 				// sanitize address
 				if (data.address) {
@@ -250,6 +265,16 @@ export const resolvers =  {
 
 				return updatedOrder;
 			});
+
+			// check with new status
+			if (oldOrderStatus !== newOrderStatus) {
+				const ordersStatusQty = await getOrderStatusQty(updatedOrder.get('companyId'));
+				// emit event for subscriptions
+				pubsub.publish(ORDER_STATUS_UPDATED, { updateOrderStatus: ordersStatusQty });
+			}
+
+			// return result
+			return updatedOrder
 		},
 		async cancelOrder(_, { id }, { user }) {
 			const order = await Order.findByPk(id);
