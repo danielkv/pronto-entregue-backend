@@ -2,12 +2,11 @@ import { gql }  from 'apollo-server';
 import { Op, literal } from 'sequelize';
 
 import { upload }  from '../controller/uploads';
-import Address from '../model/address';
 import Company from '../model/company';
 import CompanyType from '../model/companyType';
 import Product from '../model/product';
 import { sanitizeFilter, getSQLPagination } from '../utilities';
-import { whereCompanyDistance } from '../utilities/address';
+import { whereCompanyDeliveryArea } from '../utilities/address';
 
 export const typeDefs =  gql`
 	type CompanyType {
@@ -104,17 +103,13 @@ export const resolvers =  {
 		 */
 		sections(_, { limit = 8, location }) {
 			return CompanyType.findAll({
-				where: [whereCompanyDistance(location, 'companies'), { active: true }],
+				where: { active: true },
 				include: [{
 					model: Company,
-					where: { active: true, published: true },
-					subQuery: true,
+					where: [whereCompanyDeliveryArea(location, 'companies'), { active: true, published: true }],
+					
 					required: true,
 					include: [
-						{
-							model: Address,
-							required: true,
-						},
 						{
 							model: Product,
 							where: { active: true },
@@ -122,7 +117,7 @@ export const resolvers =  {
 						}
 					],
 				}],
-				subQuery: false,
+				
 				order: literal('RAND()'),
 				group: 'companyType.id',
 				limit
@@ -139,14 +134,10 @@ export const resolvers =  {
 			return parent.getCompanies({
 				where: {
 					[Op.and]: [
-						whereCompanyDistance(location, 'company', 'address.location'),
+						whereCompanyDeliveryArea(location, 'company'),
 						where
 					],
-				},
-				include: [{
-					model: Address,
-					required: true,
-				}]
+				}
 			});
 		},
 		countCompanies(parent, { onlyPublished=true }) {

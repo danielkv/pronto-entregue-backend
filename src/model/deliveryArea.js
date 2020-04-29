@@ -15,10 +15,6 @@ DeliveryArea.init({
 	name: {
 		type: Sequelize.STRING,
 	},
-	area: {
-		type: Sequelize.GEOMETRY('POLYGON'),
-		allowNull: false,
-	},
 	center: {
 		type: Sequelize.GEOMETRY('POINT'),
 		allowNull: false,

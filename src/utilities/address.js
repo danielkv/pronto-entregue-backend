@@ -1,4 +1,4 @@
-import { where, fn, col, literal } from "sequelize";
+import { where, fn, literal } from "sequelize";
 
 function parseAddressesComponents(results) {
 	if (!results.length) return [];
@@ -32,16 +32,20 @@ export function parseAddresses(results) {
 	return addresses;
 }
 
-export function whereCompanyDistance({ coordinates }, companyTableStr='company', addressColumun) {
+export function whereCompanyDeliveryArea({ coordinates }, companyId='company') {
 	if (!coordinates) throw new Error('Endereço não encontrado');
-	const userPoint = pointFromCoordinates(coordinates);
-	const addressColumunStr = addressColumun || `${companyTableStr}.address.location`;
+	const userPoint = pointFromCoordinates(coordinates, true);
+	//const addressColumunStr = addressColumun || `${companyTableStr}.address.location`;
 
-	return where(fn('ST_Distance_Sphere', userPoint, col(addressColumunStr)), '<', literal(`(SELECT Max(distance) * 1000 FROM delivery_areas WHERE companyid = ${companyTableStr}.id)`))
+	return where(literal(`SELECT COUNT(id) FROM delivery_areas WHERE companyId = \`${companyId}\`.\`id\` AND ST_Distance_Sphere(${userPoint}, center) <= radius`), '>', 0)
+	//return where(fn('ST_Distance_Sphere', userPoint, col(addressColumunStr)), '<', literal(`(SELECT Max(distance) * 1000 FROM delivery_areas WHERE companyid = ${companyTableStr}.id)`))
 }
 
-export function pointFromCoordinates(coordinates) {
-	return fn('ST_GeomFromText', literal(`'POINT(${coordinates[0]} ${coordinates[1]})'`));
+export function pointFromCoordinates(coordinates, raw=false) {
+	if (!raw)
+		return fn('ST_GeomFromText', literal(`'POINT(${coordinates[0]} ${coordinates[1]})'`));
+
+	return `ST_GeomFromText('POINT(${coordinates[0]} ${coordinates[1]})')`;
 }
 
 export function calculateDistance({ latitude: lat1, longitude: lon1 }, { latitude: lat2, longitude: lon2 }) {

@@ -1,5 +1,5 @@
 import { gql, withFilter, PubSub }  from 'apollo-server';
-import { literal, fn, where } from 'sequelize';
+import { literal, fn, where, col } from 'sequelize';
 
 import { ORDER_CREATED, ORDER_STATUS_UPDATED, getOrderStatusQty } from '../controller/order';
 import Company from '../model/company';
@@ -144,17 +144,15 @@ export const resolvers =  {
 
 			// load
 			const company = await Company.findByPk(companyId);
-			const companyAddress = await company.getAddress();
 
 			// transform points
-			const companyPoint = pointFromCoordinates(companyAddress.location.coordinates);
 			const userPoint = pointFromCoordinates(address.location.coordinates);
 
 			// user addres && companies
 			const [deliveryArea] = await company.getDeliveryAreas({
-				order: [['distance', 'ASC']],
+				order: [['radius', 'ASC']],
 				limit: 1,
-				where: where(fn('ST_Distance_Sphere', userPoint, companyPoint), '<', literal('distance * 1000')),
+				where: where(fn('ST_Distance_Sphere', userPoint, col('center')), '<=', literal('radius')),
 			})
 
 			// case delivery area's not found

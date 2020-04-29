@@ -15,7 +15,7 @@ import Rating  from '../model/rating';
 import User from '../model/user';
 import conn  from '../services/connection';
 import { getSQLPagination, sanitizeFilter }  from '../utilities';
-import { whereCompanyDistance } from '../utilities/address';
+import { whereCompanyDeliveryArea } from '../utilities/address';
 import { calculateDistance } from '../utilities/address'
 import { companyIsOpen } from '../utilities/company';
 
@@ -128,18 +128,11 @@ export const resolvers =  {
 				},
 				where: {
 					[Op.and]: [
-						whereCompanyDistance(location, 'company', 'address.location'),
+						whereCompanyDeliveryArea(location, 'company'),
 						{ ...where,	active: true, published: true }
 					]
 				},
-				include: [
-					{
-						model: Address,
-						required: true,
-					},
-					Rating,
-					CompanyType
-				],
+				include: [Rating, CompanyType],
 				order: [[col('totalRate'), 'DESC'], [col('company.name'), 'ASC']],
 				group: 'company.id',
 				subQuery: false,

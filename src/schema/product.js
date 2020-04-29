@@ -5,7 +5,6 @@ import { cacheAdaptor } from '../cache';
 import { optionsGroupsKey, categoryKey, categoryProductsKey, loadProductKey } from '../cache/keys';
 import { upload }  from '../controller/uploads';
 import { productSaleLoader, optionsGroupsLoader } from '../loaders';
-import Address from '../model/address';
 import Campaign from '../model/campaign';
 import Category from '../model/category';
 import Company from '../model/company';
@@ -18,7 +17,7 @@ import Sale from '../model/sale';
 import User from '../model/user';
 import conn  from '../services/connection';
 import { getSQLPagination, sanitizeFilter } from '../utilities';
-import { whereCompanyDistance } from '../utilities/address';
+import { whereCompanyDeliveryArea } from '../utilities/address';
 import { campaignProductWhere } from '../utilities/campaign';
 import { getSaleSelection } from '../utilities/product';
 
@@ -103,23 +102,15 @@ export const resolvers =  {
 				attributes: {
 					include: [[fn('SUM', col('company.ratings.rate')), 'totalRate']]
 				},
-				where: {
-					[Op.and]: [
-						whereCompanyDistance(location, 'company'),
-						{ ...where,	active: true }
-					]
-				},
+				where: { ...where,	active: true },
 				include: [{
 					model: Company,
-					where: { active: true, published: true },
-					required: true,
-					include: [
-						{
-							model: Address,
-							required: true,
-						},
-						Rating
+					where: [
+						whereCompanyDeliveryArea(location, 'company'),
+						{ active: true, published: true }
 					],
+					required: true,
+					include: [Rating],
 				}],
 				order: [[col('totalRate'), 'DESC'], [col('product.name'), 'ASC']],
 				group: 'product.id',
@@ -243,21 +234,13 @@ export const resolvers =  {
 		 */
 		productsOnSale(_, { limit, location }) {
 			return Product.findAll({
-				where: {
-					[Op.and]: [
-						whereCompanyDistance(location),
-						{ active: true }
-					]
-				},
+				where: { active: true },
 				include: [
 					{
 						model: Company,
-						where: { active: true, published: true },
-						include: [
-							{
-								model: Address,
-								required: true,
-							},
+						where: [
+							whereCompanyDeliveryArea(location),
+							{ active: true, published: true }
 						],
 					},
 					{
@@ -272,7 +255,7 @@ export const resolvers =  {
 					}
 				],
 				limit,
-				subQuery: false,
+				//subQuery: false,
 				order: literal('RAND()')
 			});
 		},
@@ -287,9 +270,11 @@ export const resolvers =  {
 					},
 					{
 						model: Company,
-						where: { published: true, active: true },
+						where: [
+							whereCompanyDeliveryArea(location, 'company'),
+							{ published: true, active: true }
+						],
 						required: true,
-						include: [{ model: Address, required: true }]
 					}
 				],
 				
@@ -298,7 +283,7 @@ export const resolvers =  {
 					[conn.col('product.name'), 'ASC']
 				],
 				group: ['product.id'],
-				where: [whereCompanyDistance(location, 'company'), { active: true }],
+				where: { active: true },
 				subQuery: false,
 				limit
 			});

@@ -1,5 +1,5 @@
 import { gql, ApolloError }  from 'apollo-server';
-import { fn, where, literal }  from 'sequelize';
+import { fn, where, literal, col }  from 'sequelize';
 
 import Company from '../model/company';
 import conn from '../services/connection';
@@ -27,7 +27,7 @@ export const typeDefs =  gql`
 	}
 
 	extend type Mutation {
-		checkDeliveryLocation(companyId: ID!, address: AddressInput!): DeliveryArea!
+		checkDeliveryLocation(companyId: ID!, location: GeoPoint!): DeliveryArea!
 		modifyDeliveryAreas(data: [DeliveryAreaInput]!): [DeliveryArea]!
 		removeDeliveryArea(id: ID!): DeliveryArea!
 	}
@@ -35,20 +35,18 @@ export const typeDefs =  gql`
 
 export const resolvers =  {
 	Mutation: {
-		async checkDeliveryLocation (_, { companyId, address }) {
+		async checkDeliveryLocation (_, { companyId, location }) {
 			// load
 			const company = await Company.findByPk(companyId);
-			const companyAddress = await company.getAddress();
 
 			// transform points
-			const companyPoint = pointFromCoordinates(companyAddress.location.coordinates);
-			const userPoint = pointFromCoordinates(address.location.coordinates);
+			const userPoint = pointFromCoordinates(location.coordinates);
 
 			// user addres && companies
 			const [deliveryArea] = await company.getDeliveryAreas({
-				order: [['distance', 'ASC']],
+				order: [['radius', 'ASC']],
 				limit: 1,
-				where: where(fn('ST_Distance_Sphere', userPoint, companyPoint), '<', literal('distance * 1000')),
+				where: where(fn('ST_Distance_Sphere', userPoint, col('center')), '<=', literal('radius')),
 			})
 
 			// case delivery area's not found
@@ -58,14 +56,8 @@ export const resolvers =  {
 			return deliveryArea;
 		},
 		modifyDeliveryAreas: (_, { data }, { company }) => {
-			const sanitizedData = data.map(r => {
-				const point = pointFromCoordinates(r.center.coordinates)
-				r.area = fn('ST_Buffer', point, r.radius)
-				return r;
-			})
-
-			const update = sanitizedData.filter(row=>row.id);
-			const create = sanitizedData.filter(row=>!row.id);
+			const update = data.filter(row=>row.id);
+			const create = data.filter(row=>!row.id);
 
 			return conn.transaction(async (transaction) => {
 
@@ -78,7 +70,7 @@ export const resolvers =  {
 						.then(([areaFound])=>{
 							if (!areaFound) throw new Error('Área de entrega não encontrada');
 						
-							return areaFound.update(area, { field: ['center', 'radius', 'name', 'price', 'area'], transaction });
+							return areaFound.update(area, { field: ['center', 'radius', 'name', 'price'], transaction });
 						})
 				}));
 
