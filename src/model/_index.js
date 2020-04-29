@@ -125,3 +125,12 @@ Product.belongsToMany(User, { through: 'favorite_products', as: 'favoritedBy' })
 // Sales relations
 Sale.belongsTo(Product);
 Product.hasMany(Sale);
+
+/* function init() {
+	DeliveryArea.findByPk(8)
+		.then((a)=>{
+			console.log(a.get('area').coordinates)
+		})
+}
+
+init(); */

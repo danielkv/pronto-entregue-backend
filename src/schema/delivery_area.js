@@ -8,7 +8,10 @@ import { pointFromCoordinates } from '../utilities/address';
 export const typeDefs =  gql`
 	type DeliveryArea {
 		id: ID!
-		distance: Int!
+		name: String
+		center: GeoPoint
+		radius: Float
+		distance: Int
 		price: Float!
 		createdAt: DateTime!
 		updatedAt: DateTime!
@@ -18,6 +21,9 @@ export const typeDefs =  gql`
 		id: ID
 		distance: Int
 		price: Float
+		name: String
+		center: GeoPoint
+		radius: Float
 	}
 
 	extend type Mutation {
@@ -52,8 +58,14 @@ export const resolvers =  {
 			return deliveryArea;
 		},
 		modifyDeliveryAreas: (_, { data }, { company }) => {
-			const update = data.filter(row=>row.id);
-			const create = data.filter(row=>!row.id);
+			const sanitizedData = data.map(r => {
+				const point = pointFromCoordinates(r.center.coordinates)
+				r.area = fn('ST_Buffer', point, r.radius)
+				return r;
+			})
+
+			const update = sanitizedData.filter(row=>row.id);
+			const create = sanitizedData.filter(row=>!row.id);
 
 			return conn.transaction(async (transaction) => {
 
@@ -66,7 +78,7 @@ export const resolvers =  {
 						.then(([areaFound])=>{
 							if (!areaFound) throw new Error('Área de entrega não encontrada');
 						
-							return areaFound.update(area, { field: ['distance', 'price'], transaction });
+							return areaFound.update(area, { field: ['center', 'radius', 'name', 'price', 'area'], transaction });
 						})
 				}));
 

@@ -42,6 +42,39 @@ function sanitizeToGeoPoint(coordinates) {
 	}
 }
 
+export const GeoPolygon = new GraphQLScalarType({
+	name: 'GeoPolygon',
+	serialize: extractGeoPolygon,
+	parseValue: sanitizeToGeoPolygon,
+	parseLiteral(ast) {
+		if (ast.kind === Kind.LIST) {
+			const coordinates = ast.values.map(r => parseFloat(r.value));
+			return sanitizeToGeoPoint(coordinates);
+		}
+		return null;
+	}
+})
+
+function extractGeoPolygon(point) {
+	if (typeof point !== 'object'
+	|| point.type !== 'Polygon'
+	|| !Array.isArray(point.coordinates)
+	|| !isNumber(point.coordinates[0]) || !isNumber(point.coordinates[1]))
+		throw new Error('GeoPolygon inválido');
+
+	return point.coordinates;
+}
+
+function sanitizeToGeoPolygon(coordinates) {
+	if (!isArray(coordinates))
+		throw new Error('GeoPolygon inválido');
+
+	return {
+		type: 'Polygon',
+		coordinates
+	}
+}
+
 export const DateTime = new GraphQLScalarType({
 	name: 'DateTime',
 	description: 'Date custom scalar type',

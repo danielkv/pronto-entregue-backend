@@ -10,8 +10,22 @@ class DeliveryArea extends Sequelize.Model {}
 
 DeliveryArea.init({
 	distance: {
-		type: Sequelize.INTEGER,
-		allowNull: false
+		type: Sequelize.INTEGER
+	},
+	name: {
+		type: Sequelize.STRING,
+	},
+	area: {
+		type: Sequelize.GEOMETRY('POLYGON'),
+		allowNull: false,
+	},
+	center: {
+		type: Sequelize.GEOMETRY('POINT'),
+		allowNull: false,
+	},
+	radius: {
+		type: Sequelize.FLOAT,
+		allowNull: false,
 	},
 	price: {
 		type: Sequelize.FLOAT,

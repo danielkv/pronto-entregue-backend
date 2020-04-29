@@ -35,6 +35,7 @@ const typeDefs = gql`
 	scalar Upload
 	scalar DateTime
 	scalar GeoPoint
+	scalar GeoPolygon
 	scalar JSONObject
 	scalar JSON
 
