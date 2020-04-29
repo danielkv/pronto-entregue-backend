@@ -1,10 +1,10 @@
 import express, { Router }  from 'express';
 import path  from 'path';
 
+import { flushAll } from './cache';
 import { authenticate } from './controller/authentication';
 import { importTable, exportDB } from './controller/helper';
 import { setupDataBase } from './controller/setupDB';
-import redis from './services/redis';
 
 const route = Router();
 
@@ -52,7 +52,7 @@ route.get('/resetCache/:auth', async (req, res)=>{
 		const user = await authenticate(authorization, false);
 		if (user.get('role') !== 'master') return res.status(403);
 		
-		const result = await redis.flushall();
+		const result = await flushAll();
 
 		return res.send(result);
 	} catch(err) {

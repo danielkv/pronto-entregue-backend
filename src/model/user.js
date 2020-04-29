@@ -1,5 +1,6 @@
 import Sequelize from 'sequelize';
 
+import cache from '../cache';
 import conn from '../services/connection';
 import { salt }  from '../utilities';
 
@@ -68,4 +69,4 @@ User.init({
 	sequelize: conn,
 });
 
-export default User;
+export default cache.withCache(User);

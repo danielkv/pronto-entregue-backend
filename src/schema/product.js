@@ -1,7 +1,7 @@
 import { gql }  from 'apollo-server';
 import { Op, fn, literal, col } from 'sequelize';
 
-import { cacheAdaptor } from '../cache';
+import { deleteMatch } from '../cache';
 import { optionsGroupsKey, categoryKey, categoryProductsKey, loadProductKey } from '../cache/keys';
 import { upload }  from '../controller/uploads';
 import { productSaleLoader, optionsGroupsLoader } from '../loaders';
@@ -171,8 +171,8 @@ export const resolvers =  {
 				if (data.sale) await productUpdated.createSale(data.sale, { transaction });
 
 				//Product.cache(categoryProductsKey(id)).clear();
-				cacheAdaptor.deleteMatch(`/${categoryProductsKey(oldCategoryId)}/g`)
-				cacheAdaptor.deleteMatch(`/${categoryProductsKey(newCategoryId)}/g`)
+				deleteMatch(categoryProductsKey(oldCategoryId))
+				deleteMatch(categoryProductsKey(newCategoryId))
 
 				return productUpdated;
 			})

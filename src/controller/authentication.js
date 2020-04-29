@@ -21,11 +21,9 @@ export function authenticate (authorization, checkBearer=true) {
 
 	const { id, email } = jwt.verify(authorizationToken, process.env.SECRET, { ignoreExpiration: true });
 
-	return User.findOne({
-		where: { id, email },
-		attributes: { exclude: ['password', 'salt'] }
-	})
+	return User.cache().findByPk(id)
 		.then(async (userFound)=>{
+			if (userFound.get('email') !== email) throw new AuthenticationError('Os dados de autenticação não conferem')
 			if (!userFound) throw new AuthenticationError('Usuário não encontrado');
 			if (userFound.active != true) throw new AuthenticationError('Usuário não está ativo');
 
@@ -44,7 +42,7 @@ export function authenticate (authorization, checkBearer=true) {
 
 export async function selectCompany (companyId, user) {
 	// check if company exists
-	const companyFound = await Company.findOne({ where: { id: companyId } });
+	const companyFound = await Company.cache().findByPk(companyId);
 	if (!companyFound) throw new Error('Empresa selecionada não foi encontrada');
 
 	if (user) {

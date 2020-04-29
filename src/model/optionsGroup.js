@@ -1,6 +1,6 @@
 import Sequelize  from 'sequelize';
 
-import cache, { cacheAdaptor } from '../cache';
+import cache, { deleteMatch } from '../cache';
 import { optionsKey, optionsGroupsKey } from '../cache/keys';
 import conn from '../services/connection';
 import Option  from './option';
@@ -15,7 +15,7 @@ class OptionsGroup extends Sequelize.Model {
 		const groupsRestrictionsRel = [];
 
 		// clean product group cache
-		cacheAdaptor.deleteMatch(`/${optionsGroupsKey(product.get('id'))}/g`);
+		deleteMatch(optionsGroupsKey(product.get('id')));
 		
 		//create groups
 		const result = await Promise.all(
@@ -41,7 +41,7 @@ class OptionsGroup extends Sequelize.Model {
 						}
 
 						// clean group options cache
-						cacheAdaptor.deleteMatch(`/*${optionsKey(groupModel.get('id'))}/g`);
+						deleteMatch(optionsKey(groupModel.get('id')));
 						
 						if (groupModel) {
 							if (!group.remove && group.options) group.options = await Option.updateAll(group.options, groupModel, transaction);
