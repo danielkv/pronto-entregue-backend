@@ -27,7 +27,7 @@ export const typeDefs =  gql`
 	}
 
 	extend type Mutation {
-		checkDeliveryLocation(companyId: ID!, location: GeoPoint, addresss: Address): DeliveryArea!
+		checkDeliveryLocation(companyId: ID!, location: GeoPoint, address: AddressInput): DeliveryArea!
 		modifyDeliveryAreas(data: [DeliveryAreaInput]!): [DeliveryArea]!
 		removeDeliveryArea(id: ID!): DeliveryArea!
 	}
