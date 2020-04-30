@@ -27,7 +27,7 @@ export const typeDefs =  gql`
 	}
 
 	extend type Mutation {
-		checkDeliveryLocation(companyId: ID!, location: GeoPoint!): DeliveryArea!
+		checkDeliveryLocation(companyId: ID!, location: GeoPoint, addresss: Address): DeliveryArea!
 		modifyDeliveryAreas(data: [DeliveryAreaInput]!): [DeliveryArea]!
 		removeDeliveryArea(id: ID!): DeliveryArea!
 	}
@@ -35,7 +35,10 @@ export const typeDefs =  gql`
 
 export const resolvers =  {
 	Mutation: {
-		async checkDeliveryLocation (_, { companyId, location }) {
+		async checkDeliveryLocation (_, { companyId, location, address }) {
+			// fix to update the app afterwards
+			if (!location && address) location = address.location;
+
 			// load
 			const company = await Company.findByPk(companyId);
 
