@@ -345,7 +345,7 @@ export const resolvers = {
 		fullName: (parent) => {
 			return `${parent.firstName} ${parent.lastName}`;
 		},
-		metas: (parent, { type }) => {
+		metas(parent, { type }) {
 			let where = {};
 
 			if (type) {
