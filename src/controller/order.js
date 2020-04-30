@@ -4,6 +4,7 @@ import connection from "../services/connection";
 
 // pubsub vars
 export const ORDER_CREATED = 'ORDER_CREATED';
+export const ORDER_QTY_STATUS_UPDATED = 'ORDER_QTY_STATUS_UPDATED';
 export const ORDER_STATUS_UPDATED = 'ORDER_STATUS_UPDATED';
 
 export async function getOrderStatusQty (companyId) {

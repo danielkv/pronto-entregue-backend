@@ -1,7 +1,7 @@
 import { gql, withFilter, PubSub }  from 'apollo-server';
 import { literal, fn, where, col } from 'sequelize';
 
-import { ORDER_CREATED, ORDER_STATUS_UPDATED, getOrderStatusQty } from '../controller/order';
+import { ORDER_CREATED, ORDER_QTY_STATUS_UPDATED, getOrderStatusQty, ORDER_STATUS_UPDATED } from '../controller/order';
 import Company from '../model/company';
 import Order from '../model/order';
 import OrderProduct  from '../model/orderProduct';
@@ -56,7 +56,8 @@ export const typeDefs =  gql`
 	type Subscription {
 		orderCreated(companyId: ID!): Order
 
-		updateOrderStatus(companyId: ID!): JSON!
+		updateOrderStatus(companyId: ID!): Order!
+		updateOrderStatusQty(companyId: ID!): JSON!
 	}
 
 	extend type Query {
@@ -84,11 +85,19 @@ export const resolvers =  {
 				}
 			)
 		},
+		updateOrderStatusQty: {
+			subscribe: withFilter (
+				()=> pubsub.asyncIterator([ORDER_QTY_STATUS_UPDATED]),
+				(payload, variables) => {
+					return payload.updateOrderStatusQty.companyId == variables.companyId;
+				}
+			)
+		},
 		updateOrderStatus: {
 			subscribe: withFilter (
 				()=> pubsub.asyncIterator([ORDER_STATUS_UPDATED]),
 				(payload, variables) => {
-					return payload.updateOrderStatus.companyId == variables.companyId;
+					return payload.updateOrderStatus.get('companyId') == variables.companyId;
 				}
 			)
 		}
@@ -264,11 +273,14 @@ export const resolvers =  {
 				return updatedOrder;
 			});
 
+			// emit event for update subscriptions
+			pubsub.publish(ORDER_STATUS_UPDATED, { updateOrderStatus: updatedOrder });
+
 			// check with new status
 			if (oldOrderStatus !== newOrderStatus) {
 				const ordersStatusQty = await getOrderStatusQty(updatedOrder.get('companyId'));
-				// emit event for subscriptions
-				pubsub.publish(ORDER_STATUS_UPDATED, { updateOrderStatus: ordersStatusQty });
+				// emit event for updated status subscriptions
+				pubsub.publish(ORDER_QTY_STATUS_UPDATED, { updateOrderStatusQty: ordersStatusQty });
 			}
 
 			// return result
@@ -280,7 +292,12 @@ export const resolvers =  {
 			
 			if (orderUser.get('id') !== user.get('id') && !user.can('orders_edit')) throw new Error('Você não tem permissões para cancelar esse pedido');
 
-			return await order.update({ status: 'canceled' });
+			const updatedOrder = await order.update({ status: 'canceled' });
+
+			// emit event for update subscriptions
+			pubsub.publish(ORDER_STATUS_UPDATED, { updateOrderStatus: updatedOrder });
+
+			return updatedOrder;
 		}
 	}
 }
