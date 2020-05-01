@@ -3,8 +3,10 @@ node_modules/
 
 build/
 
-.env
+*.env
 .eslintcache
 
 uploads/
 flakery-6c5b2b2fe628.json
+
+danielkv.pem
