@@ -1,0 +1,25 @@
+version: "3"
+
+services:
+  api:
+    build: .
+    restart: always
+    env_file:
+      - prod.env
+    ports:
+      - "4000:4000"
+    command: yarn start
+    links:
+      - "db:database"
+  db:
+    build: ./mysql
+    ports:
+      - "3306:3306"
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=PSqYX3HuNc
+      - MYSQL_DATABASE=pronto_entregue
+      - MYSQL_USER=prontouser
+      - MYSQL_PASSWORD=EctIonwaRTRU
+  redis:
+    image: redis:6-alpine

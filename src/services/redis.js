@@ -1,6 +1,6 @@
 import Redis from 'ioredis';
 
-const redisService = process.env.NODE_ENV === 'production' ? new Redis(process.env.REDISCLOUD_URL) : new Redis();
+const redisService = new Redis(process.env.REDISCLOUD_URL);
 
 //redisService.del();
 

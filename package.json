@@ -3,12 +3,9 @@
 	"version": "1.1.2",
 	"main": "src/app.js",
 	"license": "MIT",
-	"engines": {
-		"node": "12.14.0"
-	},
 	"scripts": {
 		"preinstall": "node ./preinstall.js",
-		"start": "node ./src/app.js",
+		"start": "node ./build/app.js",
 		"dev": "nodemon ./src/app.js",
 		"build": "sucrase ./src -d ./build --transforms imports && yarn copy_static",
 		"copy_static": "cpx \"src/**/*.{pug,png,jpg,css}\" build -v",
