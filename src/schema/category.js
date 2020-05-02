@@ -1,4 +1,5 @@
 import { gql }  from 'apollo-server';
+import { col } from 'sequelize';
 
 import { categoryProductsKey } from '../cache/keys';
 import { upload }  from '../controller/uploads';
@@ -83,13 +84,11 @@ export const resolvers =  {
 		loadCompanyCategories(_, { filter }) {
 			const where = sanitizeFilter(filter, { search: ['name'] });
 
-			console.log(filter);
-
 			return Category.findAll({
 				where,
+				order: [['order', 'ASC'], [col('products.name'), 'ASC']],
 				include: [{
 					model: Product,
-					order: [['name', 'ASC']],
 					where: { active: true },
 					include: [
 						{
