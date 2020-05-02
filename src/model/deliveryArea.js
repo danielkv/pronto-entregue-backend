@@ -9,9 +9,6 @@ import conn from '../services/connection';
 class DeliveryArea extends Sequelize.Model {}
 
 DeliveryArea.init({
-	distance: {
-		type: Sequelize.INTEGER
-	},
 	name: {
 		type: Sequelize.STRING,
 	},

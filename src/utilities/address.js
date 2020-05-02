@@ -38,7 +38,6 @@ export function whereCompanyDeliveryArea({ coordinates }, companyId='company') {
 	//const addressColumunStr = addressColumun || `${companyTableStr}.address.location`;
 
 	return where(literal(`SELECT COUNT(id) FROM delivery_areas WHERE companyId = \`${companyId}\`.\`id\` AND ST_Distance_Sphere(${userPoint}, center) <= radius`), '>', 0)
-	//return where(fn('ST_Distance_Sphere', userPoint, col(addressColumunStr)), '<', literal(`(SELECT Max(distance) * 1000 FROM delivery_areas WHERE companyid = ${companyTableStr}.id)`))
 }
 
 export function pointFromCoordinates(coordinates, raw=false) {

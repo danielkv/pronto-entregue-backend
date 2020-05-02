@@ -83,10 +83,13 @@ export const resolvers =  {
 		loadCompanyCategories(_, { filter }) {
 			const where = sanitizeFilter(filter, { search: ['name'] });
 
+			console.log(filter);
+
 			return Category.findAll({
 				where,
 				include: [{
 					model: Product,
+					order: [['name', 'ASC']],
 					where: { active: true },
 					include: [
 						{
