@@ -7,8 +7,7 @@ services:
     env_file:
       - prod.env
     ports:
-    - "4000:4000"
-    - "443:4000"
+      - "4000:4000"
     command: yarn start
     links:
       - "db:database"
@@ -26,4 +25,12 @@ services:
       - MYSQL_USER=prontouser
       - MYSQL_PASSWORD=EctIonwaRTRU
   redis:
-    image: redis:6-alpine
+	image: redis:6-alpine
+  traefik:
+	image: traefik:v2.2
+	ports:
+		- "80:80"
+		- "8080:8080"
+		- "443:443"
+	volumes:
+		- "/var/run/docker.sock:/var/run/docker.sock"
