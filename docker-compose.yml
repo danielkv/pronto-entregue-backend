@@ -1,8 +1,10 @@
-version: "3"
+version: "3.7"
 
 services:
-  api:
+  app:
     build: .
+    labels:
+      - traefik.http.routers.app.rule=Host(`api.prontoentregue.com.br`)
     restart: always
     env_file:
       - prod.env
@@ -26,3 +28,15 @@ services:
       - MYSQL_PASSWORD=EctIonwaRTRU
   redis:
     image: redis:6-alpine
+  traefik:
+    image: traefik:2.2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "8080:8080"
+      #- "443:443"
+    expose:
+      - 8080
+    command: --providers.docker
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
