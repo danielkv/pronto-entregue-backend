@@ -1,11 +1,16 @@
-extends ../index.pug
+extends ../../index.pug
 
 block content
-	div Usuário #{user.firstName} #{user.id} indicou um estabelecimento
+	div Usuário #{name} (#{email}) indicou um estabelecimento
 	br
+	if message
+		div
+			p.
+				Mensagem: #{message}
 	div
 		ul
-			li Nome: #{store.name}
-			li Endereço: #{store.address.street}, n #{store.address.number} - #{store.address.city} #{store.address.state}
-			li Email: #{store.email}
-			li telefone: #{store.phone}
+			li Estabelecimento: #{companyName}
+			if companyEmail
+				li Email: #{companyEmail}
+			if companyPhone
+				li telefone: #{companyPhone}

@@ -37,8 +37,8 @@ export const typeDefs = gql`
 		orders(pagination: Pagination): [Order]!
 		company(companyId: ID!): Company
 
-		countCompanies(filter: Filter): Int!
-		companies(filter: Filter, pagination: Pagination): [Company]!
+		countCompanies(filter: JSON): Int!
+		companies(filter: JSON, pagination: Pagination): [Company]!
 
 		favoriteProducts(pagination: Pagination): [Product]!
 

@@ -1,13 +1,14 @@
-extends ../index.pug
+extends ../../index.pug
 
 block content
 	div
-		p #{user.firstName}, obrigado pela sua sugestão. Entraremos em contato com o estabelecimento o mais rápido possível.
+		p #{name}, obrigado por sua indicação. Entraremos em contato com o estabelecimento o mais rápido possível.
 	br
-	div Estabelecimento sugerido:
+	div Estabelecimento indicado:
 	div
 		ul
-			li Nome: #{store.name}
-			li Endereço: #{store.address.street}, n #{store.address.number} - #{store.address.city} #{store.address.state}
-			li Email: #{store.email}
-			li telefone: #{store.phone}
+			li Nome: #{companyName}
+			if companyEmail
+				li Email: #{companyEmail}
+			if companyPhone
+				li telefone: #{companyPhone}

@@ -1,33 +1,22 @@
 import { gql }  from 'apollo-server';
 
-import { sendMail } from '../controller/mailer';
+import notifications from '../notifications';
 
 export const typeDefs = gql`
-	input StoreSuggestion {
-		name: String!
-		email: String!
-		phone: String!
-		address: AddressInput!
-	}
-
 	extend type Mutation {
-		suggestStore(store: StoreSuggestion): Boolean!
+		suggestCompany(data: JSON): Boolean!
 	}
 `;
 
 export const resolvers = {
 	Mutation: {
-		suggestStore(_, { store }, { user }) {
-			const emailContext = {
-				user: user.get(),
-				store,
-			}
-
+		suggestCompany(_, { data }) {
+			
 			// send an email to admin
-			sendMail('suggest-store/admin', { ...emailContext, to: process.env.EMAIL_ACCOUNT });
-
+			notifications.send('suggest-store/admin', { to: 'indicacoes@prontoentregue.com.br' }, data);
+			
 			// send a thanks email to user
-			sendMail('suggest-store/user', { ...emailContext, to: user.get('email') });
+			notifications.send('suggest-store/user', { to: data.email }, data);
 
 			return true;
 		},
