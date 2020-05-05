@@ -32,12 +32,12 @@ export function parseAddresses(results) {
 	return addresses;
 }
 
-export function whereCompanyDeliveryArea({ coordinates }, companyId='company') {
+export function whereCompanyDeliveryArea({ coordinates }, companyTable='company') {
 	if (!coordinates) throw new Error('Endereço não encontrado');
 	const userPoint = pointFromCoordinates(coordinates, true);
 	//const addressColumunStr = addressColumun || `${companyTableStr}.address.location`;
 
-	return where(literal(`SELECT COUNT(id) FROM delivery_areas WHERE companyId = \`${companyId}\`.\`id\` AND ST_Distance_Sphere(${userPoint}, center) <= radius`), '>', 0)
+	return where(literal(`SELECT COUNT(id) FROM delivery_areas WHERE companyId = \`${companyTable}\`.\`id\` AND ST_Distance_Sphere(${userPoint}, center) <= radius`), '>', 0)
 }
 
 export function pointFromCoordinates(coordinates, raw=false) {

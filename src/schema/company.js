@@ -15,7 +15,7 @@ import Rating  from '../model/rating';
 import User from '../model/user';
 import conn  from '../services/connection';
 import { getSQLPagination, sanitizeFilter }  from '../utilities';
-import { whereCompanyDeliveryArea } from '../utilities/address';
+import { whereCompanyDeliveryArea, pointFromCoordinates } from '../utilities/address';
 import { calculateDistance } from '../utilities/address'
 import { companyIsOpen } from '../utilities/company';
 
@@ -109,7 +109,8 @@ export const typeDefs =  gql`
 
 	extend type Query {
 		company(id: ID!): Company!
-
+		countCompanies(filter: JSON): Int! @hasRole(permission: "master")
+		companies(filter: JSON, pagination: Pagination, location: GeoPoint): [Company]!
 		ordersStatusQty(companyId: ID!): JSON!
 	}
 `;
@@ -183,13 +184,24 @@ export const resolvers =  {
 
 			return Company.count({ where });
 		},
-		companies: (_, { filter, pagination }) => {
-			const where = sanitizeFilter(filter, { search: ['name', 'displayName'], table: 'company' });
+		companies: (_, { filter, pagination, location }) => {
+			let where = sanitizeFilter(filter, { excludeFilters: ['location'], search: ['name', 'displayName'], table: 'company' });
 
-			return Company.findAll({
+			const sql = {
 				where,
 				...getSQLPagination(pagination),
-			});
+			};
+			
+			if (location) {
+				sql.where = [whereCompanyDeliveryArea(location), where]
+				sql.include = [Address];
+
+				const userPoint = pointFromCoordinates(location.coordinates);
+				
+				sql.order = [[fn('ST_Distance_Sphere', userPoint, col('address.location')), 'ASC']]
+			}
+		
+			return Company.findAll(sql);
 		},
 		async company(_, { id }) {
 			// check if company exists
