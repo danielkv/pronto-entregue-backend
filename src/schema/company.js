@@ -192,8 +192,9 @@ export const resolvers =  {
 				...getSQLPagination(pagination),
 			};
 			
+			// only on App
 			if (location) {
-				sql.where = [whereCompanyDeliveryArea(location), where]
+				sql.where = [whereCompanyDeliveryArea(location), { published: true }, where]
 				sql.include = [Address];
 
 				const userPoint = pointFromCoordinates(location.coordinates);
