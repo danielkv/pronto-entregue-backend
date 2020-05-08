@@ -3,6 +3,7 @@ import { Op } from 'sequelize';
 
 import { optionsKey, optionsGroupProductKey } from '../cache/keys';
 import { restrainedByLoader, groupRestrainedLoader, optionsLoader } from '../loaders';
+import Category from '../model/category';
 import Option  from '../model/option';
 import OptionsGroup  from '../model/optionsGroup';
 import Product  from '../model/product';
@@ -55,11 +56,12 @@ export const typeDefs =  gql`
 
 export const resolvers =  {
 	Query: {
-		searchOptionsGroups: (_, { search }, { company }) => {
+		searchOptionsGroups(_, { search }, { company }) {
 			return OptionsGroup.findAll({
 				where: { name: { [Op.like]: `%${search}%` }, [`$product.companyId$`]: company.get('id') },
 				include: [{
 					model: Product,
+					include: Category
 				}]
 			});
 		},
@@ -70,6 +72,7 @@ export const resolvers =  {
 	OptionsGroup: {
 		async options (parent, { filter }) {
 			if (parent.options) return parent.options;
+			
 			const optionsGroupId = parent.get('id');
 			let options = [];
 
@@ -116,6 +119,8 @@ export const resolvers =  {
 		 * - ADM - graphql/products.js
 		 */
 		product(parent) {
+			if (parent.product) return parent.product;
+
 			const optionsGroupId = parent.get('id');
 
 			return Product.cache(optionsGroupProductKey(optionsGroupId))
