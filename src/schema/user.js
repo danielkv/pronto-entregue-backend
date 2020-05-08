@@ -2,12 +2,12 @@ import { gql }  from 'apollo-server';
 import jwt from 'jsonwebtoken';
 import { Op }  from 'sequelize';
 
+import notifications from '../controller/mail';
 import { upload } from '../controller/uploads';
 import { balanceLoader } from '../loaders';
 import Company  from '../model/company';
 import User  from '../model/user';
 import UserMeta  from '../model/userMeta';
-import notifications from '../notifications';
 import conn  from '../services/connection';
 import { salt, getSQLPagination, sanitizeFilter }  from '../utilities';
 import { userCanSetRole, extractRole } from '../utilities/roles';

@@ -1,6 +1,6 @@
 import { gql }  from 'apollo-server';
 
-import notifications from '../notifications';
+import notifications from '../controller/mail';
 
 export const typeDefs = gql`
 	extend type Mutation {
