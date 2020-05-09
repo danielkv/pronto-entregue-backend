@@ -2,13 +2,14 @@ import { gql }  from 'apollo-server';
 import jwt from 'jsonwebtoken';
 import { Op }  from 'sequelize';
 
-import notifications from '../controller/mail';
 import { upload } from '../controller/uploads';
+import { MAIL_MESSAGE } from '../jobs/keys';
 import { balanceLoader } from '../loaders';
 import Company  from '../model/company';
 import User  from '../model/user';
 import UserMeta  from '../model/userMeta';
 import conn  from '../services/connection';
+import queue from '../services/queue';
 import { salt, getSQLPagination, sanitizeFilter }  from '../utilities';
 import { userCanSetRole, extractRole } from '../utilities/roles';
 
@@ -221,7 +222,13 @@ export const resolvers = {
 				expiresIn
 			}
 
-			await notifications.send('recover-password', data, context);
+			// add recovery message to queue
+			queue.add(MAIL_MESSAGE, {
+				template: 'recover-password',
+				data,
+				context
+			})
+			
 
 			return true;
 		},
@@ -248,7 +255,12 @@ export const resolvers = {
 				expiresIn
 			}
 
-			await notifications.send('new-password', data, context);
+			// add new password message to queue
+			queue.add(MAIL_MESSAGE, {
+				template: 'new-password',
+				data,
+				context
+			})
 
 			return true;
 		},

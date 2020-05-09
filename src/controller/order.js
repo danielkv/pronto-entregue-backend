@@ -29,3 +29,20 @@ function remapOrdersQty (orders) {
 
 	return qty;
 }
+
+export function getOrderStatusName(status) {
+	// isIn: [['waiting', 'preparing', 'delivery', 'delivered', 'canceled']],
+	switch(status) {
+		case 'waiting':
+			return 'Aguardando';
+		case 'preparing':
+			return 'Preparando';
+		case 'delivering':
+			return 'Na entrega';
+		case 'delivered':
+			return 'Entregue';
+		case 'canceled':
+			return 'Cancelado';
+		default: return '';
+	}
+}

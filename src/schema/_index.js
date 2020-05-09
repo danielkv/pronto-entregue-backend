@@ -13,6 +13,7 @@ import { typeDefs as DeliveryArea, resolvers as deliveryAreaResolvers }  from '.
 import directives  from './directives';
 import { typeDefs as Emails, resolvers as emailsResolvers }  from './emails';
 import { typeDefs as Meta, resolvers as metaResolvers }  from './meta';
+import { typeDefs as Notification, resolvers as NotificationResolvers }  from './notification';
 import { typeDefs as Option, resolvers as optionResolvers }  from './option';
 import { typeDefs as OptionsGroup, resolvers as optionsGroupResolvers }  from './options_group';
 import { typeDefs as Order, resolvers as orderResolvers }  from './order';
@@ -96,7 +97,7 @@ const resolvers = {
 }
 
 export default makeExecutableSchema({
-	typeDefs: [typeDefs, Address, Sale, CreditHistory, CompanyType, BusinessHour, Rating, Emails, Campaign, Category, Company, Option, OptionsGroup, OrderOptions, OrderOptionsGroup, OrderProduct, Order, PaymentMethod, Product, Role, DeliveryArea, User, Phone, Meta, GoogleSocialLogin],
-	resolvers: merge(resolvers, saleResolvers, addressResolvers, creditHistoryResolvers ,companyTypeResolvers, businessHourResolvers, ratingResolvers, emailsResolvers, campaignResolvers, categoryResolvers, companyResolvers, optionResolvers, optionsGroupResolvers, orderOptionResolvers, orderOptionsGroupResolvers, orderProductResolvers, orderResolvers, paymentMethodResolvers, productResolvers, roleResolvers, deliveryAreaResolvers, userResolvers, phoneResolvers, metaResolvers, googleResolvers),
+	typeDefs: [typeDefs, Notification, Address, Sale, CreditHistory, CompanyType, BusinessHour, Rating, Emails, Campaign, Category, Company, Option, OptionsGroup, OrderOptions, OrderOptionsGroup, OrderProduct, Order, PaymentMethod, Product, Role, DeliveryArea, User, Phone, Meta, GoogleSocialLogin],
+	resolvers: merge(resolvers, NotificationResolvers, saleResolvers, addressResolvers, creditHistoryResolvers ,companyTypeResolvers, businessHourResolvers, ratingResolvers, emailsResolvers, campaignResolvers, categoryResolvers, companyResolvers, optionResolvers, optionsGroupResolvers, orderOptionResolvers, orderOptionsGroupResolvers, orderProductResolvers, orderResolvers, paymentMethodResolvers, productResolvers, roleResolvers, deliveryAreaResolvers, userResolvers, phoneResolvers, metaResolvers, googleResolvers),
 	directiveResolvers: directives,
 })

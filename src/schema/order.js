@@ -1,6 +1,7 @@
 import { gql, withFilter, PubSub }  from 'apollo-server';
 import { literal, fn, where, col } from 'sequelize';
 
+import { queueCustomerStatusChangeNotification } from '../controller/notifications';
 import { ORDER_CREATED, ORDER_QTY_STATUS_UPDATED, getOrderStatusQty, ORDER_STATUS_UPDATED } from '../controller/order';
 import Company from '../model/company';
 import Order from '../model/order';
@@ -278,9 +279,15 @@ export const resolvers =  {
 
 			// check with new status
 			if (oldOrderStatus !== newOrderStatus) {
+				const orderId = updatedOrder.get('id');
+				const userId = updatedOrder.get('userId');
 				const ordersStatusQty = await getOrderStatusQty(updatedOrder.get('companyId'));
+
 				// emit event for updated status subscriptions
 				pubsub.publish(ORDER_QTY_STATUS_UPDATED, { updateOrderStatusQty: ordersStatusQty });
+
+				// queue customer notification
+				queueCustomerStatusChangeNotification(userId, orderId, newOrderStatus);
 			}
 
 			// return result

@@ -2,6 +2,7 @@ import { gql }  from 'apollo-server';
 import { Op, fn, col, where, literal } from 'sequelize';
 
 import { companyRateKey } from '../cache/keys';
+import { queueNewCompanyNotification } from '../controller/notifications';
 import { getOrderStatusQty } from '../controller/order';
 import { upload } from '../controller/uploads';
 import { deliveryTimeLoader, businessHoursLoader } from '../loaders';
@@ -100,6 +101,9 @@ export const typeDefs =  gql`
 	extend type Mutation {
 		# Search on APP
 		searchCompaniesOnApp(search: String!, location: GeoPoint!): [Company]!
+
+		# APP notifications
+		sendNewCompanyNoticiation(companyId: ID!): Boolean!
 		
 		# Search on ADM
 		searchCompanies(search: String!, exclude: [ID]): [Company]! @hasRole(permission: "companies_edit")
@@ -140,6 +144,13 @@ export const resolvers =  {
 				limit: 10
 			});
 		},
+		async sendNewCompanyNoticiation(_, { companyId }) {
+			queueNewCompanyNotification(companyId);
+
+			return true;
+		},
+		//
+
 		searchCompanies(_, { search, exclude = [] }) {
 			const where = sanitizeFilter({ search }, { search: ['name', 'displayName'] });
 
