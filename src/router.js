@@ -1,3 +1,4 @@
+import { UI } from 'bull-board';
 import express, { Router }  from 'express';
 import path  from 'path';
 
@@ -42,6 +43,9 @@ route.get('/import/:table', (req, res) => {
 			res.json(data)
 		});
 })
+
+// bull queue
+route.use('/bull/queues', UI);
 
 // reset Redis Cache
 route.get('/resetCache/:auth', async (req, res)=>{

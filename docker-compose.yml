@@ -13,6 +13,7 @@ services:
     command: yarn start
     links:
       - "db:database"
+      - "redis"
     environment:
       - TZ=America/Sao_Paulo
   db:
@@ -27,7 +28,10 @@ services:
       - MYSQL_USER=prontouser
       - MYSQL_PASSWORD=EctIonwaRTRU
   redis:
-    image: redis:6-alpine
+    image: redis:latest
+    command: ["redis-server", "--bind", "redis", "--port", "6379"]
+    ports:
+      - "6379:6379"
   traefik:
     image: traefik:2.2
     restart: unless-stopped
