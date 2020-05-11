@@ -16,6 +16,9 @@ export function createMessages(somePushTokens, data) {
 
 		messages.push({
 			to: pushToken,
+			priority: 'high',
+			channelId: "Standard",
+			sound: 'default',
 			...data
 		})
 	}

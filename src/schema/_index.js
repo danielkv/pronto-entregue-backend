@@ -83,11 +83,13 @@ const typeDefs = gql`
 const resolvers = {
 	Query: {
 		pageInfo(_, __, ___, info) {
+			let result;
 			try {
-				return info.variableValues.pagination;
+				result = info.variableValues.pagination;
 			} catch(err) {
-				return 0;
+				result = 0
 			}
+			return result || {};
 		},
 	},
 	Mutation: {

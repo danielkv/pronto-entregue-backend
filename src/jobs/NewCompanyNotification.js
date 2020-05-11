@@ -49,10 +49,6 @@ export default {
 			return [...allTokens, ...tokens];
 		}, []);
 		
-
-		
-	
-		
 		// define message
 		const notificationData = {
 			title: `${comanyData.companyName} ta chegando no App 👏👏`,

@@ -91,7 +91,9 @@ export const resolvers = {
 		},
 		user(parent) {
 			//return parent.getUser();
-			return ratingUserLoader.load(parent.get('userId'));
+			const userId = parent.get('userId');
+			if (!userId) return null;
+			return ratingUserLoader.load(userId);
 		},
 		order(parent) {
 			return parent.getOrder();

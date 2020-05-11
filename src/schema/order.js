@@ -1,7 +1,7 @@
 import { gql, withFilter, PubSub }  from 'apollo-server';
 import { literal, fn, where, col } from 'sequelize';
 
-import { queueCustomerStatusChangeNotification } from '../controller/notifications';
+import { queueCustomerStatusChangeNotification, queueNewOrderNotification } from '../controller/notifications';
 import { ORDER_CREATED, ORDER_QTY_STATUS_UPDATED, getOrderStatusQty, ORDER_STATUS_UPDATED } from '../controller/order';
 import Company from '../model/company';
 import Order from '../model/order';
@@ -229,6 +229,9 @@ export const resolvers =  {
 
 				// emit event for subscriptions
 				pubsub.publish(ORDER_CREATED, { orderCreated: order });
+
+				// queue company user notifications
+				queueNewOrderNotification(data.companyId, order.id);
 				
 				return order;
 			});

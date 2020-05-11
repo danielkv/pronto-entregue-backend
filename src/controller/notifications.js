@@ -1,6 +1,17 @@
-import { APP_NOTIFICATION, NEW_COMPANY_NOTIFICATION } from '../jobs/keys';
+import { APP_NOTIFICATION, NEW_COMPANY_NOTIFICATION, COMPANY_USERS_NEW_ORDER_NOTIFICATION } from '../jobs/keys';
 import UserMeta from '../model/userMeta';
 import queue from '../services/queue';
+
+/**
+ * Queue notifications to comapany users, whe order is created
+ * 
+ * @param {*} companyId 
+ * @param {*} orderId 
+ */
+export async function queueNewOrderNotification(companyId, orderId) {
+	// queue notification
+	queue.add(COMPANY_USERS_NEW_ORDER_NOTIFICATION, { companyId, orderId })
+}
 
 /**
  * Queue customer notification for new company on App

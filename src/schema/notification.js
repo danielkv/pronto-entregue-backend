@@ -41,11 +41,11 @@ export const resolvers =  {
 			
 			// parse tokens
 			const tokens = JSON.parse(meta.value);
-			const tokenIndex = tokens.findindex(t => t === token);
+			const tokenIndex = tokens.findIndex(t => t === token);
 			if (tokenIndex === -1) throw new Error('Token não encontrado');
 
 			// remove token
-			tokens.slice(tokenIndex, 1);
+			tokens.splice(tokenIndex, 1);
 
 			// save tokens
 			await meta.update({ value: JSON.stringify(tokens) });
