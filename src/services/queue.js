@@ -5,7 +5,7 @@ import * as jobs from '../jobs';
 
 const queues = Object.values(jobs).map(job => {
 
-	const bullQueue = new Queue(job.key, 'redis://redis:6379/0');
+	const bullQueue = new Queue(job.key, process.env.NODE_ENV === 'production' ? 'redis://redis:6379/0' : null);
 
 	if (job.onQueueError && typeof job.onQueueError === 'function') bullQueue.on('error', job.onQueueError)
 	else bullQueue.on('error', (err) => {
