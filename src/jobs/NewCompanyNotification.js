@@ -13,7 +13,7 @@ export default {
 	async handle ({ data: { companyId } }) {
 		// check if company exits
 		const company = await Company.findOne({
-			wherer: { id: companyId },
+			where: { id: companyId },
 			include: [Address]
 		});
 		if (!company) throw new Error('Empresa não encontrada');
@@ -70,9 +70,7 @@ export default {
 				alertData: notificationData
 			}
 		})
-
-		console.log(messages);
-
+		
 		// send messages
 		notifications.send(messages);
 	}
