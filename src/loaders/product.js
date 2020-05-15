@@ -7,7 +7,7 @@ import Sale from '../model/sale';
 
 export const optionsGroupsLoader = new DataLoader(async keys => {
 	const allGroups = await OptionsGroup.findAll({
-		where: { productId: keys, active: true },
+		where: { productId: keys, active: true, removed: false },
 		order: [['productId', 'ASC'], ['order', 'ASC']]
 	});
 	
@@ -21,7 +21,7 @@ export const optionsGroupsLoader = new DataLoader(async keys => {
 
 export const optionsLoader = new DataLoader(async keys => {
 	const allOptions = await Option.findAll({
-		where: { optionsGroupId: keys, active: true },
+		where: { optionsGroupId: keys, active: true, removed: false },
 		order: [['optionsGroupId', 'ASC'], ['order', 'ASC']]
 	});
 	

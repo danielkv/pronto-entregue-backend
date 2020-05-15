@@ -17,7 +17,7 @@ class Option extends Sequelize.Model {
 				} else if (option.id) {
 					optionModel = await Option.findByPk(option.id);
 					if (optionModel) {
-						if (option.action === "remove") optionModel = groupModel.removeOption(optionModel, { transaction });
+						if (option.action === "remove") return optionModel.update({ removed: true }, { transaction });
 						else if (option.action === "update") return optionModel.update({ ...option, optionsGroupId: groupModel.get('id') }, { fields: ['name', 'description', 'price', 'active', 'order', 'maxSelectRestrainOther', 'optionsGroupId'], transaction });
 					}
 				}
@@ -40,6 +40,11 @@ Option.init({
 		}
 	},
 	maxSelectRestrainOther: Sequelize.INTEGER,
+	removed: {
+		type: Sequelize.BOOLEAN,
+		allowNull: false,
+		defaultValue: false,
+	},
 	active: {
 		type: Sequelize.BOOLEAN,
 		defaultValue: 1,

@@ -24,6 +24,7 @@ export function sanitizeFilter(_filter = {}, _options = {}) {
 		search: ['name', 'description'],
 		excludeFilters: [],
 		table: '',
+		defaultFilter: {},
 		..._options,
 	}
 	
@@ -31,6 +32,8 @@ export function sanitizeFilter(_filter = {}, _options = {}) {
 		active: true,
 		showInactive: false,
 		search: '',
+
+		...options.defaultFilter,
 		
 		..._filter,
 	}

@@ -293,8 +293,7 @@ export const resolvers =  {
 	},
 	Product: {
 		countOptions(parent, { filter }) {
-			let where = { active: true };
-			if (filter && filter.showInactive) delete where.active;
+			const where = sanitizeFilter(filter, { defaultFilter: { removed: false } });
 
 			return Option.count({ where, include: [{ model: OptionsGroup, where: { productId: parent.get('id') } }] });
 		},
@@ -307,7 +306,7 @@ export const resolvers =  {
 				groups = await optionsGroupsLoader.load(productId);
 			else {
 			
-				const where = sanitizeFilter(filter);
+				const where = sanitizeFilter(filter, { defaultFilter: { removed: false } });
 			
 				groups = await OptionsGroup.cache(optionsGroupsKey(`${productId}:${JSON.stringify(filter)}`)) //
 					.findAll({

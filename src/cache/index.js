@@ -12,6 +12,9 @@ const adaptor = new RedisAdaptor({
 
 export async function deleteMatch(match) {
 	const keys = await redis.keys(`*${match}*`);
+	
+	if (!keys.length) return null;
+
 	return await redis.del(keys);
 }
 

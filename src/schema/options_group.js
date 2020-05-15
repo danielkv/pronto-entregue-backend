@@ -79,7 +79,7 @@ export const resolvers =  {
 			if (!filter)
 				options = await optionsLoader.load(optionsGroupId)
 			else {
-				const where = sanitizeFilter(filter);
+				const where = sanitizeFilter(filter, { defaultFilter: { removed: false } });
 
 				//return parent.getOptions({ where, order: [['order', 'ASC']] });
 				options = await Option.cache(optionsKey(`${optionsGroupId}:${JSON.stringify(filter)}`))
@@ -94,7 +94,7 @@ export const resolvers =  {
 			if (parent.options) return parent.get('options').length;
 			
 			const optionsGroupId = parent.get('id');
-			const where = sanitizeFilter(filter);
+			const where = sanitizeFilter(filter, { defaultFilter: { removed: false } });
 
 			//return parent.getOptions({ where, order: [['order', 'ASC']] });
 			const options = await Option.cache(optionsKey(`${optionsGroupId}:${JSON.stringify(filter)}`))

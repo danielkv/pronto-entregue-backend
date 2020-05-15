@@ -26,16 +26,17 @@ class OptionsGroup extends Sequelize.Model {
 					try {
 						if (!['create', 'remove', 'update'].includes(group.action)) return resolve(group);
 
-						if (group.id && group.action === "remove") {
-							groupModel = await product.removeOptionsGroup(groupModel, { transaction });
-							return resolve(groupModel);
-						} else if (group.action === 'create') {
+						if (group.action === 'create') {
 							groupModel = await product.createOptionsGroup(group, { transaction, fields: ['name', 'active', 'type', 'minSelect', 'maxSelect', 'order', 'priceType'] });
 
 							groupsRestrictionsRel.push({ tempId: group.id, id: groupModel.get('id'), model: groupModel });
-						} else if (group.id && group.action === 'update') {
+						} else if (group.id && ['update', 'remove'].includes(group.action)) {
 							[groupModel] = await product.getOptionsGroups({ where: { id: group.id } });
-							groupModel = await groupModel.update(group, { fields: ['name', 'active', 'type', 'minSelect', 'maxSelect', 'order', 'maxSelectRestrain', 'priceType'], transaction });
+
+							if (group.action === 'remove')
+								await groupModel.update({ removed: true }, { transaction });
+							else
+								groupModel = await groupModel.update(group, { fields: ['name', 'active', 'type', 'minSelect', 'maxSelect', 'order', 'maxSelectRestrain', 'priceType'], transaction });
 
 							groupsRestrictionsRel.push({ tempId: groupModel.get('id'), id: groupModel.get('id'), model: groupModel });
 						}
@@ -101,6 +102,11 @@ OptionsGroup.init({
 			if (type === 'single') return this.setDataValue('maxSelect', 1);
 			return this.setDataValue('maxSelect', val);
 		}
+	},
+	removed: {
+		type: Sequelize.BOOLEAN,
+		allowNull: false,
+		defaultValue: false,
 	},
 	active: {
 		type: Sequelize.BOOLEAN,
