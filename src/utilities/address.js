@@ -61,6 +61,7 @@ export function calculateDistance({ latitude: lat1, longitude: lon1 }, { latitud
 
 	return d * 1000;
 }
+
 // Converts numeric degrees to radians
 function toRad(Value)
 {

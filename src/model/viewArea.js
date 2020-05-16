@@ -6,9 +6,9 @@ import conn from '../services/connection';
  * Define modelo (tabela) de locais de entrega
  */
 
-class DeliveryArea extends Sequelize.Model {}
+class ViewArea extends Sequelize.Model {}
 
-DeliveryArea.init({
+ViewArea.init({
 	name: {
 		type: Sequelize.STRING,
 	},
@@ -30,4 +30,4 @@ DeliveryArea.init({
 	sequelize: conn,
 });
 
-export default DeliveryArea;
+export default ViewArea;

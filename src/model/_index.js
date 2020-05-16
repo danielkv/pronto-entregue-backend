@@ -28,13 +28,14 @@ import Role from './role';
 import Sale from './sale';
 import User from './user';
 import UserMeta from './userMeta';
-
+import ViewArea from './viewArea';
 import './triggers';
 
 // Company Relations
 Company.hasMany(CompanyMeta);
 Company.belongsToMany(User, { through: CompanyUser });
 Company.hasMany(DeliveryArea);
+Company.hasMany(ViewArea);
 Company.belongsToMany(PaymentMethod, { through: CompanyPaymentMethod });
 Company.belongsToMany(User, { through: CompanyUser });
 Company.belongsTo(CompanyType);
@@ -125,12 +126,3 @@ Product.belongsToMany(User, { through: 'favorite_products', as: 'favoritedBy' })
 // Sales relations
 Sale.belongsTo(Product);
 Product.hasMany(Sale);
-
-/* function init() {
-	DeliveryArea.findByPk(8)
-		.then((a)=>{
-			console.log(a.get('area').coordinates)
-		})
-}
-
-init(); */
