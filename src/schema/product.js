@@ -17,7 +17,7 @@ import Sale from '../model/sale';
 import User from '../model/user';
 import conn  from '../services/connection';
 import { getSQLPagination, sanitizeFilter } from '../utilities';
-import { whereCompanyDeliveryArea } from '../utilities/address';
+import { CompanyAreaAttribute } from '../utilities/address';
 import { campaignProductWhere } from '../utilities/campaign';
 import { getSaleSelection } from '../utilities/product';
 
@@ -97,18 +97,17 @@ export const resolvers =  {
 		 */
 		searchProductsOnApp(_, { search, location }) {
 			const where = sanitizeFilter({ search }, { search: ['name', 'description'] });
-			
+
 			return Product.findAll({
 				attributes: {
 					include: [[fn('SUM', col('company.ratings.rate')), 'totalRate']]
 				},
 				where: { ...where,	active: true },
+				having: { [Op.or]: [{ 'company.typeDelivery': true }, { 'company.typePickUp': true }] },
 				include: [{
+					attributes: { include: [CompanyAreaAttribute('typeDelivery', location), CompanyAreaAttribute('typePickUp', location)] },
 					model: Company,
-					where: [
-						whereCompanyDeliveryArea(location, 'company'),
-						{ active: true, published: true }
-					],
+					where: { active: true, published: true },
 					required: true,
 					include: [Rating],
 				}],
@@ -235,13 +234,13 @@ export const resolvers =  {
 		productsOnSale(_, { limit, location }) {
 			return Product.findAll({
 				where: { active: true },
+				having: { [Op.or]: [{ 'company.typeDelivery': true }, { 'company.typePickUp': true }] },
 				include: [
 					{
 						model: Company,
-						where: [
-							whereCompanyDeliveryArea(location),
-							{ active: true, published: true }
-						],
+						attributes: { include: [CompanyAreaAttribute('typeDelivery', location), CompanyAreaAttribute('typePickUp', location)] },
+						where: { active: true, published: true },
+						required: true,
 					},
 					{
 						model: Sale,
@@ -262,29 +261,33 @@ export const resolvers =  {
 		
 		async bestSellers(_, { limit, location }) {
 			const products = await Product.findAll({
+				
+				attributes: { include: [[fn('SUM', col('productRelated.quantity')), 'numberOfOrders']] },
 				include: [
-					OrderProduct,
 					{
+						model: OrderProduct,
+						as: 'productRelated'
+					},
+					/* {
 						model: Sale,
 						...getSaleSelection()
-					},
+					}, */
 					{
 						model: Company,
-						where: [
-							whereCompanyDeliveryArea(location, 'company'),
-							{ published: true, active: true }
-						],
+						attributes: { include: [CompanyAreaAttribute('typeDelivery', location), CompanyAreaAttribute('typePickUp', location)] },
+						where: { published: true, active: true },
 						required: true,
 					}
 				],
 				
 				order: [
-					[conn.fn('COUNT', conn.col('orderProduct.id')), 'DESC'],
-					[conn.col('product.name'), 'ASC']
+					[col('numberOfOrders'), 'DESC'],
+					[fn('RAND')]
 				],
 				group: ['product.id'],
 				where: { active: true },
-				subQuery: false,
+				having: { [Op.or]: [{ 'company.typeDelivery': true }, { 'company.typePickUp': true }] },
+				//subQuery: false,
 				limit
 			});
 

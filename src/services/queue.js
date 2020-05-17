@@ -3,6 +3,10 @@ import { setQueues } from 'bull-board';
 import Redis from 'ioredis';
 
 import * as jobs from '../jobs';
+//redis://redis:6379/0
+
+const redisHost = process.env.NODE_ENV === 'production' ? 'redis-small-queue.tzx2ao.ng.0001.sae1.cache.amazonaws.com' : null;
+const redisQueue = Redis.Cluster([{ host: redisHost, port: 6379 }]);
 
 
 const redisHost = process.env.NODE_ENV === 'production' ? 'redis-small-queue.tzx2ao.ng.0001.sae1.cache.amazonaws.com' : null;

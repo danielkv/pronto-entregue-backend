@@ -32,6 +32,22 @@ export function parseAddresses(results) {
 	return addresses;
 }
 
+export function CompanyAreaSelect(type, { coordinates }, companyTable='company') {
+	if (!coordinates) throw new Error('Endereço não encontrado');
+	const userPoint = pointFromCoordinates(coordinates, true);
+	const tables = { typeDelivery: 'delivery_areas', typePickUp: 'view_areas' };
+
+	const tableName = tables[type];
+
+	return literal(`(SELECT COUNT(id) FROM \`${tableName}\` WHERE companyId = \`${companyTable}\`.\`id\` AND ST_Distance_Sphere(${userPoint}, center) <= radius)`)
+}
+
+export function CompanyAreaAttribute(type, location, companyTable='company') {
+
+	return [CompanyAreaSelect(type, location, companyTable), type]
+}
+
+// deprecated
 export function whereCompanyDeliveryArea({ coordinates }, companyTable='company') {
 	if (!coordinates) throw new Error('Endereço não encontrado');
 	const userPoint = pointFromCoordinates(coordinates, true);
@@ -61,6 +77,7 @@ export function calculateDistance({ latitude: lat1, longitude: lon1 }, { latitud
 
 	return d * 1000;
 }
+
 // Converts numeric degrees to radians
 function toRad(Value)
 {
