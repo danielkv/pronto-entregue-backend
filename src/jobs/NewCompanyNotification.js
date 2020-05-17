@@ -51,8 +51,8 @@ export default {
 		
 		// define message
 		const notificationData = {
-			title: `${comanyData.companyName} ta chegando no App 👏👏`,
-			body: 'Aproveita e da uma olhada no cardápio',
+			title: `${comanyData.companyName} já chegou no App 👏👏`,
+			body: 'Aproveita e dá uma olhada no cardápio',
 		}
 
 		// create messages object
