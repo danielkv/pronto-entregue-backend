@@ -1,12 +1,12 @@
 import { gql }  from 'apollo-server';
-import { Op, literal } from 'sequelize';
+import { Op, literal, where } from 'sequelize';
 
 import { upload }  from '../controller/uploads';
 import Company from '../model/company';
 import CompanyType from '../model/companyType';
 import Product from '../model/product';
 import { sanitizeFilter, getSQLPagination } from '../utilities';
-import { whereCompanyDeliveryArea } from '../utilities/address';
+import { CompanyAreaSelect, whereCompanyDeliveryArea } from '../utilities/address';
 
 export const typeDefs =  gql`
 	type CompanyType {
@@ -106,7 +106,12 @@ export const resolvers =  {
 				where: { active: true },
 				include: [{
 					model: Company,
-					where: [whereCompanyDeliveryArea(location, 'companies'), { active: true, published: true }],
+					where: [{
+						[Op.or]: [
+							where(CompanyAreaSelect('typePickUp', location, 'companies'), '>', 0),
+							where(CompanyAreaSelect('typeDelivery', location, 'companies'), '>', 0)
+						]
+					}, { active: true, published: true }],
 					
 					required: true,
 					include: [
@@ -125,6 +130,7 @@ export const resolvers =  {
 		}
 	},
 	CompanyType: {
+		// deprecated
 		companies(parent, { location, onlyPublished=true }) {
 			if (!location) return parent.getCompanies();
 

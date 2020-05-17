@@ -20,10 +20,6 @@ ViewArea.init({
 		type: Sequelize.FLOAT,
 		allowNull: false,
 	},
-	price: {
-		type: Sequelize.FLOAT,
-		allowNull: false
-	}
 }, {
 	modelName: 'viewArea',
 	tableName: 'view_areas',

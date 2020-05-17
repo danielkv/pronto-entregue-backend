@@ -16,7 +16,7 @@ import Rating  from '../model/rating';
 import User from '../model/user';
 import conn  from '../services/connection';
 import { getSQLPagination, sanitizeFilter }  from '../utilities';
-import { whereCompanyDeliveryArea, pointFromCoordinates } from '../utilities/address';
+import { pointFromCoordinates, CompanyAreaAttribute } from '../utilities/address';
 import { calculateDistance } from '../utilities/address'
 import { companyIsOpen } from '../utilities/company';
 
@@ -31,9 +31,12 @@ export const typeDefs =  gql`
 		metas(keys: [String]): [Meta]!
 		lastMonthRevenue: Float!
 		userRelation: CompanyRelation!
-		acceptTakeout: Boolean!
 		published: Boolean!
 		isOpen: Boolean!
+
+		acceptTakeout: Boolean! #deprecated
+		typePickUp: Boolean!
+		typeDelivery: Boolean!
 
 		# customization
 		image: String
@@ -50,7 +53,6 @@ export const typeDefs =  gql`
 
 		deliveryTime: Int! #minutes
 
-		deliveryAreas: [DeliveryArea]!
 		paymentMethods(filter: Filter): [PaymentMethod]!
 
 		bestSellers(filter:Filter, pagination: Pagination): [ProductBestSeller]!
@@ -129,14 +131,14 @@ export const resolvers =  {
 			
 			return Company.findAll({
 				attributes: {
-					include: [[fn('SUM', col('ratings.rate')), 'totalRate']]
-				},
-				where: {
-					[Op.and]: [
-						whereCompanyDeliveryArea(location, 'company'),
-						{ ...where,	active: true, published: true }
+					include: [
+						CompanyAreaAttribute('typeDelivery', location),
+						CompanyAreaAttribute('typePickUp', location),
+						[fn('SUM', col('ratings.rate')), 'totalRate']
 					]
 				},
+				where: { ...where,	active: true, published: true },
+				having: { [Op.or]: [{ typeDelivery: true }, { typePickUp: true }] },
 				include: [Rating, CompanyType],
 				order: [[col('totalRate'), 'DESC'], [col('company.name'), 'ASC']],
 				group: 'company.id',
@@ -195,7 +197,7 @@ export const resolvers =  {
 
 			return Company.count({ where });
 		},
-		companies: (_, { filter, pagination, location }) => {
+		companies(_, { filter, pagination, location }) {
 			let where = sanitizeFilter(filter, { excludeFilters: ['location'], search: ['name', 'displayName'], table: 'company' });
 
 			const sql = {
@@ -205,7 +207,9 @@ export const resolvers =  {
 			
 			// only on App
 			if (location) {
-				sql.where = [whereCompanyDeliveryArea(location), { published: true }, where]
+				sql.where = [{ published: true }, where]
+				sql.attributes = { include: [CompanyAreaAttribute('typeDelivery', location), CompanyAreaAttribute('typePickUp', location)] }
+				sql.having = { [Op.or]: [{ typeDelivery: true }, { typePickUp: true }] }
 				sql.include = [Address];
 
 				const userPoint = pointFromCoordinates(location.coordinates);
@@ -224,6 +228,12 @@ export const resolvers =  {
 		},
 	},
 	Company: {
+		typePickUp(parent) {
+			return parent.get('typePickUp')
+		},
+		typeDelivery(parent) {
+			return parent.get('typeDelivery')
+		},
 		address(parent) {
 			return parent.getAddress();
 		},
@@ -340,9 +350,6 @@ export const resolvers =  {
 				where,
 				order: [['order', 'ASC'], ['displayName', 'ASC']]
 			});
-		},
-		deliveryAreas(parent) {
-			return parent.getDeliveryAreas();
 		},
 
 		countRatings(parent, { filter }) {

@@ -25,8 +25,8 @@ DeliveryArea.init({
 		allowNull: false
 	}
 }, {
-	modelName: 'viewArea',
-	tableName: 'view_areas',
+	modelName: 'deliveryArea',
+	tableName: 'delivery_areas',
 	sequelize: conn,
 });
 

@@ -26,6 +26,10 @@ export const typeDefs =  gql`
 		radius: Float
 	}
 
+	extend type Company {
+		deliveryAreas: [DeliveryArea]!
+	}
+
 	extend type Mutation {
 		checkDeliveryLocation(companyId: ID!, location: GeoPoint, address: AddressInput): DeliveryArea!
 		modifyDeliveryAreas(data: [DeliveryAreaInput]!): [DeliveryArea]!
@@ -34,6 +38,11 @@ export const typeDefs =  gql`
 `;
 
 export const resolvers =  {
+	Company: {
+		deliveryAreas(parent) {
+			return parent.getDeliveryAreas();
+		},
+	},
 	Mutation: {
 		async checkDeliveryLocation (_, { companyId, location, address }) {
 			// fix to update the app afterwards

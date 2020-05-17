@@ -85,7 +85,7 @@ Category.hasMany(Product);
 //Product relations
 Product.belongsTo(Company);
 Company.hasMany(Product);
-Product.hasOne(OrderProduct);
+Product.hasOne(OrderProduct, { as: 'productRelated' });
 Product.hasMany(OptionsGroup);
 
 //OptionsGroup relations
