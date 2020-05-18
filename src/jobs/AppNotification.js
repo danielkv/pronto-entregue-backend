@@ -4,14 +4,16 @@ import { APP_NOTIFICATION } from "./keys";
 export default {
 	key: APP_NOTIFICATION,
 	options: {},
-	async handle ({ data }) {
-		const tokens = data.tokens;
-		delete data.tokens;
+	async handle (job) {
+		const tokens = job.data.tokens;
+		delete job.data.tokens;
 		const messages = notifications.createMessages(tokens, {
 			priority: 'high',
-			...data,
+			...job.data,
 		})
-		
+		console.log(job)
 		notifications.send(messages);
+
+		return false;
 	}
 }

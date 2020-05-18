@@ -2,9 +2,9 @@ import { gql }  from 'apollo-server';
 import { Op, fn, col, where, literal } from 'sequelize';
 
 import { companyRateKey } from '../cache/keys';
-import { queueNewCompanyNotification } from '../controller/notifications';
 import { getOrderStatusQty } from '../controller/order';
 import { upload } from '../controller/uploads';
+import { NEW_COMPANY_NOTIFICATION } from '../jobs/keys';
 import { deliveryTimeLoader, businessHoursLoader } from '../loaders';
 import Address from '../model/address';
 import Company  from '../model/company';
@@ -15,6 +15,7 @@ import Product from '../model/product';
 import Rating  from '../model/rating';
 import User from '../model/user';
 import conn  from '../services/connection';
+import queue from '../services/queue';
 import { getSQLPagination, sanitizeFilter }  from '../utilities';
 import { pointFromCoordinates, CompanyAreaAttribute } from '../utilities/address';
 import { calculateDistance } from '../utilities/address'
@@ -147,7 +148,7 @@ export const resolvers =  {
 			});
 		},
 		async sendNewCompanyNoticiation(_, { companyId }) {
-			queueNewCompanyNotification(companyId);
+			queue.add(NEW_COMPANY_NOTIFICATION, { companyId });
 
 			return true;
 		},

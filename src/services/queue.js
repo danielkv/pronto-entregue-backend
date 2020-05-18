@@ -1,12 +1,11 @@
-import { setQueues } from 'bull-board';
-import { Queue, Worker } from 'bullmq'
-import Redis from 'ioredis';
+//import { setQueues } from 'bull-board';
+//import { Queue, Worker } from 'bullmq'
+//import Redis from 'ioredis';
 
 import * as jobs from '../jobs';
 //redis://redis:6379/0
 
-//const redisHost = process.env.NODE_ENV === 'production' ? 'redis-small-queue.tzx2ao.ng.0001.sae1.cache.amazonaws.com' : 'localhost';
-const redisHost = 'redis://redis:6379';
+/* const redisHost = process.env.NODE_ENV === 'production' ? 'redis://redis:6379' : 'ec2-52-67-199-173.sa-east-1.compute.amazonaws.com:6379';
 
 const redisQueue = new Redis(redisHost);
 
@@ -31,17 +30,26 @@ const queues = Object.values(jobs).map(job => {
 	}
 });
 
-setQueues(queues.map(q => q.bull));
+setQueues(queues.map(q => q.bull)); */
 
 export default {
-	queues,
+	//queues,
 	add(name, data) {
-		const queue = this.queues.find(queue => queue.name === name);
-		return queue.bull.add('JOB', data, queue.options);
+		try {
+			//const queue = this.queues.find(queue => queue.name === name);
+			// return queue.bull.add('JOB', data, queue.options);
+
+			const job = jobs[name];
+
+			// temp solution
+			job.handle({ data });
+		} catch (err) {
+			console.error('job error', err.message);
+		}
 	},
 	process() {
-		return this.queues.forEach(queue => {
+		/* return this.queues.forEach(queue => {
 			new Worker(queue.name, queue.handle, { connection: redisQueue })
-		})
+		}) */
 	}
 }

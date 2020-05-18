@@ -1,12 +1,13 @@
 import { gql, withFilter, PubSub }  from 'apollo-server';
 import { literal, fn, where, col } from 'sequelize';
 
-import { queueCustomerStatusChangeNotification, queueNewOrderNotification } from '../controller/notifications';
 import { ORDER_CREATED, ORDER_QTY_STATUS_UPDATED, getOrderStatusQty, ORDER_STATUS_UPDATED } from '../controller/order';
+import { COMPANY_USERS_NEW_ORDER_NOTIFICATION, ORDER_STATUS_CHANGE_NOTIFICATION } from '../jobs/keys';
 import Company from '../model/company';
 import Order from '../model/order';
 import OrderProduct  from '../model/orderProduct';
 import sequelize  from '../services/connection';
+import queue from '../services/queue';
 import { pointFromCoordinates } from '../utilities/address';
 import { companyIsOpen, defaultBusinessHours } from '../utilities/company';
 
@@ -231,7 +232,7 @@ export const resolvers =  {
 				pubsub.publish(ORDER_CREATED, { orderCreated: order });
 
 				// queue company user notifications
-				queueNewOrderNotification(data.companyId, order.id);
+				queue.add(COMPANY_USERS_NEW_ORDER_NOTIFICATION, { companyId: data.companyId, orderId: order.id });
 				
 				return order;
 			});
@@ -290,7 +291,7 @@ export const resolvers =  {
 				pubsub.publish(ORDER_QTY_STATUS_UPDATED, { updateOrderStatusQty: ordersStatusQty });
 
 				// queue customer notification
-				queueCustomerStatusChangeNotification(userId, orderId, newOrderStatus);
+				queue.add(ORDER_STATUS_CHANGE_NOTIFICATION, { userId, orderId, newOrderStatus });
 			}
 
 			// return result

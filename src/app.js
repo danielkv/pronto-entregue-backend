@@ -5,7 +5,7 @@ import express  from 'express';
 import http  from 'http';
 import path  from 'path';
 
-import './services/process.queue';
+//import './services/process.queue';
 
 import { createContext }  from './controller/apolloContext';
 import routes  from './router';
