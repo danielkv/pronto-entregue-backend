@@ -1,5 +1,5 @@
 import { gql }  from 'apollo-server';
-import { Op, fn, col, where, literal } from 'sequelize';
+import { Op, fn, col, where, literal, QueryTypes } from 'sequelize';
 
 import { companyRateKey } from '../cache/keys';
 import { getOrderStatusQty } from '../controller/order';
@@ -17,7 +17,7 @@ import User from '../model/user';
 import conn  from '../services/connection';
 import queue from '../services/queue';
 import { getSQLPagination, sanitizeFilter }  from '../utilities';
-import { pointFromCoordinates, CompanyAreaAttribute } from '../utilities/address';
+import { pointFromCoordinates, CompanyAreaAttribute, CompanyAreaSelect } from '../utilities/address';
 import { calculateDistance } from '../utilities/address'
 import { companyIsOpen } from '../utilities/company';
 
@@ -36,8 +36,6 @@ export const typeDefs =  gql`
 		isOpen: Boolean!
 
 		acceptTakeout: Boolean! #deprecated
-		typePickUp: Boolean!
-		typeDelivery: Boolean!
 
 		# customization
 		image: String
@@ -60,9 +58,6 @@ export const typeDefs =  gql`
 
 		businessHours: [BusinessHour]!
 
-		countOrders(filter:JSON): Int! @hasRole(permission: "orders_read")
-		orders(filter:JSON, pagination: Pagination): [Order]! @hasRole(permission: "orders_read")
-
 		countProducts(filter:Filter): Int!
 		products(filter:Filter, pagination: Pagination): [Product]! @hasRole(permission: "products_read")
 
@@ -74,6 +69,8 @@ export const typeDefs =  gql`
 		categories(filter: Filter, pagination: Pagination): [Category]!
 
 		distance(location: GeoPoint!): Float! #kilometers
+		typePickUp(location: GeoPoint): Boolean!
+		typeDelivery(location: GeoPoint): Boolean!
 	}
 
 	type ProductBestSeller {
@@ -229,11 +226,19 @@ export const resolvers =  {
 		},
 	},
 	Company: {
-		typePickUp(parent) {
-			return parent.get('typePickUp')
+		typePickUp(parent, { location }) {
+			if (parent.get('typePickUp')) return parent.get('typePickUp')
+			if (!location) return false;
+
+			return conn.query(CompanyAreaSelect('typePickUp', location,`'${parent.get('id')}'`), { type: QueryTypes.SELECT })
+				.then(([{ result }])=>result);
 		},
-		typeDelivery(parent) {
-			return parent.get('typeDelivery')
+		typeDelivery(parent, { location }) {
+			if (parent.get('typeDelivery')) return parent.get('typeDelivery')
+			if (!location) return false;
+
+			return conn.query(CompanyAreaSelect('typeDelivery', location,`'${parent.get('id')}'`), { type: QueryTypes.SELECT })
+				.then(([{ result }])=>result);
 		},
 		address(parent) {
 			return parent.getAddress();
@@ -322,24 +327,7 @@ export const resolvers =  {
 			})
 		},
 
-		countOrders(parent, { filter }) {
-			const search = ['street', 'complement', '$user.firstName$', '$user.lastName$', '$user.email$'];
-			const _filter = sanitizeFilter(filter, { search, excludeFilters: ['active'], table: 'order' });
-
-			return parent.countOrders({ where: _filter, include: [User] });
-		},
-		orders(parent, { filter, pagination }) {
-			const search = ['street', 'complement', '$user.firstName$', '$user.lastName$', '$user.email$'];
-			const _filter = sanitizeFilter(filter, { search, excludeFilters: ['active'], table: 'order' });
-
-			return parent.getOrders({
-				where: _filter,
-				order: [['createdAt', 'DESC']],
-				...getSQLPagination(pagination),
-
-				include: [User]
-			});
-		},
+		
 		type(parent) {
 			return parent.getCompanyType();
 		},

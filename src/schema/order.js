@@ -6,8 +6,10 @@ import { COMPANY_USERS_NEW_ORDER_NOTIFICATION, ORDER_STATUS_CHANGE_NOTIFICATION 
 import Company from '../model/company';
 import Order from '../model/order';
 import OrderProduct  from '../model/orderProduct';
+import User from '../model/user';
 import sequelize  from '../services/connection';
 import queue from '../services/queue';
+import { sanitizeFilter, getSQLPagination } from '../utilities';
 import { pointFromCoordinates } from '../utilities/address';
 import { companyIsOpen, defaultBusinessHours } from '../utilities/company';
 
@@ -53,6 +55,11 @@ export const typeDefs =  gql`
 		address: AddressInput
 
 		products: [OrderProductInput]
+	}
+
+	extend type Company {
+		countOrders(filter:JSON): Int! @hasRole(permission: "orders_read")
+		orders(filter:JSON, pagination: Pagination): [Order]! @hasRole(permission: "orders_read")
 	}
 
 	type Subscription {
@@ -148,6 +155,26 @@ export const resolvers =  {
 					if (!order) throw new Error('Pedido não encontrado');
 					return order;
 				})
+		}
+	},
+	Company: {
+		countOrders(parent, { filter }) {
+			const search = ['streetAddress', '$user.firstName$', '$user.lastName$', '$user.email$'];
+			const _filter = sanitizeFilter(filter, { search, excludeFilters: ['active'], table: 'order' });
+
+			return parent.countOrders({ where: _filter, include: [User] });
+		},
+		orders(parent, { filter, pagination }) {
+			const search = ['streetAddress', '$user.firstName$', '$user.lastName$', '$user.email$'];
+			const _filter = sanitizeFilter(filter, { search, excludeFilters: ['active'], table: 'order' });
+
+			return parent.getOrders({
+				where: _filter,
+				order: [['createdAt', 'DESC']],
+				...getSQLPagination(pagination),
+
+				include: [User]
+			});
 		}
 	},
 	Mutation: {

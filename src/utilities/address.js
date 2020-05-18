@@ -32,19 +32,19 @@ export function parseAddresses(results) {
 	return addresses;
 }
 
-export function CompanyAreaSelect(type, { coordinates }, companyTable='company') {
+export function CompanyAreaSelect(type, { coordinates }, company='`company`.`id`') {
 	if (!coordinates) throw new Error('Endereço não encontrado');
 	const userPoint = pointFromCoordinates(coordinates, true);
 	const tables = { typeDelivery: 'delivery_areas', typePickUp: 'view_areas' };
 
 	const tableName = tables[type];
 
-	return literal(`(SELECT COUNT(id) > 0 FROM \`${tableName}\` WHERE companyId = \`${companyTable}\`.\`id\` AND ST_Distance_Sphere(${userPoint}, center) <= radius)`)
+	return `(SELECT COUNT(id) > 0 as result FROM \`${tableName}\` WHERE companyId = ${company} AND ST_Distance_Sphere(${userPoint}, center) <= radius)`
 }
 
-export function CompanyAreaAttribute(type, location, companyTable='company') {
+export function CompanyAreaAttribute(type, location, companyTable) {
 
-	return [CompanyAreaSelect(type, location, companyTable), type]
+	return [literal(CompanyAreaSelect(type, location, companyTable)), type]
 }
 
 // deprecated

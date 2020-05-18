@@ -108,8 +108,8 @@ export const resolvers =  {
 					model: Company,
 					where: [{
 						[Op.or]: [
-							where(CompanyAreaSelect('typePickUp', location, 'companies'), '>', 0),
-							where(CompanyAreaSelect('typeDelivery', location, 'companies'), '>', 0)
+							where(literal(CompanyAreaSelect('typePickUp', location, '`companies`.`id`')), '>', 0),
+							where(literal(CompanyAreaSelect('typeDelivery', location, '`companies`.`id`')), '>', 0)
 						]
 					}, { active: true, published: true }],
 					
