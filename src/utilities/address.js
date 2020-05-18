@@ -39,7 +39,7 @@ export function CompanyAreaSelect(type, { coordinates }, companyTable='company')
 
 	const tableName = tables[type];
 
-	return literal(`(SELECT COUNT(id) FROM \`${tableName}\` WHERE companyId = \`${companyTable}\`.\`id\` AND ST_Distance_Sphere(${userPoint}, center) <= radius)`)
+	return literal(`(SELECT COUNT(id) > 0 FROM \`${tableName}\` WHERE companyId = \`${companyTable}\`.\`id\` AND ST_Distance_Sphere(${userPoint}, center) <= radius)`)
 }
 
 export function CompanyAreaAttribute(type, location, companyTable='company') {
