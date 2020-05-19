@@ -1,3 +1,4 @@
+import Order from '../model/order';
 import UserMeta from '../model/userMeta';
 import * as notifications from '../services/notifications';
 import { ORDER_STATUS_CHANGE_NOTIFICATION } from "./keys";
@@ -6,7 +7,10 @@ export default {
 	key: ORDER_STATUS_CHANGE_NOTIFICATION,
 	options: {},
 	async handle ({ data: { userId, orderId, newOrderStatus } }) {
-		const notificationData = orderCustomerNotificationData(orderId, newOrderStatus)
+		const order = await Order.findByPk(orderId);
+		if (!order) throw new Error('Pedido não encontrado');
+
+		const notificationData = orderCustomerNotificationData(order, newOrderStatus)
 		if (!notificationData) throw new Error('Não há mensagem')
 
 		// get user meta
@@ -37,8 +41,14 @@ export default {
 	}
 }
 
-function orderCustomerNotificationData(orderId, newStatus) {
+function orderCustomerNotificationData(order, newStatus) {
+	const orderId = order.get('id');
+	const type = order.get('type');
+
 	const finalTexts = ['Parece estar delicioso! 😋', 'Se faltar um pouco, foi culpa minha 😂😂', 'Deveria ter pedido um desse também... 😔', 'Se atrasar é porque comi. 😖']
+	//const pickUpFinals = ['Corre pra pegar o pedido 🏃🏃', 'Hmm, tá aqui do lado, não sei se aguento 🤭', 'Só vim buscar que eu guardo pra você 👊']
+
+	//const finalTexts = order.type === 'takeout' ? pickUpFinals : deliveryFinals;
 	const selectedFinalText = finalTexts[Math.floor(Math.random() * finalTexts.length)];
 	
 	switch(newStatus) {
@@ -50,10 +60,15 @@ function orderCustomerNotificationData(orderId, newStatus) {
 				body: `O Pedido #${orderId} está sendo preparado. ${selectedFinalText}`
 			};
 		case 'delivering':
-			return {
-				title: 'Seu pedido está a caminho',
-				body: `O pedido #${orderId} já está saindo do estabelecimento para seu endereço. ${selectedFinalText}`
-			};
+			return type === 'takeout'
+				? {
+					title: 'Seu pedido está a caminho',
+					body: `O pedido #${orderId} está aguardando a retirada. ${selectedFinalText}`
+				}
+				: {
+					title: 'Seu pedido está pronto',
+					body: `O pedido #${orderId} já está saindo do estabelecimento para seu endereço. ${selectedFinalText}`
+				};
 		case 'delivered':
 			return null;
 		case 'canceled':
