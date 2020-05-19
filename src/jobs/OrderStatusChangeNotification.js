@@ -46,9 +46,9 @@ function orderCustomerNotificationData(order, newStatus) {
 	const type = order.get('type');
 
 	const finalTexts = ['Parece estar delicioso! 😋', 'Se faltar um pouco, foi culpa minha 😂😂', 'Deveria ter pedido um desse também... 😔', 'Se atrasar é porque comi. 😖']
-	//const pickUpFinals = ['Corre pra pegar o pedido 🏃🏃', 'Hmm, tá aqui do lado, não sei se aguento 🤭', 'Só vim buscar que eu guardo pra você 👊']
+	const pickUpFinals = ['Corre pra pegar o pedido 🏃🏃', 'Hmm, tá aqui do lado, não sei se aguento 🤭', 'Só vim buscar que eu guardo pra você 👊']
 
-	//const finalTexts = order.type === 'takeout' ? pickUpFinals : deliveryFinals;
+	const selectedFinalTextPickUp = pickUpFinals[Math.floor(Math.random() * pickUpFinals.length)];
 	const selectedFinalText = finalTexts[Math.floor(Math.random() * finalTexts.length)];
 	
 	switch(newStatus) {
@@ -63,7 +63,7 @@ function orderCustomerNotificationData(order, newStatus) {
 			return type === 'takeout'
 				? {
 					title: 'Seu pedido está a caminho',
-					body: `O pedido #${orderId} está aguardando a retirada. ${selectedFinalText}`
+					body: `O pedido #${orderId} está aguardando a retirada. ${selectedFinalTextPickUp}`
 				}
 				: {
 					title: 'Seu pedido está pronto',
