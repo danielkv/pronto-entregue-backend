@@ -62,12 +62,12 @@ function orderCustomerNotificationData(order, newStatus) {
 		case 'delivering':
 			return type === 'takeout'
 				? {
-					title: 'Seu pedido está a caminho',
+					title: 'Seu pedido está pronto',
 					body: `O pedido #${orderId} está aguardando a retirada. ${selectedFinalTextPickUp}`
 				}
 				: {
-					title: 'Seu pedido está pronto',
-					body: `O pedido #${orderId} já está saindo do estabelecimento para seu endereço. ${selectedFinalText}`
+					title: 'Seu pedido está a caminho',
+					body: `O pedido #${orderId} já está a caminho do seu endereço. ${selectedFinalText}`
 				};
 		case 'delivered':
 			return null;
