@@ -1,0 +1,29 @@
+version: "3.7"
+
+services:
+  app:
+    build: .
+    labels:
+      - traefik.http.routers.app.rule=Host(`api.prontoentregue.com.br`)
+    command: yarn start
+  db:
+    ports:
+      - "3306:3306"
+    environment:
+      - TZ=America/Sao_Paulo
+      - MYSQL_ROOT_PASSWORD=PSqYX3HuNc
+      - MYSQL_DATABASE=pronto_entregue
+      - MYSQL_USER=prontouser
+      - MYSQL_PASSWORD=EctIonwaRTRU
+  traefik:
+    image: traefik:2.2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "8080:8080"
+      #- "443:443"
+    expose:
+      - 8080
+    command: --providers.docker
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock

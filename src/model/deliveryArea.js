@@ -14,15 +14,12 @@ DeliveryArea.init({
 	},
 	center: {
 		type: Sequelize.GEOMETRY('POINT'),
-		allowNull: false,
 	},
 	radius: {
 		type: Sequelize.FLOAT,
-		allowNull: false,
 	},
 	price: {
 		type: Sequelize.FLOAT,
-		allowNull: false
 	}
 }, {
 	modelName: 'deliveryArea',

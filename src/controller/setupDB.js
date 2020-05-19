@@ -41,8 +41,8 @@ export function setupDataBase (req, res) {
 			}
 
 			// recreate all tables
-			await conn.sync({ force: Boolean(req.query.force) });
-			result += `<li>Tables synced ${req.query.force ? 'forced' : ''}</li>`;
+			await conn.sync({ force: Boolean(req.query.force), alter: Boolean(req.query.alter) });
+			result += `<li>Tables synced ${req.query.force ? 'forced' : ''} ${req.query.alter ? 'alter' : ''}</li>`;
 		
 			if (req.query.default) {
 				result += '<li>creating default data...</li><ul>';

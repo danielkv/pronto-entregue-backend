@@ -6,6 +6,11 @@ import { flushAll } from './cache';
 import { authenticate } from './controller/authentication';
 import { importTable, exportDB } from './controller/helper';
 import { setupDataBase } from './controller/setupDB';
+import CreditHistory from './model/creditHistory';
+import Order from './model/order';
+import conn from './services/connection';
+
+
 
 const route = Router();
 
@@ -19,6 +24,24 @@ route.get('/networkTest', (req, res)=>{
 
 // porta de instalação
 route.get('/setup', setupDataBase);
+
+// porta de instalação
+route.get('/sync/:table', async (req, res) => {
+	if (!process.env.SETUP) return res.sendStatus(404);
+	
+	try {
+		const { table } = req.params;
+		const model = require(`./model/${table}`).default
+
+		console.log(model)
+		await model.sync({ alter: true });
+	
+		res.send(`${table} alterado com sucesso`);
+	} catch (err) {
+		res.send(err.message)
+	}
+	
+});
 
 // export database
 route.get('/export', (req, res) => {

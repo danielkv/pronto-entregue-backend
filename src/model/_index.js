@@ -60,6 +60,8 @@ CompanyUser.belongsTo(Role);
 
 // Statement relations
 CreditHistory.belongsTo(User);
+CreditHistory.hasOne(Order);
+Order.belongsTo(CreditHistory);
 User.hasMany(CreditHistory);
 
 // CreditBalance relations

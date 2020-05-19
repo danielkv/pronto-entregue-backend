@@ -1,7 +1,9 @@
 import { gql }  from 'apollo-server';
 
+import { balanceLoader } from '../loaders';
 import CreditHistory from '../model/creditHistory';
 import User from '../model/user';
+import { sanitizeFilter, getSQLPagination } from '../utilities';
 
 export const typeDefs = gql`
 
@@ -19,13 +21,19 @@ export const typeDefs = gql`
 		history: String
 	}
 
+	extend type User {
+		creditBalance: Float!
+		countCreditHistory(filter: JSON): Int!
+		creditHistory(filter: JSON, pagination: Pagination): [CreditHistory]!
+	}
+
 	extend type Mutation {
 		createCreditHistory(userId: ID!, data: CreditHistoryInput!): CreditHistory! @hasRole(permission: "master")
 	}
 
 `;
 
-export const resolvers =  {
+export const resolvers = {
 	Mutation: {
 		async createCreditHistory(_, { userId, data }) {
 			// check if user exists
@@ -40,6 +48,27 @@ export const resolvers =  {
 				...data,
 				userId
 			})
+		}
+	},
+	User: {
+		async creditBalance(parent) {
+			const balance = await balanceLoader.load(parent.get('id'));
+
+			return balance.get('value');
+		},
+		countCreditHistory(parent, { filter }) {
+			const where = sanitizeFilter(filter, { excludeFilters: ['active'], search: ['history'] });
+
+			return parent.countCreditHistory({ where });
+		},
+		creditHistory(parent, { filter, pagination }) {
+			const where = sanitizeFilter(filter, { excludeFilters: ['active'], search: ['history'] });
+
+			return parent.getCreditHistory({
+				where,
+				...getSQLPagination(pagination),
+				order: [['createdAt', 'DESC']]
+			});
 		}
 	}
 }
