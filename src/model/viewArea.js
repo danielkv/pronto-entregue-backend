@@ -16,6 +16,10 @@ ViewArea.init({
 		type: Sequelize.GEOMETRY('POINT'),
 		allowNull: false,
 	},
+	active: {
+		type: Sequelize.BOOLEAN,
+		defaultValue: true,
+	},
 	radius: {
 		type: Sequelize.FLOAT,
 		allowNull: false,

@@ -15,6 +15,10 @@ DeliveryArea.init({
 	center: {
 		type: Sequelize.GEOMETRY('POINT'),
 	},
+	active: {
+		type: Sequelize.BOOLEAN,
+		defaultValue: true,
+	},
 	radius: {
 		type: Sequelize.FLOAT,
 	},

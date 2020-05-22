@@ -29,7 +29,7 @@ export const typeDefs =  gql`
 		message: String!
 		createdAt: DateTime!
 		updatedAt: DateTime!
-		paymentMethod: PaymentMethod!
+		paymentMethod: PaymentMethod
 		
 		company: Company!
 		address: Address
@@ -43,6 +43,7 @@ export const typeDefs =  gql`
 		type: String
 		status: String
 		paymentMethodId: ID
+		useCredits: Boolean
 		companyId: ID
 
 		paymentFee: Float
@@ -251,6 +252,25 @@ export const resolvers =  {
 
 				// create order
 				const order = await company.createOrder(data, { transaction });
+
+				// check if order use credits
+				if (data.useCredits) {
+					const user = await User.findByPk(data.userId);
+					if (!user) throw new Error('Usuário não encontrado');
+
+					const balanceModel = await user.getCreditBalance();
+					if (!balanceModel) throw new('Nenhum crédito na sua conta');
+
+					const totalOrder = data.price + data.discount;
+					
+					const creditBalance = balanceModel.get('value');
+					if (creditBalance < totalOrder && !data.paymentMethodId) throw new Error('Você não tem créditos suficientes para esse pedido, selecione também um método de pagamento para completar o valor');
+					
+					const creditsUse = creditBalance >= totalOrder ? totalOrder : creditBalance;
+					
+					const createdCreditHitory = await user.createCreditHistory({ value: -creditsUse, history: `Pedido #${order.get('id')} em ${company.get('displayName')}` }, { transaction })
+					await order.setCreditHistory(createdCreditHitory, { transaction })
+				}
 				
 				// create order products
 				await OrderProduct.updateAll(data.products, order, transaction);
@@ -329,6 +349,8 @@ export const resolvers =  {
 			const orderUser = await order.getUser();
 			
 			if (orderUser.get('id') !== user.get('id') && !user.can('orders_edit')) throw new Error('Você não tem permissões para cancelar esse pedido');
+
+			if (order.get('status') !== 'waiting') throw new Error('Você não pode cancelar esse pedido, o status dele já foi alterado');
 
 			const updatedOrder = await order.update({ status: 'canceled' });
 

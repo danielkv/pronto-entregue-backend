@@ -10,6 +10,7 @@ function parseAddressesComponents(results) {
 		};
 		result.address_components.forEach(component => {
 			component.types.forEach(type => {
+				// eslint-disable-next-line camelcase
 				componentTypes[type] = { long_name: component.long_name, short_name: component.short_name }
 			})
 		})
@@ -39,7 +40,7 @@ export function CompanyAreaSelect(type, { coordinates }, company='`company`.`id`
 
 	const tableName = tables[type];
 
-	return `(SELECT COUNT(id) > 0 as result FROM \`${tableName}\` WHERE companyId = ${company} AND ST_Distance_Sphere(${userPoint}, center) <= radius)`
+	return `(SELECT COUNT(id) > 0 as result FROM \`${tableName}\` WHERE active AND companyId = ${company} AND ST_Distance_Sphere(${userPoint}, center) <= radius)`
 }
 
 export function CompanyAreaAttribute(type, location, companyTable) {

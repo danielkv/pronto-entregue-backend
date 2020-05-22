@@ -6,6 +6,7 @@ export const typeDefs =  gql`
 	type ViewArea {
 		id: ID!
 		name: String
+		active: Boolean!
 		center: GeoPoint
 		radius: Float
 		createdAt: DateTime!
@@ -15,6 +16,7 @@ export const typeDefs =  gql`
 	input ViewAreaInput {
 		id: ID
 		name: String
+		active: Boolean
 		center: GeoPoint
 		radius: Float
 	}
@@ -51,7 +53,7 @@ export const resolvers =  {
 						.then(([areaFound])=>{
 							if (!areaFound) throw new Error('Área de vizualização não encontrada');
 						
-							return areaFound.update(area, { field: ['center', 'radius', 'name'], transaction });
+							return areaFound.update(area, { field: ['center', 'radius', 'name', 'active'], transaction });
 						})
 				}));
 

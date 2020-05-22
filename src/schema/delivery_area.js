@@ -10,6 +10,7 @@ export const typeDefs =  gql`
 		id: ID!
 		name: String
 		center: GeoPoint
+		active: Boolean!
 		radius: Float
 		distance: Int
 		price: Float!
@@ -20,6 +21,7 @@ export const typeDefs =  gql`
 	input DeliveryAreaInput {
 		id: ID
 		distance: Int
+		active: Boolean
 		price: Float
 		name: String
 		center: GeoPoint
@@ -82,7 +84,7 @@ export const resolvers =  {
 						.then(([areaFound])=>{
 							if (!areaFound) throw new Error('Área de entrega não encontrada');
 						
-							return areaFound.update(area, { field: ['center', 'radius', 'name', 'price'], transaction });
+							return areaFound.update(area, { field: ['center', 'radius', 'name', 'price', 'active'], transaction });
 						})
 				}));
 

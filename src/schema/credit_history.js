@@ -27,6 +27,10 @@ export const typeDefs = gql`
 		creditHistory(filter: JSON, pagination: Pagination): [CreditHistory]!
 	}
 
+	extend type Order {
+		creditHistory: CreditHistory
+	}
+
 	extend type Mutation {
 		createCreditHistory(userId: ID!, data: CreditHistoryInput!): CreditHistory! @hasRole(permission: "master")
 	}
@@ -48,6 +52,11 @@ export const resolvers = {
 				...data,
 				userId
 			})
+		}
+	},
+	Order: {
+		creditHistory(parent) {
+			return parent.getCreditHistory();
 		}
 	},
 	User: {

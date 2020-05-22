@@ -5,13 +5,14 @@
 	"version": "0.2.0",
 	"configurations": [
 		{
-			"type": "node",
+			"type": "docker",
 			"request": "attach",
-			"name": "Launch Program",
-			"restart": true,
+			"name": "Launch Node.js in Docker",
+			"preLaunchTask": "Run Docker Container"
+			/* "restart": true,
 			"skipFiles": [
 				"<node_internals>/**"
-			]
+			] */
 		}
 	]
 }
