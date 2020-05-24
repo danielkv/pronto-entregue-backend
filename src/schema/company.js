@@ -1,11 +1,11 @@
 import { gql }  from 'apollo-server';
 import { Op, fn, col, where, literal, QueryTypes } from 'sequelize';
 
-import { companyRateKey } from '../cache/keys';
 import { getOrderStatusQty } from '../controller/order';
 import { upload } from '../controller/uploads';
 import { NEW_COMPANY_NOTIFICATION } from '../jobs/keys';
-import { deliveryTimeLoader, businessHoursLoader } from '../loaders';
+import { deliveryTimeLoader, businessHoursLoader, rateLoader } from '../loaders';
+import { addressLoader } from '../loaders/address';
 import Address from '../model/address';
 import Company  from '../model/company';
 import CompanyMeta  from '../model/companyMeta';
@@ -19,7 +19,7 @@ import queue from '../services/queue';
 import { getSQLPagination, sanitizeFilter }  from '../utilities';
 import { pointFromCoordinates, CompanyAreaAttribute, CompanyAreaSelect } from '../utilities/address';
 import { calculateDistance } from '../utilities/address'
-import { companyIsOpen } from '../utilities/company';
+import { companyIsOpen, isOpenAttribute } from '../utilities/company';
 
 export const typeDefs =  gql`
 	type Company {
@@ -206,13 +206,15 @@ export const resolvers =  {
 			// only on App
 			if (location) {
 				sql.where = [{ published: true }, where]
-				sql.attributes = { include: [CompanyAreaAttribute('typeDelivery', location), CompanyAreaAttribute('typePickUp', location)] }
+				sql.attributes = { include: [CompanyAreaAttribute('typeDelivery', location), CompanyAreaAttribute('typePickUp', location), isOpenAttribute('metas.value')] }
 				sql.having = { [Op.or]: [{ typeDelivery: true }, { typePickUp: true }] }
-				sql.include = [Address];
+				sql.include = [Address, { model: CompanyMeta, where: { key: 'businessHours' } }];
 
 				const userPoint = pointFromCoordinates(location.coordinates);
+
+				sql.subQuery = false;
 				
-				sql.order = [[fn('ST_Distance_Sphere', userPoint, col('address.location')), 'ASC']]
+				sql.order = [[col('isOpen'), 'DESC'], [fn('ST_Distance_Sphere', userPoint, col('address.location')), 'ASC']]
 			}
 		
 			return Company.findAll(sql);
@@ -241,7 +243,9 @@ export const resolvers =  {
 				.then(([{ result }])=>result);
 		},
 		address(parent) {
-			return parent.getAddress();
+			const addressId = parent.get('addressId');
+			
+			return addressLoader.load(addressId);
 		},
 		userRelation: (parent) => {
 			if (!parent.companyRelation) throw new Error('Nenhum usuário selecionado');
@@ -396,17 +400,7 @@ export const resolvers =  {
 		},
 		async rate(parent) {
 			const companyId = parent.get('id');
-			const rating = await Rating.cache(companyRateKey(companyId))
-				.findOne({
-					attributes: [[fn('AVG', col('rate')), 'rateAvarage']],
-					where: { companyId }
-				});
-
-			/* const [rating] = await parent.getRatings({
-				attributes: [[fn('AVG', col('rate')), 'rateAvarage']]
-			}) */
-
-			return rating.get('rateAvarage') || 0;
+			return rateLoader.load(companyId)
 		},
 		async distance(parent, { location }) {
 			const companyAddress = await Address.cache().findByPk(parent.get('addressId'));
