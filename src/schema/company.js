@@ -308,8 +308,9 @@ export const resolvers =  {
 			return businessHoursLoader.load(parent.get('id'));
 		},
 		async isOpen(parent) {
+			if (parent.get('isOpen')) return parent.get('isOpen');
+
 			const businessHours = await businessHoursLoader.load(parent.get('id'));
-			
 			return companyIsOpen(businessHours);
 		},
 
