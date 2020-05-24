@@ -1,5 +1,7 @@
 import { gql }  from 'apollo-server';
 
+import { orderOptionsLoader } from '../loaders/order';
+
 export const typeDefs =  gql`
 	type OrderOptionsGroup {
 		id: ID!
@@ -21,7 +23,8 @@ export const typeDefs =  gql`
 export const resolvers =  {
 	OrderOptionsGroup: {
 		options: (parent) => {
-			return parent.getOptions();
+			const groupId = parent.get('id');
+			return orderOptionsLoader.load(groupId)
 		},
 		optionsGroupRelated: (parent) => {
 			return parent.getOptionsGroupRelated();

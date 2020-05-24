@@ -1,6 +1,6 @@
 import { gql }  from 'apollo-server';
 
-import { orderProductsLoader } from '../loaders/order';
+import { orderProductsLoader, orderOptionsGroupsLoader } from '../loaders/order';
 
 export const typeDefs =  gql`
 	type OrderProduct {
@@ -49,9 +49,12 @@ export const resolvers =  {
 	},
 	OrderProduct: {
 		optionsGroups(parent) {
-			return parent.getOptionsGroups();
+			const productId = parent.get('id')
+
+			return orderOptionsGroupsLoader.load(productId);
 		},
 		productRelated(parent) {
+			
 			return parent.getProductRelated();
 		},
 		image(parent) {
