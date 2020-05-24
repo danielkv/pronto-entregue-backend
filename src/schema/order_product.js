@@ -1,5 +1,7 @@
 import { gql }  from 'apollo-server';
 
+import { orderProductsLoader } from '../loaders/order';
+
 export const typeDefs =  gql`
 	type OrderProduct {
 		id: ID!
@@ -22,9 +24,29 @@ export const typeDefs =  gql`
 		productRelatedId: ID
 		optionsGroups: [OrderOptionsGroupInput!]
 	}
+
+	extend type Order {
+		countProducts: Int!
+		products: [OrderProduct]!
+	}
 `;
 
 export const resolvers =  {
+	Order: {
+		products(parent) {
+			//return parent.getProducts();
+			const orderId = parent.get('id');
+
+			return orderProductsLoader.load(orderId);
+		},
+		async countProducts(parent) {
+			const orderId = parent.get('id');
+
+			const products = await orderProductsLoader.load(orderId);
+
+			return products.length;
+		},
+	},
 	OrderProduct: {
 		optionsGroups(parent) {
 			return parent.getOptionsGroups();

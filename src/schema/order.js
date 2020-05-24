@@ -3,6 +3,7 @@ import { literal, fn, where, col } from 'sequelize';
 
 import { ORDER_CREATED, ORDER_QTY_STATUS_UPDATED, getOrderStatusQty, ORDER_STATUS_UPDATED } from '../controller/order';
 import { COMPANY_USERS_NEW_ORDER_NOTIFICATION, ORDER_STATUS_CHANGE_NOTIFICATION } from '../jobs/keys';
+import { orderCompanyLoader } from '../loaders/order';
 import Company from '../model/company';
 import Order from '../model/order';
 import OrderProduct  from '../model/orderProduct';
@@ -33,9 +34,6 @@ export const typeDefs =  gql`
 		
 		company: Company!
 		address: Address
-
-		countProducts: Int!
-		products: [OrderProduct]!		
 	}	
 
 	input OrderInput {
@@ -118,12 +116,7 @@ export const resolvers =  {
 
 			return parent.getUser();
 		},
-		products: (parent) => {
-			return parent.getProducts();
-		},
-		countProducts: (parent) => {
-			return parent.countProducts();
-		},
+		
 		paymentMethod: (parent) => {
 			if (parent.paymentMethod) return parent.paymentMethod;
 
@@ -146,7 +139,9 @@ export const resolvers =  {
 			}
 		},
 		company(parent) {
-			return parent.getCompany();
+			const companyId = parent.get('companyId')
+
+			return orderCompanyLoader.load(companyId);
 		}
 	},
 	Query: {
