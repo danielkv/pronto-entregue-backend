@@ -7,6 +7,7 @@
 		"preinstall": "node ./preinstall.js",
 		"start": "node ./build/app.js",
 		"dev": "nodemon ./src/app.js",
+		"docker": "docker-compose up",
 		"build": "sucrase ./src -d ./build --transforms imports && yarn copy_static",
 		"copy_static": "cpx \"src/**/*.{pug,png,jpg,css}\" build -v",
 		"lint": "eslint --cache --color --ext .jsx,.js src"

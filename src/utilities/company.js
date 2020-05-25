@@ -70,7 +70,7 @@ export function isOpenAttribute(column='') {
 
 	const timeNow = 'TIME(now())';
 
-	const isOpen = literal(`(IF(${hour1} IS NOT NULL, ${timeNow} BETWEEN ${from1} AND ${to1}, false) OR IF(${hour2} IS NOT NULL, ${timeNow} BETWEEN ${from2} AND ${to2}, false))`)
+	const isOpen = literal(`IF(IF(${hour1} IS NOT NULL, ${timeNow} BETWEEN ${from1} AND ${to1}, false) OR IF(${hour2} IS NOT NULL, ${timeNow} BETWEEN ${from2} AND ${to2}, false), true, false)`)
 
 	return [isOpen, 'isOpen'];
 }
