@@ -55,7 +55,9 @@ OrderProduct.init({
 }, {
 	modelName: 'orderProduct',
 	tableName: 'order_products',
-	sequelize: conn
+	sequelize: conn,
+	charset: 'utf8mb4',
+	collate: 'utf8mb4_general_ci',
 });
 
 export default OrderProduct;

@@ -62,6 +62,8 @@ Order.init({
 	stateAddress: Sequelize.STRING,
 	locationAddress: Sequelize.GEOMETRY('POINT'),
 }, {
+	charset: 'utf8mb4',
+	collate: 'utf8mb4_general_ci',
 	modelName: 'order',
 	tableName: 'orders',
 	sequelize: conn
