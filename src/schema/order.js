@@ -70,6 +70,9 @@ export const typeDefs =  gql`
 
 	extend type Query {
 		order (id: ID!): Order!
+
+		countOrders(filter:JSON): Int! @hasRole(permission: "master")
+		orders (filter: JSON, pagination: Pagination): [Order]! @hasRole(permission: "master")
 	}
 
 	extend type Mutation {
@@ -145,12 +148,30 @@ export const resolvers =  {
 		}
 	},
 	Query: {
-		order: (_, { id }) => {
+		order(_, { id }) {
 			return Order.findByPk(id)
 				.then((order)=>{
 					if (!order) throw new Error('Pedido não encontrado');
 					return order;
 				})
+		},
+		countOrders(parent, { filter }) {
+			const search = ['streetAddress', '$user.firstName$', '$user.lastName$', '$user.email$'];
+			const where = sanitizeFilter(filter, { search, excludeFilters: ['active'], table: 'order' });
+
+			return Order.count({ where, include: [User] });
+		},
+		orders(_, { filter, pagination }) {
+			const search = ['streetAddress', '$user.firstName$', '$user.lastName$', '$user.email$'];
+			const where = sanitizeFilter(filter, { search, excludeFilters: ['active'], table: 'order' });
+
+			return Order.findAll({
+				where,
+				order: [['createdAt', 'DESC']],
+				...getSQLPagination(pagination),
+
+				include: [User]
+			});
 		}
 	},
 	Company: {
