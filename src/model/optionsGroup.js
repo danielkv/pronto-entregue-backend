@@ -1,7 +1,6 @@
 import Sequelize  from 'sequelize';
 
-import cache, { deleteMatch } from '../cache';
-import { optionsKey, optionsGroupsKey } from '../cache/keys';
+import cache from '../cache';
 import conn from '../services/connection';
 import Option  from './option';
 
@@ -13,9 +12,6 @@ class OptionsGroup extends Sequelize.Model {
 	static async updateAll (groups, product, transaction=null) {
 		const restrictingGroups = groups.filter((g) => g.maxSelectRestrain);
 		const groupsRestrictionsRel = [];
-
-		// clean product group cache
-		deleteMatch(optionsGroupsKey(product.get('id')));
 		
 		//create groups
 		const result = await Promise.all(
@@ -40,9 +36,6 @@ class OptionsGroup extends Sequelize.Model {
 
 							groupsRestrictionsRel.push({ tempId: groupModel.get('id'), id: groupModel.get('id'), model: groupModel });
 						}
-
-						// clean group options cache
-						deleteMatch(optionsKey(groupModel.get('id')));
 						
 						if (groupModel) {
 							if (!group.remove && group.options) group.options = await Option.updateAll(group.options, groupModel, transaction);

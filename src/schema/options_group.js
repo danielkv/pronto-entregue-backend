@@ -1,14 +1,12 @@
 import { gql }  from 'apollo-server';
 import { Op } from 'sequelize';
 
-import { optionsKey, optionsGroupProductKey } from '../cache/keys';
+import { optionsGroupProductKey } from '../cache/keys';
 import { restrainedByLoader, groupRestrainedLoader, optionsLoader } from '../loaders';
 import Category from '../model/category';
-import Option  from '../model/option';
 import OptionsGroup  from '../model/optionsGroup';
 import Product  from '../model/product';
 import { sanitizeFilter } from '../utilities';
-
 
 export const typeDefs =  gql`
 
@@ -61,7 +59,7 @@ export const resolvers =  {
 				where: { name: { [Op.like]: `%${search}%` }, [`$product.companyId$`]: company.get('id') },
 				include: [{
 					model: Product,
-					include: Category
+					include: [Category]
 				}]
 			});
 		},
@@ -74,35 +72,30 @@ export const resolvers =  {
 			if (parent.options) return parent.options;
 			
 			const optionsGroupId = parent.get('id');
-			let options = [];
 
-			if (!filter)
-				options = await optionsLoader.load(optionsGroupId)
-			else {
-				const where = sanitizeFilter(filter, { defaultFilter: { removed: false } });
-
-				//return parent.getOptions({ where, order: [['order', 'ASC']] });
-				options = await Option.cache(optionsKey(`${optionsGroupId}:${JSON.stringify(filter)}`))
-					.findAll({
-						where: [where, { optionsGroupId }]
-					})
-			}
-
-			return options;
-		},
-		async countOptions(parent, { filter }) {
-			if (parent.options) return parent.get('options').length;
+			if (!filter) return optionsLoader.load(optionsGroupId)
 			
-			const optionsGroupId = parent.get('id');
 			const where = sanitizeFilter(filter, { defaultFilter: { removed: false } });
 
 			//return parent.getOptions({ where, order: [['order', 'ASC']] });
-			const options = await Option.cache(optionsKey(`${optionsGroupId}:${JSON.stringify(filter)}`))
-				.findAll({
-					where: [where, { optionsGroupId }]
-				})
+			return parent.getOptions({
+				where: [where, { optionsGroupId }],
+				order: [['order', 'ASC']]
+			})
+		},
+		countOptions(parent, { filter }) {
+			if (parent.options) return parent.get('options').length;
+			
+			const optionsGroupId = parent.get('id');
 
-			return options.length;
+			if (!filter) return optionsLoader.load(optionsGroupId).then((res)=>res.length);
+
+			const where = sanitizeFilter(filter, { defaultFilter: { removed: false } });
+
+			//return parent.getOptions({ where,  });
+			return parent.countOptions({
+				where
+			})
 		},
 		groupRestrained(parent) {
 			const maxSelectRestrain = parent.get('maxSelectRestrain');
