@@ -1,7 +1,6 @@
 
 import { gql }  from 'apollo-server';
 
-import Address from '../model/address';
 import GMaps from '../services/googleMapsClient';
 import { parseAddresses } from '../utilities/address';
 

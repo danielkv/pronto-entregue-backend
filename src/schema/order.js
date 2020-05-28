@@ -138,6 +138,7 @@ export const resolvers =  {
 				district: parent.get('districtAddress'),
 				city: parent.get('cityAddress'),
 				state: parent.get('stateAddress'),
+				reference: parent.get('referenceAddress'),
 				location: parent.get('locationAddress'),
 			}
 		},
@@ -251,6 +252,7 @@ export const resolvers =  {
 						districtAddress: data.address.district,
 						cityAddress: data.address.city,
 						stateAddress: data.address.state,
+						referenceAddress: data.address.reference,
 						locationAddress: data.address.location,
 					}
 					delete data.address;
@@ -323,6 +325,7 @@ export const resolvers =  {
 						districtAddress: data.address.district,
 						cityAddress: data.address.city,
 						stateAddress: data.address.state,
+						referenceAddress: data.address.reference,
 						locationAddress: data.address.location,
 					}
 					delete data.address;
