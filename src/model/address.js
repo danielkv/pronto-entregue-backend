@@ -13,6 +13,7 @@ Address.init({
 	zipcode: Sequelize.INTEGER,
 	city: Sequelize.STRING,
 	state: Sequelize.STRING,
+	reference: Sequelize.STRING,
 	location: {
 		type: Sequelize.GEOMETRY('POINT'),
 		allowNull: false

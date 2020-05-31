@@ -4,7 +4,6 @@ import { gql }  from 'apollo-server';
 import GMaps from '../services/googleMapsClient';
 import { parseAddresses } from '../utilities/address';
 
-
 export const typeDefs = gql`
 
 	type Address {
@@ -17,6 +16,7 @@ export const typeDefs = gql`
 		district: String
 		city: String
 		state: String
+		reference: String
 		location: GeoPoint!
 	}
 
@@ -30,12 +30,15 @@ export const typeDefs = gql`
 		district: String!
 		city: String!
 		state: String!
+		reference: String
 		location: GeoPoint
 	}
 
 	extend type Mutation {
 		searchAddress(search: String!): [Address]!
 		searchLocation(location: GeoPoint!): Address!
+
+		createAddress(data: AddressInput!, userId: ID): Address!
 	}
 
 `;
@@ -55,6 +58,7 @@ export const resolvers =  {
 
 			return addresses;
 		},
+		// deprecated
 		async searchLocation(_, { location }) {
 			const { data: { results } } = await GMaps.reverseGeocode({
 				params: {

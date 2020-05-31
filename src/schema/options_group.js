@@ -68,7 +68,7 @@ export const resolvers =  {
 		},
 	},
 	OptionsGroup: {
-		async options (parent, { filter }) {
+		options (parent, { filter }) {
 			if (parent.options) return parent.options;
 			
 			const optionsGroupId = parent.get('id');
@@ -78,15 +78,20 @@ export const resolvers =  {
 			const where = sanitizeFilter(filter, { defaultFilter: { removed: false } });
 
 			//return parent.getOptions({ where, order: [['order', 'ASC']] });
+<<<<<<< HEAD
 			return parent.getOptions({
 				where: [where, { optionsGroupId }],
 				order: [['order', 'ASC']]
 			})
+=======
+			return parent.getOptions({ where })
+>>>>>>> improve-address
 		},
 		countOptions(parent, { filter }) {
 			if (parent.options) return parent.get('options').length;
 			
 			const optionsGroupId = parent.get('id');
+<<<<<<< HEAD
 
 			if (!filter) return optionsLoader.load(optionsGroupId).then((res)=>res.length);
 
@@ -96,6 +101,15 @@ export const resolvers =  {
 			return parent.countOptions({
 				where
 			})
+=======
+
+			if (!filter) return optionsLoader.load(optionsGroupId).then(res => res.length)
+
+			const where = sanitizeFilter(filter, { defaultFilter: { removed: false } });
+
+			//return parent.getOptions({ where, order: [['order', 'ASC']] });
+			return parent.countOptions({ where })
+>>>>>>> improve-address
 		},
 		groupRestrained(parent) {
 			const maxSelectRestrain = parent.get('maxSelectRestrain');

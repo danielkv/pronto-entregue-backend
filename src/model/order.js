@@ -60,6 +60,7 @@ Order.init({
 	zipcodeAddress: Sequelize.INTEGER,
 	cityAddress: Sequelize.STRING,
 	stateAddress: Sequelize.STRING,
+	referenceAddress: Sequelize.STRING,
 	locationAddress: Sequelize.GEOMETRY('POINT'),
 }, {
 	charset: 'utf8mb4',

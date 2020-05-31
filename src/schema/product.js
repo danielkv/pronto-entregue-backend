@@ -135,7 +135,6 @@ export const resolvers =  {
 				if (!category) throw new Error('Categoria não encontrada');
 
 				// create product
-				//const product = await category.createProduct({ ...data, companyId: company.get('id') }, { transaction });
 				const product = await Product.cache().create({ ...data, companyId: company.get('id') }, { transaction })
 
 				// create options groups
@@ -308,11 +307,20 @@ export const resolvers =  {
 			if (!filter) return optionsGroupsLoader.load(productId);
 			
 			const where = sanitizeFilter(filter, { defaultFilter: { removed: false } });
+<<<<<<< HEAD
 			
 			return parent.getOptionsGroups({
 				where,
 				order: [['order', 'ASC']]
 			});
+=======
+			
+			return parent.getOptionsGroups({
+				where,
+				order: [['order', 'ASC']]
+			})
+			
+>>>>>>> improve-address
 		},
 		category(parent) {
 			if (parent.category) return parent.get('category');

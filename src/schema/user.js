@@ -4,6 +4,7 @@ import { Op }  from 'sequelize';
 
 import { upload } from '../controller/uploads';
 import { MAIL_MESSAGE } from '../jobs/keys';
+import Address  from '../model/address';
 import Company  from '../model/company';
 import User  from '../model/user';
 import UserMeta  from '../model/userMeta';
@@ -77,7 +78,10 @@ export const typeDefs = gql`
 
 		removeUserAddress (id: ID!): Address! @isAuthenticated
 		updateUserAddress (id: ID!, data: AddressInput!): Address! @isAuthenticated
+		#deprecated
 		createUserAddress (data: AddressInput!): Address! @isAuthenticated
+
+		setUserAddress(addressData: AddressInput!, userId: ID): Address!
 	}
 
 	extend type Query {
@@ -341,9 +345,22 @@ export const resolvers = {
 
 			return userFound;
 		},
+		// deprecated
 		createUserAddress (_, { data }, ctx) {
 			return ctx.user.createAddress(data);
 		},
+		async setUserAddress(_, { addressData, userId = null }) {
+			let address;
+			if (addressData.id) address = await Address.findByPk(addressData.id);
+			if (!address) address = await Address.create(addressData);
+
+			if (userId) {
+				const user = await User.findByPk(userId);
+				user.addAddress(address);
+			}
+
+			return address;
+		}
 	},
 	User: {
 		addresses(parent) {
