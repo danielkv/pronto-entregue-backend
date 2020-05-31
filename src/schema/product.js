@@ -135,7 +135,6 @@ export const resolvers =  {
 				if (!category) throw new Error('Categoria não encontrada');
 
 				// create product
-				//const product = await category.createProduct({ ...data, companyId: company.get('id') }, { transaction });
 				const product = await Product.cache().create({ ...data, companyId: company.get('id') }, { transaction })
 
 				// create options groups
@@ -300,25 +299,19 @@ export const resolvers =  {
 
 			return Option.count({ where, include: [{ model: OptionsGroup, where: { productId: parent.get('id') } }] });
 		},
-		async optionsGroups(parent, { filter }) {
+		optionsGroups(parent, { filter }) {
 			if (parent.optionsGroups) return parent.optionsGroups;
 			const productId = parent.get('id');
-			let groups = []
 
-			if (!filter)
-				groups = await optionsGroupsLoader.load(productId);
-			else {
+			if (!filter) return optionsGroupsLoader.load(productId);
 			
-				const where = sanitizeFilter(filter, { defaultFilter: { removed: false } });
+			const where = sanitizeFilter(filter, { defaultFilter: { removed: false } });
 			
-				groups = await OptionsGroup.cache(optionsGroupsKey(`${productId}:${JSON.stringify(filter)}`)) //
-					.findAll({
-						where: [where, { productId }],
-						order: [['order', 'ASC']]
-					})
-			}
-
-			return groups;
+			return parent.getOptionsGroups({
+				where,
+				order: [['order', 'ASC']]
+			})
+			
 		},
 		category(parent) {
 			if (parent.category) return parent.get('category');

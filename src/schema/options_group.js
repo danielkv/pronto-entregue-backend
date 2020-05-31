@@ -1,10 +1,9 @@
 import { gql }  from 'apollo-server';
 import { Op } from 'sequelize';
 
-import { optionsKey, optionsGroupProductKey } from '../cache/keys';
+import { optionsGroupProductKey } from '../cache/keys';
 import { restrainedByLoader, groupRestrainedLoader, optionsLoader } from '../loaders';
 import Category from '../model/category';
-import Option  from '../model/option';
 import OptionsGroup  from '../model/optionsGroup';
 import Product  from '../model/product';
 import { sanitizeFilter } from '../utilities';
@@ -70,39 +69,29 @@ export const resolvers =  {
 		},
 	},
 	OptionsGroup: {
-		async options (parent, { filter }) {
+		options (parent, { filter }) {
 			if (parent.options) return parent.options;
 			
 			const optionsGroupId = parent.get('id');
-			let options = [];
 
-			if (!filter)
-				options = await optionsLoader.load(optionsGroupId)
-			else {
-				const where = sanitizeFilter(filter, { defaultFilter: { removed: false } });
+			if (!filter) return optionsLoader.load(optionsGroupId)
+			
+			const where = sanitizeFilter(filter, { defaultFilter: { removed: false } });
 
-				//return parent.getOptions({ where, order: [['order', 'ASC']] });
-				options = await Option.cache(optionsKey(`${optionsGroupId}:${JSON.stringify(filter)}`))
-					.findAll({
-						where: [where, { optionsGroupId }]
-					})
-			}
-
-			return options;
+			//return parent.getOptions({ where, order: [['order', 'ASC']] });
+			return parent.getOptions({ where })
 		},
 		async countOptions(parent, { filter }) {
 			if (parent.options) return parent.get('options').length;
 			
 			const optionsGroupId = parent.get('id');
+
+			if (!filter) return optionsLoader.load(optionsGroupId).then(res => res.length)
+
 			const where = sanitizeFilter(filter, { defaultFilter: { removed: false } });
 
 			//return parent.getOptions({ where, order: [['order', 'ASC']] });
-			const options = await Option.cache(optionsKey(`${optionsGroupId}:${JSON.stringify(filter)}`))
-				.findAll({
-					where: [where, { optionsGroupId }]
-				})
-
-			return options.length;
+			return parent.countOptions({ where })
 		},
 		groupRestrained(parent) {
 			const maxSelectRestrain = parent.get('maxSelectRestrain');
