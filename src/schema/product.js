@@ -2,7 +2,7 @@ import { gql }  from 'apollo-server';
 import { Op, fn, literal, col } from 'sequelize';
 
 import { deleteMatch } from '../cache';
-import { optionsGroupsKey, categoryKey, categoryProductsKey, loadProductKey } from '../cache/keys';
+import { categoryKey, categoryProductsKey, loadProductKey } from '../cache/keys';
 import { upload }  from '../controller/uploads';
 import { productSaleLoader, optionsGroupsLoader } from '../loaders';
 import Campaign from '../model/campaign';
@@ -305,30 +305,14 @@ export const resolvers =  {
 			const productId = parent.get('id');
 
 			if (!filter) return optionsGroupsLoader.load(productId);
-<<<<<<< HEAD
-			
+
 			const where = sanitizeFilter(filter, { defaultFilter: { removed: false } });
-<<<<<<< HEAD
-			
-			return parent.getOptionsGroups({
-				where,
-				order: [['order', 'ASC']]
-			});
-=======
-=======
-			
-			const where = sanitizeFilter(filter, { defaultFilter: { removed: false } });
->>>>>>> improve-address
 			
 			return parent.getOptionsGroups({
 				where,
 				order: [['order', 'ASC']]
 			})
 			
-<<<<<<< HEAD
->>>>>>> improve-address
-=======
->>>>>>> improve-address
 		},
 		category(parent) {
 			if (parent.category) return parent.get('category');
