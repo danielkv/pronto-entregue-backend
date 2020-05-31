@@ -305,6 +305,7 @@ export const resolvers =  {
 			const productId = parent.get('id');
 
 			if (!filter) return optionsGroupsLoader.load(productId);
+<<<<<<< HEAD
 			
 			const where = sanitizeFilter(filter, { defaultFilter: { removed: false } });
 <<<<<<< HEAD
@@ -314,12 +315,19 @@ export const resolvers =  {
 				order: [['order', 'ASC']]
 			});
 =======
+=======
+			
+			const where = sanitizeFilter(filter, { defaultFilter: { removed: false } });
+>>>>>>> improve-address
 			
 			return parent.getOptionsGroups({
 				where,
 				order: [['order', 'ASC']]
 			})
 			
+<<<<<<< HEAD
+>>>>>>> improve-address
+=======
 >>>>>>> improve-address
 		},
 		category(parent) {
