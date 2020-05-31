@@ -78,35 +78,15 @@ export const resolvers =  {
 			const where = sanitizeFilter(filter, { defaultFilter: { removed: false } });
 
 			//return parent.getOptions({ where, order: [['order', 'ASC']] });
-<<<<<<< HEAD
-<<<<<<< HEAD
 			return parent.getOptions({
 				where: [where, { optionsGroupId }],
 				order: [['order', 'ASC']]
 			})
-=======
-			return parent.getOptions({ where })
->>>>>>> improve-address
-=======
-			return parent.getOptions({ where })
->>>>>>> improve-address
 		},
 		countOptions(parent, { filter }) {
 			if (parent.options) return parent.get('options').length;
 			
 			const optionsGroupId = parent.get('id');
-<<<<<<< HEAD
-<<<<<<< HEAD
-
-			if (!filter) return optionsLoader.load(optionsGroupId).then((res)=>res.length);
-
-			const where = sanitizeFilter(filter, { defaultFilter: { removed: false } });
-
-			//return parent.getOptions({ where,  });
-			return parent.countOptions({
-				where
-			})
-=======
 
 			if (!filter) return optionsLoader.load(optionsGroupId).then(res => res.length)
 
@@ -114,16 +94,7 @@ export const resolvers =  {
 
 			//return parent.getOptions({ where, order: [['order', 'ASC']] });
 			return parent.countOptions({ where })
->>>>>>> improve-address
-=======
 
-			if (!filter) return optionsLoader.load(optionsGroupId).then(res => res.length)
-
-			const where = sanitizeFilter(filter, { defaultFilter: { removed: false } });
-
-			//return parent.getOptions({ where, order: [['order', 'ASC']] });
-			return parent.countOptions({ where })
->>>>>>> improve-address
 		},
 		groupRestrained(parent) {
 			const maxSelectRestrain = parent.get('maxSelectRestrain');
