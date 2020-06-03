@@ -3,7 +3,7 @@ import { fn, col } from 'sequelize';
 
 import CompanyMeta from '../model/companyMeta';
 import Rating from '../model/rating';
-import { defaultBusinessHours } from '../utilities/company';
+import { defaultBusinessHours, defaultPlan } from '../utilities/company';
 import { remap } from './remap';
 
 export const deliveryTimeLoader = new DataLoader(async keys => {
@@ -54,6 +54,18 @@ export const businessHoursLoader = new DataLoader(async keys => {
 			return JSON.parse(m.value)
 		else
 			return defaultBusinessHours();
+	});
+	
+}, { cache: false });
+
+export const planLoader = new DataLoader(async keys => {
+	const metas = await CompanyMeta.findAll({ where: { companyId: keys, key: 'plan' } });
+
+	return remap(keys, metas, 'companyId', (m) => {
+		if (m)
+			return JSON.parse(m.value)
+		else
+			return defaultPlan();
 	});
 	
 }, { cache: false });

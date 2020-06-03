@@ -1,6 +1,6 @@
 import { gql }  from 'apollo-server';
 
-import { balanceLoader } from '../loaders';
+import { balanceLoader, creditHistoryLoader } from '../loaders';
 import CreditHistory from '../model/creditHistory';
 import User from '../model/user';
 import { sanitizeFilter, getSQLPagination } from '../utilities';
@@ -56,7 +56,9 @@ export const resolvers = {
 	},
 	Order: {
 		creditHistory(parent) {
-			return parent.getCreditHistory();
+			const orderId = parent.get('id');
+
+			return creditHistoryLoader.load(orderId);
 		}
 	},
 	User: {

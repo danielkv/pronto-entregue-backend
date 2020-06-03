@@ -3,7 +3,7 @@ import { literal, fn, where, col } from 'sequelize';
 
 import { ORDER_CREATED, ORDER_QTY_STATUS_UPDATED, getOrderStatusQty, ORDER_STATUS_UPDATED } from '../controller/order';
 import { COMPANY_USERS_NEW_ORDER_NOTIFICATION, ORDER_STATUS_CHANGE_NOTIFICATION } from '../jobs/keys';
-import { orderCompanyLoader } from '../loaders/order';
+import { orderCompanyLoader } from '../loaders';
 import Company from '../model/company';
 import Order from '../model/order';
 import OrderProduct  from '../model/orderProduct';
@@ -24,6 +24,7 @@ export const typeDefs =  gql`
 		deliveryPrice: Float!
 		deliveryTime: Int!
 		price: Float!
+		subtotal: Float!
 		type: String!
 		discount: Float!
 		status: String!
@@ -146,6 +147,9 @@ export const resolvers =  {
 			const companyId = parent.get('companyId')
 
 			return orderCompanyLoader.load(companyId);
+		},
+		subtotal (parent) {
+			return parent.get('price') + parent.get('discount');
 		}
 	},
 	Query: {

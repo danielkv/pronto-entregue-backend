@@ -1,6 +1,7 @@
 import DataLoader from 'dataloader';
 
 import Company from '../model/company';
+import CreditHistory from '../model/creditHistory';
 import OrderOptions from '../model/orderOptions';
 import OrderOptionsGroup from '../model/orderOptionsGroup';
 import OrderProduct from '../model/orderProduct';
@@ -50,4 +51,12 @@ export const orderOptionsLoader = new DataLoader(async keys => {
 		const groupOptions = allOptions.filter(m => m.orderOptionsGroupId === key)
 		return groupOptions;
 	})
+}, { cache: false })
+
+export const creditHistoryLoader = new DataLoader(async keys => {
+	const histories = await CreditHistory.findAll({
+		where: { orderId: keys }
+	});
+	
+	return remap(keys, histories, 'orderId')
 }, { cache: false })

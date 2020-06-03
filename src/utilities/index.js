@@ -66,7 +66,7 @@ export function sanitizeFilter(_filter = {}, _options = {}) {
 		}
 	}
 		
-	if (filter.createdAt) {
+	if (filter.createdAt && !filter.period) {
 		const createdAt = filter.createdAt;
 		delete filter.createdAt;
 			
@@ -76,6 +76,13 @@ export function sanitizeFilter(_filter = {}, _options = {}) {
 				where(fn('date', col(`${options.table ? `${options.table}.`: ''}createdAt`)), fn(createdAt)),
 			]
 		}
+	}
+
+	if (filter.period) {
+		const period = filter.period;
+		delete filter.createdAt;
+		delete filter.period;
+		filter = [where, { createdAt: { [Op.between]: [period.start, period.end] } }]
 	}
 		
 	return filter;

@@ -47,7 +47,7 @@ CompanyMeta.init({
 		type: Sequelize.STRING,
 		comment: 'phone | email | document | businessHours | address | ...',
 		set(val) {
-			const uniqueTypes = ['document', 'businessHours', 'deliveryTime', 'color', 'background', 'logo'];
+			const uniqueTypes = ['document', 'businessHours', 'deliveryTime', 'color', 'background', 'logo', 'plan'];
 			if (uniqueTypes.includes(val))
 				this.setDataValue('unique', true);
 			

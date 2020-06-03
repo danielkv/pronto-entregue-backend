@@ -1,6 +1,6 @@
 import { gql }  from 'apollo-server';
 
-import { orderOptionsLoader } from '../loaders/order';
+import { orderOptionsLoader } from '../loaders';
 
 export const typeDefs =  gql`
 	type OrderOptionsGroup {
