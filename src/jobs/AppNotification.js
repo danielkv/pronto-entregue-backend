@@ -11,7 +11,6 @@ export default {
 			priority: 'high',
 			...job.data,
 		})
-		console.log(job)
 		notifications.send(messages);
 
 		return false;

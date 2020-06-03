@@ -4,15 +4,19 @@
 	// For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
 	"version": "0.2.0",
 	"configurations": [
+		
 		{
-			"type": "docker",
+			"type": "node",
 			"request": "attach",
-			"name": "Launch Node.js in Docker",
-			"preLaunchTask": "Run Docker Container"
-			/* "restart": true,
-			"skipFiles": [
-				"<node_internals>/**"
-			] */
-		}
+			"name": "Docker: Attach to Node",
+			"localRoot": "${workspaceFolder}/src",
+			"remoteRoot": "/usr/app/src",
+			"restart": true,
+			"sourceMaps": true,
+			"port": 9229,
+			"protocol": "inspector",
+			"stopOnEntry": false
+		},
+		
 	]
 }

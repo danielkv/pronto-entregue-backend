@@ -72,7 +72,6 @@ export const resolvers =  {
 			return companies.map(company => {
 				const plan = company.metas.length ? JSON.parse(company.metas[0].value) : defaultPlan();
 				const companyResult = calculateCompanyValues(company, plan);
-				console.log("COMPANIES", companyResult);
 				return companyResult
 			})
 		}
