@@ -2,6 +2,6 @@
 	"watch": ["src"],
 	"ext": "js",
 	"execMap": {
-		"js": "node --inspect-brk=0.0.0.0 -r sucrase/register"
+		"js": "node --inspect=0.0.0.0 -r sucrase/register"
 	}
 }

@@ -1,23 +1,36 @@
 import { gql }  from 'apollo-server';
+import moment from 'moment';
 
-import { calculateCompanyValues } from '../controller/reports';
+import { calculateCompanies } from '../controller/reports';
 import Company from '../model/company';
 import CompanyMeta from '../model/companyMeta';
 import CreditHistory from '../model/creditHistory';
 import Order from '../model/order';
 import { sanitizeFilter } from '../utilities';
-import { defaultPlan } from '../utilities/company';
 
 export const typeDefs =  gql`
 	
+	type CompaniesReport {
+		companies: [CompanyReport]!
+		
+		credits: Float
+		companyDiscount: Float!
+		totalDiscount: Float!
+		revenue: Float!
+		tax: Float!
+		taxable: Float!
+		countOrders: Int!
+	}
+
 	type CompanyReport {
 		id: ID!
 		displayName: String!
 		plan: CompanyPlan!
 
-		orders(filter: JSON): [OrderReport]!
+		countOrders: Int!
+		orders: [OrderReport]!
 
-		usDiscount: Float!
+		credits: Float!
 		companyDiscount: Float!
 		totalDiscount: Float!
 		revenue: Float!
@@ -32,6 +45,8 @@ export const typeDefs =  gql`
 		price: Float!
 		discount: Float!
 
+		datetime: String!
+
 		creditHistory: CreditHistory
 		
 		tax: Float!
@@ -39,7 +54,7 @@ export const typeDefs =  gql`
 	}
 
 	extend type Query {
-		companiesReport(companiesIds: [ID]): [CompanyReport]!
+		companiesReport(companiesIds: [ID], filter: JSON): CompaniesReport!
 	}
 
 `;
@@ -57,6 +72,7 @@ export const resolvers =  {
 						model: Order,
 						required: true,
 						where: ordersWhere,
+						subQuery: true,
 						include: [CreditHistory]
 					},
 					{
@@ -67,18 +83,24 @@ export const resolvers =  {
 				]
 			})
 
-			
-
-			return companies.map(company => {
-				const plan = company.metas.length ? JSON.parse(company.metas[0].value) : defaultPlan();
-				const companyResult = calculateCompanyValues(company, plan);
-				return companyResult
-			})
+			return calculateCompanies(companies);
 		}
 	},
-	/* CompanyReport: {
-		orders(parent, { filter }){
-			
+	CompaniesReport: {
+		countOrders(parent) {
+			return parent.companies.reduce((value, company)=>{
+				return company.orders.length + value
+			}, 0)
 		}
-	} */
+	},
+	CompanyReport: {
+		countOrders(parent) {
+			return parent.orders.length
+		}
+	},
+	OrderReport: {
+		datetime(parent){
+			return moment(parent.createdAt).format()
+		}
+	}
 }
