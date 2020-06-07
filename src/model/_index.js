@@ -5,13 +5,13 @@
  */
 
 import Address from './address';
-import Campaign from './campaign';
 import Category from './category';
 import Company from './company';
 import CompanyMeta from './companyMeta';
 import CompanyPaymentMethod from './companyPaymentMethod';
 import CompanyType from './companyType';
 import CompanyUser from './companyUser';
+import Coupon from './coupon';
 import CreditBalance from './creditBalance';
 import CreditHistory from './creditHistory';
 import DeliveryArea from './deliveryArea';
@@ -113,13 +113,17 @@ OrderProduct.belongsTo(Product, { as: 'productRelated' });
 orderOptionsGroup.belongsTo(OptionsGroup, { as: 'optionsGroupRelated' });
 OrderOptions.belongsTo(Options, { as: 'optionRelated' });
 
-// Campaign relations
-Campaign.belongsToMany(Product, { through: 'campaign_products' });
-Product.belongsToMany(Campaign, { through: 'campaign_products' });
-Campaign.belongsToMany(Company, { through: 'campaign_companies' });
-Company.belongsToMany(Campaign, { through: 'campaign_companies' });
-Campaign.belongsToMany(User, { through: 'campaign_users' });
-User.belongsToMany(Campaign, { through: 'campaign_users' });
+// Coupon relations
+Coupon.belongsToMany(Product, { through: 'coupon_products' });
+Product.belongsToMany(Coupon, { through: 'coupon_products' });
+Coupon.belongsToMany(Company, { through: 'coupon_companies' });
+Company.belongsToMany(Coupon, { through: 'coupon_companies' });
+Coupon.belongsToMany(User, { through: 'coupon_users' });
+User.belongsToMany(Coupon, { through: 'coupon_users' });
+Coupon.hasMany(Order);
+Order.belongsTo(Coupon);
+/* Coupon.belongsToMany(User, { through: 'user_coupons' });
+User.belongsToMany(Coupon, { through: 'user_coupons' }); */
 
 // favorites
 User.belongsToMany(Product, { through: 'favorite_products', as: 'favoriteProducts' });

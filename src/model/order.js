@@ -10,7 +10,7 @@ class Order extends Sequelize.Model {}
 Order.init({
 	//Dados principais
 	paymentFee: Sequelize.DECIMAL(10,2),
-	deliveryPrice: Sequelize.STRING,
+	deliveryPrice: Sequelize.DECIMAL(10,2),
 	deliveryTime: {
 		type: Sequelize.INTEGER,
 		defaultValue: 0,

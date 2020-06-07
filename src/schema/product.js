@@ -5,7 +5,6 @@ import { deleteMatch } from '../cache';
 import { categoryKey, categoryProductsKey, loadProductKey } from '../cache/keys';
 import { upload }  from '../controller/uploads';
 import { productSaleLoader, optionsGroupsLoader } from '../loaders';
-import Campaign from '../model/campaign';
 import Category from '../model/category';
 import Company from '../model/company';
 import Option  from '../model/option';
@@ -18,7 +17,6 @@ import User from '../model/user';
 import conn  from '../services/connection';
 import { getSQLPagination, sanitizeFilter } from '../utilities';
 import { CompanyAreaAttribute } from '../utilities/address';
-import { campaignProductWhere } from '../utilities/campaign';
 import { getSaleSelection } from '../utilities/product';
 
 export const typeDefs =  gql`
@@ -48,8 +46,7 @@ export const typeDefs =  gql`
 		category: Category!
 		company: Company!
 
-		countCampaigns(notIn: [ID]): Int!
-		campaigns(notIn: [ID]): [Campaign]!
+		
 
 		sale: Sale
 	}
@@ -337,26 +334,7 @@ export const resolvers =  {
 
 			return Company.cache().findByPk(parent.get('companyId'));
 		},
-		countCampaigns(parent, { notIn = {} }) {
-			// count all realted campaigns
-			return Campaign.count({
-				where: {
-					...campaignProductWhere(parent),
-					id: { [Op.notIn]: notIn }
-				},
-				include: [Product, Company]
-			})
-		},
-		campaigns(parent, { notIn = {} }) {
-			// get all realted campaigns
-			return Campaign.findAll({
-				where: {
-					...campaignProductWhere(parent),
-					id: { [Op.notIn]: notIn }
-				},
-				include: [Product, Company]
-			})
-		},
+		
 
 		async sale(parent) {
 			if (parent.sales) return parent.sales[0];

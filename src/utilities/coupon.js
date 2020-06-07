@@ -1,6 +1,6 @@
 import { Op, fn } from 'sequelize';
 
-export function campaignProductWhere(product) {
+export function couponProductWhere(product) {
 	return {
 		'$companies.id$': {
 			[Op.or]: [

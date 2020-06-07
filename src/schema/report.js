@@ -4,6 +4,7 @@ import moment from 'moment';
 import { calculateCompanies } from '../controller/reports';
 import Company from '../model/company';
 import CompanyMeta from '../model/companyMeta';
+import Coupon from '../model/coupon';
 import CreditHistory from '../model/creditHistory';
 import Order from '../model/order';
 import { sanitizeFilter } from '../utilities';
@@ -13,7 +14,10 @@ export const typeDefs =  gql`
 	type CompaniesReport {
 		companies: [CompanyReport]!
 		
-		credits: Float
+		credits: Float!
+		coupons: Float!
+		taxableCoupon: Float!
+
 		companyDiscount: Float!
 		totalDiscount: Float!
 		revenue: Float!
@@ -31,6 +35,9 @@ export const typeDefs =  gql`
 		orders: [OrderReport]!
 
 		credits: Float!
+		coupons: Float!
+		taxableCoupon: Float!
+
 		companyDiscount: Float!
 		totalDiscount: Float!
 		revenue: Float!
@@ -48,6 +55,9 @@ export const typeDefs =  gql`
 		datetime: String!
 
 		creditHistory: CreditHistory
+		coupon: Coupon
+		couponValue: Float!
+		taxableCoupon: Float!
 		
 		tax: Float!
 		taxable: Float!
@@ -73,7 +83,7 @@ export const resolvers =  {
 						required: true,
 						where: ordersWhere,
 						subQuery: true,
-						include: [CreditHistory]
+						include: [CreditHistory, Coupon]
 					},
 					{
 						model: CompanyMeta,

@@ -55,8 +55,8 @@ export const orderOptionsLoader = new DataLoader(async keys => {
 
 export const creditHistoryLoader = new DataLoader(async keys => {
 	const histories = await CreditHistory.findAll({
-		where: { orderId: keys }
+		where: { id: keys }
 	});
 	
-	return remap(keys, histories, 'orderId')
+	return remap(keys, histories)
 }, { cache: false })

@@ -5,6 +5,7 @@ import { ORDER_CREATED, ORDER_QTY_STATUS_UPDATED, getOrderStatusQty, ORDER_STATU
 import { COMPANY_USERS_NEW_ORDER_NOTIFICATION, ORDER_STATUS_CHANGE_NOTIFICATION } from '../jobs/keys';
 import { orderCompanyLoader } from '../loaders';
 import Company from '../model/company';
+import Coupon from '../model/coupon';
 import Order from '../model/order';
 import OrderProduct  from '../model/orderProduct';
 import User from '../model/user';
@@ -272,6 +273,13 @@ export const resolvers =  {
 				const isOpen = companyIsOpen(businessHours);
 				if (!(selectedCompany && selectedCompany.get('id') === company.get('id')) && !isOpen) throw new Error(`${company.get('displayName')} está fechado no momento`);
 
+				//check if coupon is valid
+				if (data.couponId) {
+					const coupon = await Coupon.findByPk(data.couponId);
+
+					coupon.isValid(data);
+				}
+
 				// create order
 				const order = await company.createOrder(data, { transaction });
 
@@ -293,6 +301,8 @@ export const resolvers =  {
 					const createdCreditHitory = await user.createCreditHistory({ value: -creditsUse, history: `Pedido #${order.get('id')} em ${company.get('displayName')}` }, { transaction })
 					await order.setCreditHistory(createdCreditHitory, { transaction })
 				}
+
+				
 				
 				// create order products
 				await OrderProduct.updateAll(data.products, order, transaction);

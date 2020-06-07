@@ -56,9 +56,10 @@ export const resolvers = {
 	},
 	Order: {
 		creditHistory(parent) {
-			const orderId = parent.get('id');
+			const creditHistoryId = parent.get('creditHistoryId');
+			if (!creditHistoryId) return;
 
-			return creditHistoryLoader.load(orderId);
+			return creditHistoryLoader.load(creditHistoryId);
 		}
 	},
 	User: {

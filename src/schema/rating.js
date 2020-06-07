@@ -53,7 +53,6 @@ export const resolvers = {
 			return Rating.create(data);
 		},
 		async updateRating(_, { id, data }) {
-			// check if campaign exists
 			const ratingFound = await Rating.findByPk(id);
 			if (!ratingFound) throw new Error('Avaliação não encontrado');
 
@@ -62,7 +61,6 @@ export const resolvers = {
 	},
 	Query: {
 		async rating(_, { id }) {
-			// check if campaign exists
 			const ratingFound = await Rating.findByPk(id);
 			if (!ratingFound) throw new Error('Avaliação não encontrado');
 
