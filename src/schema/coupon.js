@@ -187,20 +187,32 @@ export const resolvers = {
 			return couponFound;
 		},
 		countCoupons(_, { filter }) {
-			const where = sanitizeFilter(filter, { search: ['name', 'description', '$company.name$', '$user.firstName$', '$product.name$'] });
+			const where = sanitizeFilter(filter, { excludeFilters: ['companyId'], search: ['name', 'description', '$company.name$', '$user.firstName$', '$product.name$'] });
 
 			return Coupon.findAll({
 				where,
 				include: [Company, User, Product]
 			}).then((res)=>res.length)
 		},
-		coupons(_, { filter, pagination }) {
-			const where = sanitizeFilter(filter, { search: ['name', 'description', '$company.name$', '$user.firstName$', '$product.name$'] });
+		coupons(_, { filter, pagination }, { user }) {
+			let where = {};
+			if (filter.companyId) {
+				where['$companies.id$'] = {
+					[Op.or]: [
+						filter.companyId,
+						{ [Op.is]: null }
+					]
+				};
+			}
+			if (!user.can('master')) filter.masterOnly = false;
+			
+			where = [where, sanitizeFilter(filter, { excludeFilters: ['companyId'], search: ['name', 'description', '$company.name$', '$user.firstName$', '$product.name$'] })];
 
 			return Coupon.findAll({
 				where,
 				order: [['expiresAt', 'DESC'], ['createdAt', 'Desc']],
 				include: [Company, User, Product],
+				subQuery: false,
 				...getSQLPagination(pagination),
 			})
 		}

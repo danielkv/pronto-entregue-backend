@@ -264,10 +264,6 @@ export const resolvers =  {
 						model: OrderProduct,
 						as: 'productRelated'
 					},
-					/* {
-						model: Sale,
-						...getSaleSelection()
-					}, */
 					{
 						model: Company,
 						attributes: { include: [CompanyAreaAttribute('typeDelivery', location), CompanyAreaAttribute('typePickUp', location)] },

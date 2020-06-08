@@ -1,13 +1,15 @@
-import Sequelize, { Op } from 'sequelize';
+import Sequelize, { Op, fn } from 'sequelize';
 
 import conn from '../services/connection';
 import Company from './company';
 import Order from './order';
 import Product from './product';
+import Sale from './sale';
 import User from './user';
 
 class Coupon extends Sequelize.Model {
 	async isValid(order) {
+		console.log('VALIDATION')
 		let rulesWhere = {};
 		let include = [];
 
@@ -26,7 +28,18 @@ class Coupon extends Sequelize.Model {
 
 		// check coupon products restrictions
 		if (order.products.length) {
-			include = [...include, Product]
+			include = [...include, { model: Product, include: [{ model: Sale, where: { active: true, removed: false } }] }]
+			
+			rulesWhere[Op.or] = [
+				{ ['$products.sales.id$']: null },
+				{
+					[Op.or]: [
+						{ ['$products.sales.startsAt$']: { [Op.gt]: fn('NOW') } },
+						{ ['$products.sales.expiresAt$']: { [Op.lt]: fn('NOW') } }
+					]
+				}
+			];
+			
 			rulesWhere['$products.id$'] = {
 				[Op.or]: [
 					order.products.map(prod => prod.productRelatedId),
