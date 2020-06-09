@@ -1,8 +1,7 @@
 import { gql }  from 'apollo-server';
 import { Op, fn, literal, col } from 'sequelize';
 
-import { deleteMatch } from '../cache';
-import { categoryKey, categoryProductsKey, loadProductKey } from '../cache/keys';
+import { categoryKey, loadProductKey } from '../cache/keys';
 import { upload }  from '../controller/uploads';
 import { productSaleLoader, optionsGroupsLoader } from '../loaders';
 import Category from '../model/category';
@@ -152,10 +151,6 @@ export const resolvers =  {
 				const product = await Product.findByPk(id);
 				if (!product) throw new Error('Produto não encontrado');
 
-				// get old and new categoryId before update to clean cache
-				const oldCategoryId = product.get('categoryId');
-				const newCategoryId = data.categoryId;
-
 				// update product
 				const productUpdated = await product.cache().update(data, { fields: ['name', 'description', 'sku', 'price', 'fromPrice', 'order', 'active', 'image', 'type', 'categoryId'], transaction });
 
@@ -164,10 +159,6 @@ export const resolvers =  {
 
 				// sales
 				if (data.sale) await productUpdated.createSale(data.sale, { transaction });
-
-				//Product.cache(categoryProductsKey(id)).clear();
-				deleteMatch(categoryProductsKey(oldCategoryId))
-				deleteMatch(categoryProductsKey(newCategoryId))
 
 				return productUpdated;
 			})

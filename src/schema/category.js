@@ -1,7 +1,6 @@
 import { gql }  from 'apollo-server';
 import { col } from 'sequelize';
 
-import { categoryProductsKey } from '../cache/keys';
 import { upload }  from '../controller/uploads';
 import Category  from '../model/category';
 import Company from '../model/company';
@@ -132,7 +131,7 @@ export const resolvers =  {
 			const where = sanitizeFilter(filter, { search: ['name'] });
 
 			//return parent.getProducts({ where });
-			return await Product.cache(categoryProductsKey(`${categoryId}:${JSON.stringify(filter)}`)).findAll({
+			return await Product.findAll({
 				where: [where, { categoryId }],
 				order: [['name', 'ASC']]
 			})
@@ -143,7 +142,7 @@ export const resolvers =  {
 			const categoryId = parent.get('id');
 			const where = sanitizeFilter(filter, { search: ['name'] });
 
-			const products = await Product.cache(categoryProductsKey(`${categoryId}:${JSON.stringify(filter)}`)).findAll({
+			const products = await Product.findAll({
 				where: [where, { categoryId }],
 				order: [['name', 'ASC']]
 			})

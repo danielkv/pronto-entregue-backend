@@ -4,3 +4,4 @@ export * from './company';
 export * from './rating';
 export * from './order';
 export * from './address';
+export * from './category';
