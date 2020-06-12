@@ -4,6 +4,7 @@ import path  from 'path';
 import { flushAll } from './cache';
 import { authenticate } from './controller/authentication';
 import { setupDataBase } from './controller/setupDB';
+import redis from './services/redis'
 
 const route = Router();
 
@@ -36,11 +37,17 @@ route.get('/sync/:table/:auth', async (req, res) => {
 	} catch (err) {
 		res.send(err.message)
 	}
-	
 });
 
 // bull queue
 //route.use('/bull/queues', UI);
+
+route.use('/testKey', (req, res)=>{
+	redis.get('testKey')
+		.then((result)=>{
+			res.send(result);
+		})
+});
 
 // reset Redis Cache
 route.get('/resetCache/:auth', async (req, res)=>{

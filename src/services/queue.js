@@ -1,18 +1,21 @@
 //import { setQueues } from 'bull-board';
-//import { Queue, Worker } from 'bullmq'
-//import Redis from 'ioredis';
+import { Queue, Worker } from 'bullmq'
 
 import * as jobs from '../jobs';
+import redis from './connection'
+
 //redis://redis:6379/0
 
-/* const redisHost = process.env.NODE_ENV === 'production' ? 'redis://redis:6379' : 'ec2-52-67-199-173.sa-east-1.compute.amazonaws.com:6379';
+//const redisHost = process.env.NODE_ENV === 'production' ? 'redis://redis' : 'redisdb.tzx2ao.ng.0001.sae1.cache.amazonaws.com';
+const host = process.env.NODE_ENV === 'production' ? 'redisdb.tzx2ao.ng.0001.sae1.cache.amazonaws.com' : process.env.REDISCLOUD_URL;
+const port = 6379;
 
-const redisQueue = new Redis(redisHost);
+//const redisQueue = new Redis(redisHost);
 
 const queues = Object.values(jobs).map(job => {
 
 	try {
-		const bullQueue = new Queue(job.key, { connection: redisQueue });
+		const bullQueue = new Queue(job.key, { connection: { host, port } });
 
 		if (job.onQueueError && typeof job.onQueueError === 'function') bullQueue.on('error', job.onQueueError)
 		else bullQueue.on('error', (err) => {
@@ -30,26 +33,26 @@ const queues = Object.values(jobs).map(job => {
 	}
 });
 
-setQueues(queues.map(q => q.bull)); */
+//setQueues(queues.map(q => q.bull));
 
 export default {
-	//queues,
-	add(name, data) {
+	queues,
+	add(name, id, data) {
 		try {
-			//const queue = this.queues.find(queue => queue.name === name);
-			// return queue.bull.add('JOB', data, queue.options);
+			const queue = this.queues.find(queue => queue.name === name);
+			return queue.bull.add(id, data, queue.options);
 
-			const job = jobs[name];
+			/* const job = jobs[name];
 
 			// temp solution
-			job.handle({ data });
+			job.handle({ data }); */
 		} catch (err) {
 			console.error('job error', err.message);
 		}
 	},
 	process() {
-		/* return this.queues.forEach(queue => {
-			new Worker(queue.name, queue.handle, { connection: redisQueue })
-		}) */
+		return this.queues.forEach(queue => {
+			new Worker(queue.name, queue.handle, { connection: redis })
+		})
 	}
 }

@@ -113,7 +113,7 @@ export const resolvers = {
 				if (user.can('master')) data.masterOnly = true;
 				else {
 					// if user is not master, the coupon will be charged from company
-					data.taxable = true;
+					data.taxable = 100;
 
 					// if user is not master, the company has to be selected
 					if (!data.companies.length) data.companies = [company.get('id')]
@@ -144,7 +144,7 @@ export const resolvers = {
 				if (user.can('master')) data.masterOnly = true;
 				else {
 					// if user is not master, the coupon will be charged from company
-					data.taxable = true;
+					data.taxable = 100;
 
 					// if user is not master, the company has to be selected
 					if (!data.companies.length) data.companies = [company.get('id')]
