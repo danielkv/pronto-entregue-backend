@@ -37,10 +37,10 @@ const queues = Object.values(jobs).map(job => {
 
 export default {
 	queues,
-	add(name, id, data) {
+	add(name, id, data, options={}) {
 		try {
 			const queue = this.queues.find(queue => queue.name === name);
-			return queue.bull.add(id, data, queue.options);
+			return queue.bull.add(id, data, { ...queue.options, ...options });
 
 			/* const job = jobs[name];
 
@@ -52,7 +52,7 @@ export default {
 	},
 	process() {
 		return this.queues.forEach(queue => {
-			new Worker(queue.name, queue.handle, { connection: redis })
+			new Worker(queue.name, queue.handle, { connection: { host, port } })
 		})
 	}
 }

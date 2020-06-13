@@ -222,7 +222,7 @@ export const resolvers = {
 			}
 
 			// add recovery message to queue
-			queue.add(MAIL_MESSAGE, {
+			queue.add(MAIL_MESSAGE, MAIL_MESSAGE, {
 				template: 'recover-password',
 				data,
 				context
@@ -255,7 +255,7 @@ export const resolvers = {
 			}
 
 			// add new password message to queue
-			queue.add(MAIL_MESSAGE, {
+			queue.add(MAIL_MESSAGE, MAIL_MESSAGE, {
 				template: 'new-password',
 				data,
 				context

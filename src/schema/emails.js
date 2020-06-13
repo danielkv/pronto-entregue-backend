@@ -14,14 +14,14 @@ export const resolvers = {
 		suggestCompany(_, { data }) {
 			
 			// add email job to admin
-			queue.add(MAIL_MESSAGE, {
+			queue.add(MAIL_MESSAGE, MAIL_MESSAGE, {
 				template: 'suggest-store/admin',
 				data: { to: 'indicacoes@prontoentregue.com.br' },
 				context: data
 			})
 
 			// add email job to user
-			queue.add(MAIL_MESSAGE, {
+			queue.add(MAIL_MESSAGE, MAIL_MESSAGE, {
 				template: 'suggest-store/user',
 				data: { to: data.email },
 				context: data

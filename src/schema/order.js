@@ -311,7 +311,7 @@ export const resolvers =  {
 				pubsub.publish(ORDER_CREATED, { orderCreated: order });
 
 				// queue company user notifications
-				queue.add(COMPANY_USERS_NEW_ORDER_NOTIFICATION, { companyId: data.companyId, orderId: order.id });
+				queue.add(COMPANY_USERS_NEW_ORDER_NOTIFICATION, `${COMPANY_USERS_NEW_ORDER_NOTIFICATION}_${order.id}`, { companyId: data.companyId, orderId: order.id });
 				
 				return order;
 			});
@@ -371,7 +371,7 @@ export const resolvers =  {
 				pubsub.publish(ORDER_QTY_STATUS_UPDATED, { updateOrderStatusQty: ordersStatusQty });
 
 				// queue customer notification
-				queue.add(ORDER_STATUS_CHANGE_NOTIFICATION, { userId, orderId, newOrderStatus });
+				queue.add(ORDER_STATUS_CHANGE_NOTIFICATION, `${ORDER_STATUS_CHANGE_NOTIFICATION}_${orderId}_${newOrderStatus}`, { userId, orderId, newOrderStatus });
 			}
 
 			// return result

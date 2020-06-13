@@ -144,7 +144,7 @@ export const resolvers =  {
 			});
 		},
 		async sendNewCompanyNoticiation(_, { companyId }) {
-			queue.add(NEW_COMPANY_NOTIFICATION, { companyId });
+			queue.add(NEW_COMPANY_NOTIFICATION, `${NEW_COMPANY_NOTIFICATION}_${companyId}`, { companyId });
 
 			return true;
 		},
