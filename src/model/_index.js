@@ -14,6 +14,7 @@ import CompanyUser from './companyUser';
 import Coupon from './coupon';
 import CreditBalance from './creditBalance';
 import CreditHistory from './creditHistory';
+import Delivery from './delivery';
 import DeliveryArea from './deliveryArea';
 import Options from './option';
 import OptionsGroup from './optionsGroup';
@@ -132,3 +133,11 @@ Product.belongsToMany(User, { through: 'favorite_products', as: 'favoritedBy' })
 // Sales relations
 Sale.belongsTo(Product);
 Product.hasMany(Sale);
+
+// Deliveries
+Delivery.belongsTo(Order);
+Order.hasOne(Delivery);
+Delivery.belongsTo(User);
+User.hasOne(Delivery);
+Delivery.belongsTo(User, { as: 'deliveryMan' });
+User.hasOne(Delivery, { as: 'deliveryMan' });

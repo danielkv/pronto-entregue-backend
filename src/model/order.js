@@ -1,12 +1,13 @@
 import Sequelize  from 'sequelize';
 
-import conn  from '../services/connection';
+import conn from '../services/connection';
 
 /*
  * Define modelo (tabela) de pedidos
  */
 
 class Order extends Sequelize.Model {}
+
 Order.init({
 	//Dados principais
 	paymentFee: Sequelize.DECIMAL(10,2),
@@ -17,7 +18,7 @@ Order.init({
 		allowNull: false
 	},
 	type: {
-		type: Sequelize.ENUM('takeout', 'delivery'),
+		type: Sequelize.ENUM('takeout', 'delivery', 'peDelivery'),
 		allowNull: false,
 		defaultValue: 'delivery'
 	},
@@ -46,7 +47,7 @@ Order.init({
 		}
 	},
 	status: {
-		type: Sequelize.ENUM('waiting', 'preparing', 'delivering', 'delivered', 'canceled'),
+		type: Sequelize.ENUM('waiting', 'preparing', 'waitingDelivery', 'delivering', 'delivered', 'canceled'),
 		defaultValue: 'waiting',
 	},
 	message: Sequelize.TEXT,

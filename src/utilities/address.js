@@ -1,5 +1,36 @@
 import { where, fn, literal } from "sequelize";
 
+export function splitAddress(model, modelName='', suffix='') {
+	return {
+		id: `_${modelName}_${model.get('id')}`,
+		name: model.get(`nameAddress${suffix}`),
+		street: model.get(`streetAddress${suffix}`),
+		number: model.get(`numberAddress${suffix}`),
+		complement: model.get(`complementAddress${suffix}`),
+		zipcode: model.get(`zipcodeAddress${suffix}`),
+		district: model.get(`districtAddress${suffix}`),
+		city: model.get(`cityAddress${suffix}`),
+		state: model.get(`stateAddress${suffix}`),
+		reference: model.get(`referenceAddress${suffix}`),
+		location: model.get(`locationAddress${suffix}`),
+	}
+}
+
+export function joinAddress(address, suffix='') {
+	return {
+		[`nameAddress${suffix}`]: address.name,
+		[`streetAddress${suffix}`]: address.street,
+		[`numberAddress${suffix}`]: address.number,
+		[`complementAddress${suffix}`]: address.complement,
+		[`zipcodeAddress${suffix}`]: address.zipcode,
+		[`districtAddress${suffix}`]: address.district,
+		[`cityAddress${suffix}`]: address.city,
+		[`stateAddress${suffix}`]: address.state,
+		[`referenceAddress${suffix}`]: address.reference,
+		[`locationAddress${suffix}`]: address.location
+	}
+}
+
 function parseAddressesComponents(results) {
 	if (!results.length) return [];
 

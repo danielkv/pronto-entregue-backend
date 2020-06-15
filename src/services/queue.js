@@ -2,7 +2,6 @@
 import { Queue, Worker } from 'bullmq'
 
 import * as jobs from '../jobs';
-import redis from './connection'
 
 //redis://redis:6379/0
 

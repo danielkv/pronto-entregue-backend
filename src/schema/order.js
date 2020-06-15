@@ -1,21 +1,20 @@
-import { gql, withFilter, PubSub }  from 'apollo-server';
+import { gql, withFilter }  from 'apollo-server';
 import { literal, fn, where, col } from 'sequelize';
 
-import { ORDER_CREATED, ORDER_QTY_STATUS_UPDATED, getOrderStatusQty, ORDER_STATUS_UPDATED } from '../controller/order';
-import { COMPANY_USERS_NEW_ORDER_NOTIFICATION, ORDER_STATUS_CHANGE_NOTIFICATION } from '../jobs/keys';
-import { orderCompanyLoader } from '../loaders';
+import CreditsController from '../controller/credits';
+import OrderController from '../controller/order';
+import { ORDER_CREATED, ORDER_QTY_STATUS_UPDATED, ORDER_STATUS_UPDATED } from '../controller/order';
+import { orderCompanyLoader, orderUserLoader, orderPaymentMethodLoader } from '../loaders';
 import Company from '../model/company';
 import Coupon from '../model/coupon';
 import Order from '../model/order';
 import OrderProduct  from '../model/orderProduct';
 import User from '../model/user';
 import sequelize  from '../services/connection';
-import queue from '../services/queue';
+import pubSub from '../services/pubsub'
 import { sanitizeFilter, getSQLPagination } from '../utilities';
-import { pointFromCoordinates } from '../utilities/address';
+import { pointFromCoordinates, joinAddress } from '../utilities/address';
 import { companyIsOpen, defaultBusinessHours } from '../utilities/company';
-
-const pubsub = new PubSub();
 
 export const typeDefs =  gql`
 	type Order {
@@ -36,7 +35,7 @@ export const typeDefs =  gql`
 		
 		company: Company!
 		address: Address
-	}	
+	}
 
 	input OrderInput {
 		userId: ID
@@ -84,6 +83,8 @@ export const typeDefs =  gql`
 		createOrder(data: OrderInput!): Order! @isAuthenticated
 		updateOrder(id: ID!, data: OrderInput!): Order! @hasRole(permission: "orders_edit")
 
+		changeStatus(id: ID!, newStatus: String!): Order!
+
 		cancelOrder(id: ID!): Order!
 	}
 `;
@@ -92,15 +93,15 @@ export const resolvers =  {
 	Subscription: {
 		orderCreated: {
 			subscribe: withFilter (
-				()=> pubsub.asyncIterator([ORDER_CREATED]),
+				()=> pubSub.asyncIterator(ORDER_CREATED),
 				(payload, variables) => {
-					return payload.orderCreated.get('companyId') == variables.companyId;
+					return payload.orderCreated.companyId == variables.companyId;
 				}
 			)
 		},
 		updateOrderStatusQty: {
 			subscribe: withFilter (
-				()=> pubsub.asyncIterator([ORDER_QTY_STATUS_UPDATED]),
+				()=> pubSub.asyncIterator(ORDER_QTY_STATUS_UPDATED),
 				(payload, variables) => {
 					return payload.updateOrderStatusQty.companyId == variables.companyId;
 				}
@@ -108,26 +109,33 @@ export const resolvers =  {
 		},
 		updateOrderStatus: {
 			subscribe: withFilter (
-				()=> pubsub.asyncIterator([ORDER_STATUS_UPDATED]),
+				()=> pubSub.asyncIterator([ORDER_STATUS_UPDATED]),
 				(payload, variables) => {
-					return payload.updateOrderStatus.get('companyId') == variables.companyId;
+					return payload.updateOrderStatus.companyId == variables.companyId;
 				}
 			)
 		}
 	},
 	Order: {
-		user: (parent) => {
+		async user(parent) {
 			if (parent.user) return parent.user;
 
-			return parent.getUser();
+			const userId = parent.userId;
+			const user = await orderUserLoader.load(userId);
+
+			return user
 		},
 		
-		paymentMethod: (parent) => {
+		paymentMethod(parent) {
 			if (parent.paymentMethod) return parent.paymentMethod;
 
-			return parent.getPaymentMethod();
+			const paymentMethodId = parent.paymentMethodId;
+			return orderPaymentMethodLoader.load(paymentMethodId);
 		},
-		address(parent) {
+
+		async address(parent) {
+			if (!(parent instanceof Order)) parent = await Order.findByPk(parent.id);
+
 			if (parent.get('type') === 'takeout') return null;
 
 			return {
@@ -145,12 +153,12 @@ export const resolvers =  {
 			}
 		},
 		company(parent) {
-			const companyId = parent.get('companyId')
+			const companyId = parent.companyId
 
 			return orderCompanyLoader.load(companyId);
 		},
 		subtotal (parent) {
-			return parent.get('price') + parent.get('discount');
+			return parent.price + parent.discount;
 		}
 	},
 	Query: {
@@ -246,24 +254,6 @@ export const resolvers =  {
 		},
 		createOrder(_, { data }, { company: selectedCompany }) {
 			return sequelize.transaction(async (transaction) => {
-				// sanitize address
-				if (data.address) {
-					const address = {
-						nameAddress: data.address.name,
-						streetAddress: data.address.street,
-						numberAddress: data.address.number,
-						complementAddress: data.address.complement,
-						zipcodeAddress: data.address.zipcode,
-						districtAddress: data.address.district,
-						cityAddress: data.address.city,
-						stateAddress: data.address.state,
-						referenceAddress: data.address.reference,
-						locationAddress: data.address.location,
-					}
-					delete data.address;
-					data = { ...data, ...address };
-				}
-				
 				// check if company exits
 				const company = await Company.findByPk(data.companyId);
 				if (!company) throw new Error('Estabelecimento não encontrado');
@@ -276,72 +266,33 @@ export const resolvers =  {
 				//check if coupon is valid
 				if (data.couponId) {
 					const coupon = await Coupon.findByPk(data.couponId);
-
-					coupon.isValid(data);
+					await coupon.isValid(data);
 				}
-
-				// create order
-				const order = await company.createOrder(data, { transaction });
-
-				// check if order use credits
+				
+				// check if user credits
 				if (data.useCredits) {
-					const user = await User.findByPk(data.userId);
-					if (!user) throw new Error('Usuário não encontrado');
-
-					const balanceModel = await user.getCreditBalance();
-					if (!balanceModel) throw new('Nenhum crédito na sua conta');
-
-					const totalOrder = data.price + data.discount;
-					
-					const creditBalance = balanceModel.get('value');
-					if (creditBalance < totalOrder && !data.paymentMethodId) throw new Error('Você não tem créditos suficientes para esse pedido, selecione também um método de pagamento para completar o valor');
-					
-					const creditsUse = creditBalance >= totalOrder ? totalOrder : creditBalance;
-					
-					const createdCreditHitory = await user.createCreditHistory({ value: -creditsUse, history: `Pedido #${order.get('id')} em ${company.get('displayName')}` }, { transaction })
-					await order.setCreditHistory(createdCreditHitory, { transaction })
+					const createdHistory = await CreditsController.checkUserCredits(createdOrder, company, { transaction });
+					data.creditHistoryId = createdHistory.get('id');
 				}
-
 				
-				
-				// create order products
-				await OrderProduct.updateAll(data.products, order, transaction);
+				// create order
+				const createdOrder = await OrderController.create(data, company, { transaction });
 
-				// emit event for subscriptions
-				pubsub.publish(ORDER_CREATED, { orderCreated: order });
-
-				// queue company user notifications
-				queue.add(COMPANY_USERS_NEW_ORDER_NOTIFICATION, `${COMPANY_USERS_NEW_ORDER_NOTIFICATION}_${order.id}`, { companyId: data.companyId, orderId: order.id });
-				
-				return order;
+				return createdOrder;
 			});
 		},
-		async updateOrder(_, { id, data }) {
-			// GET old order status
-			let oldOrderStatus = null;
-			let newOrderStatus =  data.status;
-
-			const updatedOrder = await sequelize.transaction(async (transaction) => {
+		updateOrder(_, { id, data }) {
+			return sequelize.transaction(async (transaction) => {
 				// check if order exists
 				const order = await Order.findByPk(id);
 				if (!order) throw new Error('Pedido não encontrado');
 
-				oldOrderStatus = order.get('status');
+				// allow to change status only using funcion changeStatus
+				if (data.status) delete data.status;
 
 				// sanitize address
 				if (data.address) {
-					const address = {
-						nameAddress: data.address.name,
-						streetAddress: data.address.street,
-						numberAddress: data.address.number,
-						complementAddress: data.address.complement,
-						zipcodeAddress: data.address.zipcode,
-						districtAddress: data.address.district,
-						cityAddress: data.address.city,
-						stateAddress: data.address.state,
-						referenceAddress: data.address.reference,
-						locationAddress: data.address.location,
-					}
+					const address = joinAddress(data.address);
 					delete data.address;
 					data = { ...data, ...address };
 				}
@@ -357,26 +308,14 @@ export const resolvers =  {
 
 				return updatedOrder;
 			});
-
-			// emit event for update subscriptions
-			pubsub.publish(ORDER_STATUS_UPDATED, { updateOrderStatus: updatedOrder });
-
-			// check with new status
-			if (oldOrderStatus !== newOrderStatus) {
-				const orderId = updatedOrder.get('id');
-				const userId = updatedOrder.get('userId');
-				const ordersStatusQty = await getOrderStatusQty(updatedOrder.get('companyId'));
-
-				// emit event for updated status subscriptions
-				pubsub.publish(ORDER_QTY_STATUS_UPDATED, { updateOrderStatusQty: ordersStatusQty });
-
-				// queue customer notification
-				queue.add(ORDER_STATUS_CHANGE_NOTIFICATION, `${ORDER_STATUS_CHANGE_NOTIFICATION}_${orderId}_${newOrderStatus}`, { userId, orderId, newOrderStatus });
-			}
-
-			// return result
-			return updatedOrder
 		},
+		async changeStatus (_, { id, newStatus }, { user: loggedUser }) {
+			const order = await Order.findByPk(id);
+			if (!order) throw new Error('Pedido não encontrado');
+
+			return OrderController.changeStatus(order, newStatus, null, { loggedUser });
+		},
+		// deprecated => use changeStatus
 		async cancelOrder(_, { id }, { user }) {
 			const order = await Order.findByPk(id);
 			const orderUser = await order.getUser();
@@ -388,7 +327,7 @@ export const resolvers =  {
 			const updatedOrder = await order.update({ status: 'canceled' });
 
 			// emit event for update subscriptions
-			pubsub.publish(ORDER_STATUS_UPDATED, { updateOrderStatus: updatedOrder });
+			pubSub.publish(ORDER_STATUS_UPDATED, { updateOrderStatus: updatedOrder });
 
 			return updatedOrder;
 		}

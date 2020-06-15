@@ -2,6 +2,7 @@ import { gql }  from 'apollo-server';
 import { Op, fn } from 'sequelize';
 
 import { upload } from '../controller/uploads';
+import { orderCouponLoader } from '../loaders';
 import Company from '../model/company';
 import Coupon from '../model/coupon';
 import Product from '../model/product';
@@ -290,7 +291,10 @@ export const resolvers = {
 	},
 	Order: {
 		coupon(parent) {
-			return parent.getCoupon();
+			const couponId = parent.couponId;
+			if (!couponId) return;
+
+			return orderCouponLoader.load(couponId);
 		}
 	}
 }

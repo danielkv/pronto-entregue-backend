@@ -1,10 +1,13 @@
 import DataLoader from 'dataloader';
 
 import Company from '../model/company';
+import Coupon from '../model/coupon';
 import CreditHistory from '../model/creditHistory';
 import OrderOptions from '../model/orderOptions';
 import OrderOptionsGroup from '../model/orderOptionsGroup';
 import OrderProduct from '../model/orderProduct';
+import PaymentMethod from '../model/paymentMethod';
+import User from '../model/user';
 import { remap } from './remap';
 
 export const orderCompanyLoader = new DataLoader(async keys => {
@@ -59,4 +62,28 @@ export const creditHistoryLoader = new DataLoader(async keys => {
 	});
 	
 	return remap(keys, histories)
+}, { cache: false })
+
+export const orderUserLoader = new DataLoader(async keys => {
+	const users = await User.findAll({
+		where: { id: keys }
+	});
+	
+	return remap(keys, users)
+}, { cache: false })
+
+export const orderPaymentMethodLoader = new DataLoader(async keys => {
+	const methods = await PaymentMethod.findAll({
+		where: { id: keys }
+	});
+	
+	return remap(keys, methods)
+}, { cache: false })
+
+export const orderCouponLoader = new DataLoader(async keys => {
+	const coupons = await Coupon.findAll({
+		where: { id: keys }
+	});
+	
+	return remap(keys, coupons)
 }, { cache: false })

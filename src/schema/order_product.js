@@ -35,12 +35,12 @@ export const resolvers =  {
 	Order: {
 		products(parent) {
 			//return parent.getProducts();
-			const orderId = parent.get('id');
+			const orderId = parent.id;
 
 			return orderProductsLoader.load(orderId);
 		},
 		async countProducts(parent) {
-			const orderId = parent.get('id');
+			const orderId = parent.id;
 
 			const products = await orderProductsLoader.load(orderId);
 

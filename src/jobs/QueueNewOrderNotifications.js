@@ -1,13 +1,23 @@
+import { ORDER_CREATED } from '../controller/order';
 import Company from '../model/company';
+import Order from '../model/order';
 import User from '../model/user';
 import UserMeta from '../model/userMeta';
 import * as notifications from '../services/notifications';
-import { COMPANY_USERS_NEW_ORDER_NOTIFICATION } from "./keys";
+import pubSub from '../services/pubsub';
+import { QUEUE_NEW_ORDER_NOTIFICATIONS } from "./keys";
 
 export default {
-	key: COMPANY_USERS_NEW_ORDER_NOTIFICATION,
+	key: QUEUE_NEW_ORDER_NOTIFICATIONS,
 	options: {},
 	async handle ({ data: { companyId, orderId } }) {
+		// check if order exists
+		const order = await Order.findByPk(orderId);
+		if (!order) throw new Error("Pedido não encontrado");
+
+		// send pubsub notification
+		pubSub.publish(ORDER_CREATED, { orderCreated: order.get() });
+
 		// get company users
 		const tokenMetas = await UserMeta.findAll({
 			where: { key: 'notification_tokens' },

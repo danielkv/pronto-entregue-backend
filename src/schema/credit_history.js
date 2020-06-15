@@ -56,7 +56,7 @@ export const resolvers = {
 	},
 	Order: {
 		creditHistory(parent) {
-			const creditHistoryId = parent.get('creditHistoryId');
+			const creditHistoryId = parent.creditHistoryId;
 			if (!creditHistoryId) return;
 
 			return creditHistoryLoader.load(creditHistoryId);
