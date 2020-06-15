@@ -1,12 +1,20 @@
 import User from '../user';
 
-function createBalance(user) {
-	user.createCreditBalance({
-		value: 0,
-	})
-}
+export default new class UserTriggerFactory {
 
-User.afterCreate('createBalance', createBalance)
-User.afterBulkCreate('createBulkBalance', async users => {
-	await Promise.all([users.map(user => createBalance(user))])
-})
+	start() {
+		User.afterCreate('createBalance', this.createBalance)
+		User.afterBulkCreate('createBulkBalance', async users => {
+			await Promise.all([users.map(user => this.createBalance(user))])
+		})
+
+		console.log(' - Setup model user triggers')
+	}
+
+	createBalance(user) {
+		user.createCreditBalance({
+			value: 0,
+		})
+	}
+
+}

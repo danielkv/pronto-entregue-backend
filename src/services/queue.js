@@ -50,8 +50,12 @@ export default {
 		}
 	},
 	process() {
-		return this.queues.forEach(queue => {
+		const processes =  this.queues.forEach(queue => {
 			new Worker(queue.name, queue.handle, { connection: { host, port } })
-		})
+		});
+
+		console.log('Jobs processor started\n')
+
+		return processes;
 	}
 }

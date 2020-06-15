@@ -38,7 +38,3 @@ const pubsub = new RedisPubSub({
 });
 
 export default pubsub;
-
-pubsub.subscribe(ORDER_CREATED, test => {
-	console.log(test);
-})

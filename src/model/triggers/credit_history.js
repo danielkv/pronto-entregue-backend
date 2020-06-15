@@ -3,18 +3,26 @@ import { col, fn } from "sequelize";
 import CreditBalance from "../creditBalance";
 import CreditHistory from "../creditHistory";
 
-async function updateCreditBalance (history, { transaction }) {
-	const userId = history.get('userId');
+export default new class CreditHistoryTriggerFactory {
 
-	const [balance] = await CreditHistory.findAll({
-		attributes: [
-			[fn('SUM', col('value')), 'totalBalance']
-		],
-		where: { userId },
-		transaction
-	})
+	start () {
+		CreditHistory.afterSave('updateCreditBalance', this.updateCreditBalance);
 
-	await CreditBalance.update({ value: balance.get('totalBalance') }, { where: { userId }, transaction });
+		console.log(' - Setup credit history triggers')
+	}
+
+	async updateCreditBalance (history, { transaction }) {
+		const userId = history.get('userId');
+
+		const [balance] = await CreditHistory.findAll({
+			attributes: [
+				[fn('SUM', col('value')), 'totalBalance']
+			],
+			where: { userId },
+			transaction
+		})
+
+		await CreditBalance.update({ value: balance.get('totalBalance') }, { where: { userId }, transaction });
+	}
+
 }
-
-CreditHistory.afterSave('updateCreditBalance', updateCreditBalance);

@@ -18,24 +18,6 @@ const redisService = new Redis({
 	},
 });
 
-redisService.on('ready', async ()=>{
-	try {
-		console.log('PRONTO')
-
-		console.log('---Salvando dados')
-		const ok = await redisService.set('testKey', 'valor_aquele');
-		console.log('---Dados salvos', ok)
-
-		console.log('---Buscando dados')
-		const result = await redisService.get('testKey');
-		console.log('---Dados encontrados');
-
-		console.log('testKey =>', result);
-	} catch (err) {
-		console.error(err);
-	}
-})
-
 redisService.on('error', async (err)=>{
 	
 	console.error(err);
