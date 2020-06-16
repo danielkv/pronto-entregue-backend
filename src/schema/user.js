@@ -4,7 +4,6 @@ import { Op }  from 'sequelize';
 
 import { upload } from '../controller/uploads';
 import JobQueue from '../factory/queue';
-import { MAIL_MESSAGE } from '../jobs/keys';
 import Address  from '../model/address';
 import Company  from '../model/company';
 import User  from '../model/user';
@@ -222,7 +221,7 @@ export const resolvers = {
 			}
 
 			// add recovery message to queue
-			JobQueue.add(MAIL_MESSAGE, MAIL_MESSAGE, {
+			JobQueue.mails.add('mail', {
 				template: 'recover-password',
 				data,
 				context
@@ -255,7 +254,7 @@ export const resolvers = {
 			}
 
 			// add new password message to queue
-			JobQueue.add(MAIL_MESSAGE, MAIL_MESSAGE, {
+			JobQueue.mails.add('mail', {
 				template: 'new-password',
 				data,
 				context

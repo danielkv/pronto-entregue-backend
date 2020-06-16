@@ -1,7 +1,7 @@
 import DeliveryEventsFactory from '../events/delivery';
 import OrderEventsFactory from '../events/order';
 
-export default new class EventFactory {
+class EventFactory {
 	start() {
 		console.log('Start setup Events')
 		DeliveryEventsFactory.start();
@@ -9,3 +9,7 @@ export default new class EventFactory {
 		console.log(' - Events ready\n')
 	}
 }
+
+const AppEvents = new EventFactory();
+
+export default AppEvents;

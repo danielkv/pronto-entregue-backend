@@ -4,7 +4,6 @@ import { Op, fn, col, where, literal, QueryTypes } from 'sequelize';
 import { getOrderStatusQty } from '../controller/order';
 import { upload } from '../controller/uploads';
 import JobQueue from '../factory/queue';
-import { NEW_COMPANY_NOTIFICATION } from '../jobs/keys';
 import { deliveryTimeLoader, businessHoursLoader, rateLoader, addressLoader } from '../loaders';
 import Address from '../model/address';
 import Company  from '../model/company';
@@ -144,7 +143,7 @@ export const resolvers =  {
 			});
 		},
 		async sendNewCompanyNoticiation(_, { companyId }) {
-			JobQueue.add(NEW_COMPANY_NOTIFICATION, `${NEW_COMPANY_NOTIFICATION}_${companyId}`, { companyId });
+			JobQueue.notifications.add('createCompany', { companyId })
 
 			return true;
 		},

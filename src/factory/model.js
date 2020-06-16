@@ -3,7 +3,10 @@
  * estrangeiras entre todas as tabelas.
  * 
  */
+import path from 'path';
 
+import { authenticate } from '../controller/authentication';
+import { setupDataBase } from '../controller/setupDB';
 import Address from '../model/address';
 import Category from '../model/category';
 import Company from '../model/company';
@@ -32,14 +35,45 @@ import UserTriggerFactory from '../model/triggers/user';
 import User from '../model/user';
 import UserMeta from '../model/userMeta';
 import ViewArea from '../model/viewArea';
+import AppRouter from './router';
 
-export default new class ModelFactory {
+class ModelsFactory {
 	start() {
 		console.log('Start setup DB models')
 		this.setupAssociations();
 		this.setupTriggers();
+		this.setupRoutes();
 		
 		console.log(' - DB ready\n')
+	}
+
+	setupRoutes () {
+		// porta de instalação
+		AppRouter.add('DB', (router)=> {
+			router.get('/setup', setupDataBase);
+
+			// porta de instalação
+			router.get('/sync/:table/:auth', async (req, res) => {
+				try {
+					const authorization = req.params.auth;
+					if (!authorization) return res.sendStatus(403);
+
+					const user = await authenticate(authorization, false);
+					if (user.get('role') !== 'master') return res.sendStatus(403);
+	
+					const { table } = req.params;
+					const model = require(path.resolve(__dirname, '..', 'model', table)).default
+
+					await model.sync({ alter: true });
+	
+					res.send(`${table} alterado com sucesso`);
+				} catch (err) {
+					res.send(err.message)
+				}
+			});
+		})
+
+		console.log(' - Added DB Routes')
 	}
 
 	setupTriggers () {
@@ -161,3 +195,7 @@ export default new class ModelFactory {
 		console.log(' - Setup DB Associations')
 	}
 }
+
+const AppModels = new ModelsFactory();
+
+export default AppModels;

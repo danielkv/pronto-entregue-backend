@@ -1,7 +1,7 @@
 import DeliveryController from '../controller/delivery';
-import OrderController from '../controller/order';
+import OrderController, { ORDER_CREATED } from '../controller/order';
 import JobQueue from '../factory/queue';
-import { QUEUE_ORDER_STATUS_UPDATED, ORDER_STATUS_CHANGE_NOTIFICATION } from '../jobs/keys';
+import pubSub from '../services/pubsub';
 
 export default new class OrderEventsFactory {
 	start() {
@@ -18,17 +18,25 @@ export default new class OrderEventsFactory {
 		})
 
 		/**
-		 * Queue job for notify after change order status
+		 * Queue job to notify  after change order status
 		 */
 		OrderController.on('changeStatus', ({ order, newStatus })=>{
 			const orderId = order.get('id');
 			const userId = order.get('userId');
 
 			// queue events for updated order status
-			JobQueue.add(QUEUE_ORDER_STATUS_UPDATED, `${QUEUE_ORDER_STATUS_UPDATED}_${orderId}_${newStatus}`, { orderId });
+			JobQueue.notifications.add('orderChangeStatus', { userId, orderId, newOrderStatus: newStatus })
+		});
 
-			// queue customer notification
-			JobQueue.add(ORDER_STATUS_CHANGE_NOTIFICATION, `${ORDER_STATUS_CHANGE_NOTIFICATION}_${orderId}_${newStatus}`, { userId, orderId, newOrderStatus: newStatus })
+		/**
+		 * Notify company (pubsub subscriptions) when order is created
+		 */
+		OrderController.on('create', ({ order, company })=>{
+			// publish pubsub
+			pubSub.publish(ORDER_CREATED, { orderCreated: order });
+
+			// queue order notifications
+			JobQueue.notifications.add('createOrder', { companyId: company.companyId, orderId: order.id })
 		});
 
 		console.log(' - Setup Order events')

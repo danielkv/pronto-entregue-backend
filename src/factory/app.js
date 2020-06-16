@@ -1,17 +1,16 @@
 import JobQueue from '../factory/queue';
-import EventsFactory from './events';
-import ModelFactory from './model';
-import ServerFactory from './server';
+import AppEvents from './events';
+import AppModels from './model';
+import AppRouter from './router';
+import AppServer from './server';
 
 export default new class AppFactory {
 	start() {
-		ModelFactory.start();
-		EventsFactory.start();
+		AppModels.start();
+		AppEvents.start();
 		JobQueue.start()
-		ServerFactory.start();
-
-		//test
-		JobQueue.testSchedule();
+		AppRouter.start();
+		AppServer.start();
 	}
 
 	startJobsProcessors() {

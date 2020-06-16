@@ -1,7 +1,6 @@
 import DeliveryController from '../controller/delivery';
 import OrderController from '../controller/order';
 import JobQueue from '../factory/queue';
-import { QUEUE_NEW_DELIVERY_NOTIFICATION, NOTIFY_DELIVERY_SET_DELIVERY_MAN } from '../jobs/keys';
 
 export default new class DeliveryEventFactory {
 	start () {
@@ -23,7 +22,7 @@ export default new class DeliveryEventFactory {
 
 			// recurrent job to notify delivery men
 			// it will be destroyed when some delivery man is set to delivery
-			JobQueue.add(QUEUE_NEW_DELIVERY_NOTIFICATION, `${QUEUE_NEW_DELIVERY_NOTIFICATION}_${deliveryId}`, { deliveryId }, { repeate: { every: repeatEvery } });
+			JobQueue.notifications.add('createDelivery', { deliveryId }, { repeate: { every: repeatEvery }, jobId: `createDelivery_${deliveryId}` } )
 		});
 
 		/**
@@ -33,7 +32,7 @@ export default new class DeliveryEventFactory {
 			const deliveryId = delivery.get('id')
 
 			// notify user / company delivery man is on the way
-			JobQueue.add(NOTIFY_DELIVERY_SET_DELIVERY_MAN, `${NOTIFY_DELIVERY_SET_DELIVERY_MAN}_${deliveryId}`, { deliveryId });
+			JobQueue.notifications.add('setDeliveryMan', { deliveryId } )
 
 			// remove recurrent queue for this delivery
 

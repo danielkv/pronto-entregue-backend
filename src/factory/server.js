@@ -1,16 +1,16 @@
 import { ApolloServer }  from 'apollo-server-express';
 import cors  from 'cors';
 import express  from 'express';
-import http  from 'http';
+import http from 'http';
 import path  from 'path';
 
 import { createContext }  from '../controller/apolloContext';
-import routes  from '../router';
+import AppRouter from './router';
 import GraphQlSchemaFactory from './schema';
 
-export default new class ServerFactory {
+class ServerFactory {
 	createServers () {
-		this.app = this.createExpressServer(routes);
+		this.app = this.createExpressServer(AppRouter.router);
 
 		this.httpServer = this.createHttpServer(this.app);
 
@@ -81,3 +81,7 @@ export default new class ServerFactory {
 		console.log(' - Server ready \n')
 	}
 }
+
+const AppServer = new ServerFactory();
+
+export default AppServer;

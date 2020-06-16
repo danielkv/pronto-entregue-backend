@@ -1,8 +1,6 @@
 import EventEmitter from 'events';
 import { QueryTypes } from "sequelize";
 
-import JobQueue from "../factory/queue";
-import { QUEUE_NEW_ORDER_NOTIFICATIONS } from "../jobs/keys";
 import OrderProduct from "../model/orderProduct";
 import connection from "../services/connection";
 import { joinAddress } from "../utilities/address";
@@ -67,15 +65,10 @@ class OrderController extends EventEmitter {
 		await OrderProduct.updateAll(data.products, order, options.transaction);
 
 		// emit event
-		this.emit('create', { order, company, options });
-
-		// queue order notifications
-		JobQueue.add(QUEUE_NEW_ORDER_NOTIFICATIONS, `${QUEUE_NEW_ORDER_NOTIFICATIONS}_${order.id}`, { companyId: data.companyId, orderId: order.id });
+		this.emit('create', { order, company });
 	
 		return order;
 	}
-
-
 
 	/**
 	 * Change order status, all orders should go trough this function
