@@ -1,7 +1,7 @@
 import DeliveryController from '../controller/delivery';
 import OrderController from '../controller/order';
+import JobQueue from '../factory/queue';
 import { QUEUE_NEW_DELIVERY_NOTIFICATION, NOTIFY_DELIVERY_SET_DELIVERY_MAN } from '../jobs/keys';
-import queue from '../services/queue';
 
 export default new class DeliveryEventFactory {
 	start () {
@@ -23,7 +23,7 @@ export default new class DeliveryEventFactory {
 
 			// recurrent job to notify delivery men
 			// it will be destroyed when some delivery man is set to delivery
-			queue.add(QUEUE_NEW_DELIVERY_NOTIFICATION, `${QUEUE_NEW_DELIVERY_NOTIFICATION}_${deliveryId}`, { deliveryId }, { repeate: { every: repeatEvery } });
+			JobQueue.add(QUEUE_NEW_DELIVERY_NOTIFICATION, `${QUEUE_NEW_DELIVERY_NOTIFICATION}_${deliveryId}`, { deliveryId }, { repeate: { every: repeatEvery } });
 		});
 
 		/**
@@ -33,9 +33,10 @@ export default new class DeliveryEventFactory {
 			const deliveryId = delivery.get('id')
 
 			// notify user / company delivery man is on the way
-			queue.add(NOTIFY_DELIVERY_SET_DELIVERY_MAN, `${NOTIFY_DELIVERY_SET_DELIVERY_MAN}_${deliveryId}`, { deliveryId });
+			JobQueue.add(NOTIFY_DELIVERY_SET_DELIVERY_MAN, `${NOTIFY_DELIVERY_SET_DELIVERY_MAN}_${deliveryId}`, { deliveryId });
 
 			// remove recurrent queue for this delivery
+
 		});
 
 		/**
@@ -46,10 +47,10 @@ export default new class DeliveryEventFactory {
 			const userId = delivery.get('userId');
 			
 			// queue events for updated order status
-			queue.add(QUEUE_ORDER_STATUS_UPDATED, `${QUEUE_ORDER_STATUS_UPDATED}_${deliveryId}_${newStatus}`, { orderId: deliveryId });
+			JobQueue.add(QUEUE_ORDER_STATUS_UPDATED, `${QUEUE_ORDER_STATUS_UPDATED}_${deliveryId}_${newStatus}`, { orderId: deliveryId });
 			
 			// queue customer notification
-			queue.add(ORDER_STATUS_CHANGE_NOTIFICATION, `${ORDER_STATUS_CHANGE_NOTIFICATION}_${deliveryId}_${newStatus}`, { userId, orderId: deliveryId, newOrderStatus: newStatus })
+			JobQueue.add(ORDER_STATUS_CHANGE_NOTIFICATION, `${ORDER_STATUS_CHANGE_NOTIFICATION}_${deliveryId}_${newStatus}`, { userId, orderId: deliveryId, newOrderStatus: newStatus })
 		}); */
 
 		console.log(' - Setup Delivery events')

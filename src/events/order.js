@@ -1,7 +1,7 @@
 import DeliveryController from '../controller/delivery';
 import OrderController from '../controller/order';
+import JobQueue from '../factory/queue';
 import { QUEUE_ORDER_STATUS_UPDATED, ORDER_STATUS_CHANGE_NOTIFICATION } from '../jobs/keys';
-import queue from '../services/queue';
 
 export default new class OrderEventsFactory {
 	start() {
@@ -25,10 +25,10 @@ export default new class OrderEventsFactory {
 			const userId = order.get('userId');
 
 			// queue events for updated order status
-			queue.add(QUEUE_ORDER_STATUS_UPDATED, `${QUEUE_ORDER_STATUS_UPDATED}_${orderId}_${newStatus}`, { orderId });
+			JobQueue.add(QUEUE_ORDER_STATUS_UPDATED, `${QUEUE_ORDER_STATUS_UPDATED}_${orderId}_${newStatus}`, { orderId });
 
 			// queue customer notification
-			queue.add(ORDER_STATUS_CHANGE_NOTIFICATION, `${ORDER_STATUS_CHANGE_NOTIFICATION}_${orderId}_${newStatus}`, { userId, orderId, newOrderStatus: newStatus })
+			JobQueue.add(ORDER_STATUS_CHANGE_NOTIFICATION, `${ORDER_STATUS_CHANGE_NOTIFICATION}_${orderId}_${newStatus}`, { userId, orderId, newOrderStatus: newStatus })
 		});
 
 		console.log(' - Setup Order events')

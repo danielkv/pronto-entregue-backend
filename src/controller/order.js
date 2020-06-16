@@ -1,10 +1,10 @@
 import EventEmitter from 'events';
 import { QueryTypes } from "sequelize";
 
-import { ORDER_STATUS_CHANGE_NOTIFICATION, QUEUE_ORDER_STATUS_UPDATED, QUEUE_NEW_ORDER_NOTIFICATIONS } from "../jobs/keys";
+import JobQueue from "../factory/queue";
+import { QUEUE_NEW_ORDER_NOTIFICATIONS } from "../jobs/keys";
 import OrderProduct from "../model/orderProduct";
 import connection from "../services/connection";
-import queue from "../services/queue";
 import { joinAddress } from "../utilities/address";
 
 // pubsub vars
@@ -70,7 +70,7 @@ class OrderController extends EventEmitter {
 		this.emit('create', { order, company, options });
 
 		// queue order notifications
-		queue.add(QUEUE_NEW_ORDER_NOTIFICATIONS, `${QUEUE_NEW_ORDER_NOTIFICATIONS}_${order.id}`, { companyId: data.companyId, orderId: order.id });
+		JobQueue.add(QUEUE_NEW_ORDER_NOTIFICATIONS, `${QUEUE_NEW_ORDER_NOTIFICATIONS}_${order.id}`, { companyId: data.companyId, orderId: order.id });
 	
 		return order;
 	}

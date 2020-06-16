@@ -1,9 +1,7 @@
 import EventEmitter from 'events';
 
-import { QUEUE_NEW_DELIVERY_NOTIFICATION } from "../jobs/keys";
 import Delivery from "../model/delivery";
 import User from "../model/user";
-import queue from "../services/queue";
 import { joinAddress, splitAddress } from "../utilities/address";
 
 class DeliveryController extends EventEmitter {

@@ -3,13 +3,13 @@ import jwt from 'jsonwebtoken';
 import { Op }  from 'sequelize';
 
 import { upload } from '../controller/uploads';
+import JobQueue from '../factory/queue';
 import { MAIL_MESSAGE } from '../jobs/keys';
 import Address  from '../model/address';
 import Company  from '../model/company';
 import User  from '../model/user';
 import UserMeta  from '../model/userMeta';
 import conn  from '../services/connection';
-import queue from '../services/queue';
 import { salt, getSQLPagination, sanitizeFilter }  from '../utilities';
 import { userCanSetRole, extractRole } from '../utilities/roles';
 
@@ -222,7 +222,7 @@ export const resolvers = {
 			}
 
 			// add recovery message to queue
-			queue.add(MAIL_MESSAGE, MAIL_MESSAGE, {
+			JobQueue.add(MAIL_MESSAGE, MAIL_MESSAGE, {
 				template: 'recover-password',
 				data,
 				context
@@ -255,7 +255,7 @@ export const resolvers = {
 			}
 
 			// add new password message to queue
-			queue.add(MAIL_MESSAGE, MAIL_MESSAGE, {
+			JobQueue.add(MAIL_MESSAGE, MAIL_MESSAGE, {
 				template: 'new-password',
 				data,
 				context
