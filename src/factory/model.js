@@ -26,6 +26,7 @@ import OrderOptions from '../model/orderOptions';
 import orderOptionsGroup  from '../model/orderOptionsGroup';
 import OrderProduct from '../model/orderProduct';
 import PaymentMethod from '../model/paymentMethod';
+import PeDeliveryArea from '../model/peDeliveryArea';
 import Product from '../model/product';
 import Rating from '../model/rating';
 import Role from '../model/role';
@@ -85,13 +86,16 @@ class ModelsFactory {
 		// Company Relations
 		Company.hasMany(CompanyMeta);
 		Company.belongsToMany(User, { through: CompanyUser });
-		Company.hasMany(DeliveryArea);
-		Company.hasMany(ViewArea);
 		Company.belongsToMany(PaymentMethod, { through: CompanyPaymentMethod });
 		Company.belongsToMany(User, { through: CompanyUser });
 		Company.belongsTo(CompanyType);
 		CompanyType.hasMany(Company);
 		Company.belongsTo(Address);
+		
+		// Delivery Areas
+		Company.hasMany(DeliveryArea);
+		Company.hasMany(ViewArea);
+		Company.hasMany(PeDeliveryArea);
 
 		// categories relations
 		Category.belongsTo(Company);

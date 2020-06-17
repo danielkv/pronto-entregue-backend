@@ -12,7 +12,6 @@ class RouterFactory {
 
 		this.addedRoutes.push([name, callback]);
 	}
-
 	
 	start() {
 		console.log('Setup Routes');

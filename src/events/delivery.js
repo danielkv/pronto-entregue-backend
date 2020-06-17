@@ -13,44 +13,33 @@ export default new class DeliveryEventFactory {
 		})
 
 		/**
-		 * Queue jobs when delivery is created
+		 * Queue jobs when delivery change status to waitingDelivery
+		 * it is used to notify delivery men around the addressFrom
 		 */
-		DeliveryController.on('create', ({ delivery })=>{
+		DeliveryController.on('changeStatus', ({ delivery })=>{
+
 			const deliveryId = delivery.get('id');
 
 			const repeatEvery = 1000 * 60 * 5;
 
 			// recurrent job to notify delivery men
-			// it will be destroyed when some delivery man is set to delivery
-			JobQueue.notifications.add('createDelivery', { deliveryId }, { repeate: { every: repeatEvery }, jobId: `createDelivery_${deliveryId}` } )
+			// it will be removed when some delivery man is set to delivery
+			JobQueue.notifications.add('notifyDeliveryMen', { deliveryId }, { repeate: { every: repeatEvery }, jobId: `notifyDeliveryMen_${deliveryId}` } )
 		});
 
 		/**
 		 * Queue jobs when deliveryMan is set to a delivery
 		 */
-		DeliveryController.on('setDeliveryMan', ({ delivery, deliveryMan })=>{
+		DeliveryController.on('setDeliveryMan', async ({ delivery })=>{
 			const deliveryId = delivery.get('id')
 
 			// notify user / company delivery man is on the way
 			JobQueue.notifications.add('setDeliveryMan', { deliveryId } )
 
 			// remove recurrent queue for this delivery
-
+			const job = await JobQueue.notifications.getJob(`notifyDeliveryMen_${deliveryId}`);
+			job.remove();
 		});
-
-		/**
-		 * Queue job for notify users when delivery change status
-		 */
-		/* DeliveryController.on('changeStatus', ({ delivery, newStatus })=>{
-			const deliveryId = delivery.get('id');
-			const userId = delivery.get('userId');
-			
-			// queue events for updated order status
-			JobQueue.add(QUEUE_ORDER_STATUS_UPDATED, `${QUEUE_ORDER_STATUS_UPDATED}_${deliveryId}_${newStatus}`, { orderId: deliveryId });
-			
-			// queue customer notification
-			JobQueue.add(ORDER_STATUS_CHANGE_NOTIFICATION, `${ORDER_STATUS_CHANGE_NOTIFICATION}_${deliveryId}_${newStatus}`, { userId, orderId: deliveryId, newOrderStatus: newStatus })
-		}); */
 
 		console.log(' - Setup Delivery events')
 	}
