@@ -9,6 +9,8 @@ export async function setDeliveryMan({ data: { orderId } }) {
 	const companyId = order.get('companyId');
 	const ordersStatusQty = await OrderController.getOrderStatusQty(companyId);
 
+	//if delivery status is waitingDelviery
+
 	pubSub.publish(ORDER_STATUS_UPDATED, { updateOrderStatus: order });
 
 	pubSub.publish(ORDER_QTY_STATUS_UPDATED, { updateOrderStatusQty: ordersStatusQty });

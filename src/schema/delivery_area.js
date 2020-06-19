@@ -1,9 +1,6 @@
-import { gql, ApolloError }  from 'apollo-server';
-import { fn, where, literal, col }  from 'sequelize';
+import { gql }  from 'apollo-server';
 
-import Company from '../model/company';
 import conn from '../services/connection';
-import { pointFromCoordinates } from '../utilities/address';
 
 export const typeDefs =  gql`
 	type DeliveryArea {
@@ -33,7 +30,6 @@ export const typeDefs =  gql`
 	}
 
 	extend type Mutation {
-		checkDeliveryLocation(companyId: ID!, location: GeoPoint, address: AddressInput): DeliveryArea!
 		modifyDeliveryAreas(data: [DeliveryAreaInput]!): [DeliveryArea]!
 		removeDeliveryArea(id: ID!): DeliveryArea!
 	}
@@ -46,29 +42,6 @@ export const resolvers =  {
 		},
 	},
 	Mutation: {
-		async checkDeliveryLocation (_, { companyId, location, address }) {
-			// fix to update the app afterwards
-			if (!location && address) location = address.location;
-
-			// load
-			const company = await Company.findByPk(companyId);
-
-			// transform points
-			const userPoint = pointFromCoordinates(location.coordinates);
-
-			// user addres && companies
-			const [deliveryArea] = await company.getDeliveryAreas({
-				order: [['radius', 'ASC']],
-				limit: 1,
-				where: where(fn('ST_Distance_Sphere', userPoint, col('center')), '<=', literal('radius')),
-			})
-
-			// case delivery area's not found
-			if (!deliveryArea) throw new ApolloError(`${company.displayName} não faz entregas para esse endereço`, 'DELIVERY_LOCATION');
-
-			//return delivery area
-			return deliveryArea;
-		},
 		modifyDeliveryAreas: (_, { data }, { company }) => {
 			const update = data.filter(row=>row.id);
 			const create = data.filter(row=>!row.id);

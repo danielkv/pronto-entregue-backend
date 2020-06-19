@@ -2,6 +2,7 @@ import { gql }  from 'apollo-server';
 import jwt from 'jsonwebtoken';
 import { Op }  from 'sequelize';
 
+import DeliveryManController from '../controller/deliveryMan';
 import { upload } from '../controller/uploads';
 import JobQueue from '../factory/queue';
 import Address  from '../model/address';
@@ -11,6 +12,7 @@ import UserMeta  from '../model/userMeta';
 import conn  from '../services/connection';
 import { salt, getSQLPagination, sanitizeFilter }  from '../utilities';
 import { userCanSetRole, extractRole } from '../utilities/roles';
+import { userAddressesIdsLoader, addressLoader } from '../loaders';
 
 export const typeDefs = gql`
 
@@ -81,6 +83,9 @@ export const typeDefs = gql`
 		createUserAddress (data: AddressInput!): Address! @isAuthenticated
 
 		setUserAddress(addressData: AddressInput!, userId: ID): Address!
+
+		enableDeliveryMan(userId: ID!): Boolean!
+		disableDeliveryMan(userId: ID!): Boolean!
 	}
 
 	extend type Query {
@@ -129,7 +134,8 @@ export const resolvers = {
 
 			return User.findAll({
 				where: { ...where, active: true, id: { [Op.notIn]: exclude } },
-				include: [Company]
+				include: [Company],
+				limit: 10
 			});
 		},
 		createUser(_, { data }, { user, company }) {
@@ -359,11 +365,38 @@ export const resolvers = {
 			}
 
 			return address;
+		},
+		async enableDeliveryMan(_, { userId }) {
+			// checks if user exists
+			const user = await User.findByPk(userId);
+			if (!user) throw new Error('Usuário não encontrado');
+
+			// active delivery man
+			await DeliveryManController.active(user)
+
+			return true;
+		},
+		async disableDeliveryMan(_, { userId }) {
+			// checks if user exists
+			const user = await User.findByPk(userId);
+			if (!user) throw new Error('Usuário não encontrado');
+
+			// enable delivery man
+			await DeliveryManController.enable(user)
+
+			return true;
 		}
 	},
 	User: {
-		addresses(parent) {
-			return parent.getAddresses();
+		async addresses(parent) {
+			if (parent.addresses) return parent.addresses;
+
+			const userId = parent.get('id')
+			const addressesIds = await userAddressesIdsLoader.load(userId);
+
+			const addresses = await addressLoader.loadMany(addressesIds);
+
+			return addresses;
 		},
 		fullName: (parent) => {
 			return `${parent.firstName} ${parent.lastName}`;

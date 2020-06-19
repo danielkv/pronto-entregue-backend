@@ -35,39 +35,64 @@ class OrderController extends EventEmitter {
 		return qty;
 	}
 
-	/* export function getOrderStatusName(status) {
-	// isIn: [['waiting', 'preparing', 'delivery', 'delivered', 'canceled']],
-	switch(status) {
-		case 'waiting':
-			return 'Aguardando';
-		case 'preparing':
-			return 'Preparando';
-		case 'delivering':
-			return 'Na entrega';
-		case 'delivered':
-			return 'Entregue';
-		case 'canceled':
-			return 'Cancelado';
-		default: return '';
-	}
-} */
-
-	async create (data, company, options) {
-	// check if order has delivery address, if not throw an error
-		if (!data.address) throw new Error('Pedido não tem endereço de entrega')
-		const address = joinAddress(data.address);
-		data = { ...data, ...address };
+	/**
+	 * Create new order to the company (companyInstace)
+	 * 
+	 * @param {Object} data 
+	 * @param {Company} companyInstance 
+	 * @param {Object} options 
+	 */
+	async create (data, companyInstance, options) {
+		// check if order has delivery address, if not throw an error
+		if (data.type !== 'takeout') {
+			if (!data.address) throw new Error('Pedido não tem endereço de entrega');
+			const address = joinAddress(data.address);
+			data = { ...data, ...address };
+		}
 
 		// create order
-		const order = await company.createOrder(data, options);
+		const order = await companyInstance.createOrder(data, options);
 	
 		// create order products
 		await OrderProduct.updateAll(data.products, order, options.transaction);
 
 		// emit event
-		this.emit('create', { order, company });
+		this.emit('create', { order, company: companyInstance });
 	
 		return order;
+	}
+
+	/**
+	 * Update the order (companyInstace)
+	 * 
+	 * @param {Object} data 
+	 * @param {Order} orderInstance 
+	 * @param {Object} options 
+	 */
+
+	async update (data, orderInstance, options) {
+		if (data.status) delete data.status;
+
+		// sanitize address
+		if (data.address) {
+			const address = joinAddress(data.address);
+			delete data.address;
+			data = { ...data, ...address };
+		}
+
+		// cannot update payment method
+		if (data.paymentMethod) delete data.paymentMethod;
+
+		// update order
+		const updatedOrder = await orderInstance.update(data, options);
+
+		// update, create, remove order products
+		if (data.products) await OrderProduct.updateAll(data.products, updatedOrder, options.transaction || null);
+
+		// emit event
+		this.emit('update', { order: updatedOrder });
+
+		return updatedOrder;
 	}
 
 	/**
@@ -84,9 +109,6 @@ class OrderController extends EventEmitter {
 		// if new status is the same
 		if (oldStatus === newStatus) return;
 
-		// get order user
-		const orderUser = await orderInstance.getUser();
-
 		// check availability
 		const availableStatus = ['waiting', 'preparing', 'waitingDelivery', 'delivering', 'delivered', 'canceled'];
 		const newStatusIndex = availableStatus.findIndex((stat) => stat === newStatus);
@@ -97,7 +119,7 @@ class OrderController extends EventEmitter {
 		// check if can return status
 		if (!loggedUser.can('master') && newStatusIndex < orlStatusindex ) throw new Error('Não é possível retornar pedido ao status anterior');
 		// -> check if user can cancel order
-		if (newStatus === 'canceled' && (orderUser.get('id') !== loggedUser.get('id') && !loggedUser.can('orders_edit'))) throw new Error('Você não tem permissões para cancelar esse pedido');
+		if (newStatus === 'canceled' && (orderInstance.get('userId') !== loggedUser.get('id') && !loggedUser.can('orders_edit'))) throw new Error('Você não tem permissões para cancelar esse pedido');
 	
 		// update order status
 		const updatedOrder = await orderInstance.update({ status: newStatus }, { ...options, fields: ['status'] });

@@ -4,9 +4,10 @@ export const createContext = async ({ req, connection }) => {
 	if (connection) {
 		//console.log(connection.context)
 	} else {
-		const admOrigin = req.hostname && (req.hostname === 'localhost' || req.hostname === 'prontoentregue.com.br')
+		const { authorization, companyid: companyId, selectedaddress, adminconnection } = req.headers;
 
-		const { authorization, companyid: companyId, selectedaddress } = req.headers;
+		const admOrigin = adminconnection === 'true';
+
 		let user = null, company = null, address = null;
 		
 		if (authorization) user = await authenticate(authorization);

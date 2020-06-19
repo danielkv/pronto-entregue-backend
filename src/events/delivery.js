@@ -5,9 +5,9 @@ import JobQueue from '../factory/queue';
 export default new class DeliveryEventFactory {
 	start () {
 		/**
-		 * fired when delivery should be created from order
+		 * create a delivery when order status is changed to preparing
 		 */
-		OrderController.on('create', async ({ order, company }) => {
+		OrderController.on('changeStatus', async ({ order, company }) => {
 			// if delivery should be handle by us
 			if (order.get('type') === 'peDelivery') await DeliveryController.createFromOrder(order, company);
 		})
@@ -16,7 +16,8 @@ export default new class DeliveryEventFactory {
 		 * Queue jobs when delivery change status to waitingDelivery
 		 * it is used to notify delivery men around the addressFrom
 		 */
-		DeliveryController.on('changeStatus', ({ delivery })=>{
+		DeliveryController.on('changeStatus', ({ delivery, newStatus })=>{
+			if (newStatus !== 'waitingDelivery') return;
 
 			const deliveryId = delivery.get('id');
 

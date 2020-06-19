@@ -1,9 +1,11 @@
 import { gql }  from 'apollo-server';
 
 import DeliveryController from '../controller/delivery';
+import DeliveryManController from '../controller/deliveryMan';
 import OrderController from '../controller/order';
 import Delivery from '../model/delivery';
 import Order from '../model/order';
+import User from '../model/user';
 import conn from '../services/connection';
 
 export const typeDefs = gql`
@@ -64,18 +66,27 @@ export const resolvers = {
 			return updatedDelivery;
 		},
 		async setDeliveryMan(_, { deliveryId, userId }) {
+			// check if delivery exists
 			const delivery = await Delivery.findByPk(deliveryId);
 			if (!delivery) throw new Error('Nenhuma entrega encontrada');
 
-			const deliveryMan = await DeliveryController.setDeliveryMan(delivery, userId);
+			// check if user exists
+			const user = User.cache().findByPk(userId);
+			if (!user) throw new Error('Usuário não encontrado');
+
+			// check if user is delivery man
+			if (DeliveryManController.userIsDeliveryMan(user)) throw new Error('Esse usuário não é um entregador')
+
+			// set user to delivery
+			const deliveryMan = await DeliveryController.setDeliveryMan(delivery, user);
 
 			return deliveryMan;
 		},
-		async callDeliveryMan(_, { deliveryId }) {
+		async callDeliveryMan(_, { deliveryId }, { user: loggedUser }) {
 			const delivery = await Delivery.findByPk(deliveryId);
 			if (!delivery) throw new Error('Entrega não encontrada');
 
-			DeliveryController.changeStatus(delivery, 'waitingDelivery', options, { loggedUser })
+			DeliveryController.changeStatus(delivery, 'waitingDelivery', {}, { loggedUser })
 		}
 	}
 }

@@ -25,7 +25,7 @@ class OrderProduct extends Sequelize.Model {
 							productModel = await order.createProduct(product, { transaction })
 						} else if (product.id && product.action === 'update') {
 							[productModel] = await order.getProducts({ where: { id: product.id } });
-							productModel = await productModel.update(product, { fields: ['name', 'quantity'], transaction });
+							productModel = await productModel.update(product, { fields: ['name', 'quantity', 'message'], transaction });
 						}
 						
 						if (productModel) {

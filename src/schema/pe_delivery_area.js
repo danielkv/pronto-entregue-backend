@@ -12,7 +12,6 @@ export const typeDefs =  gql`
 		center: GeoPoint
 		active: Boolean!
 		radius: Float
-		distance: Int
 		price: Float!
 		createdAt: DateTime!
 		updatedAt: DateTime!
@@ -20,7 +19,6 @@ export const typeDefs =  gql`
 
 	input PeDeliveryAreaInput {
 		id: ID
-		distance: Int
 		active: Boolean
 		price: Float
 		name: String
@@ -29,7 +27,7 @@ export const typeDefs =  gql`
 	}
 
 	extend type Company {
-		peDeliveryAreas: [DeliveryArea]!
+		peDeliveryAreas: [PeDeliveryArea]!
 	}
 
 	extend type Mutation {

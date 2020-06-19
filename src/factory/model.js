@@ -37,6 +37,7 @@ import User from '../model/user';
 import UserMeta from '../model/userMeta';
 import ViewArea from '../model/viewArea';
 import AppRouter from './router';
+import UserAddress from '../model/UserAddresses';
 
 class ModelsFactory {
 	start() {
@@ -130,7 +131,7 @@ class ModelsFactory {
 		User.hasMany(UserMeta);
 		User.hasMany(Order);
 		User.belongsToMany(Company, { through: CompanyUser });
-		User.belongsToMany(Address, { through: 'user_addresses' });
+		User.belongsToMany(Address, { through: UserAddress });
 
 		//UserMeta
 		UserMeta.belongsTo(User);

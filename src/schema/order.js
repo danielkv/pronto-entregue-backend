@@ -1,19 +1,20 @@
-import { gql, withFilter }  from 'apollo-server';
+import { gql, withFilter, ApolloError }  from 'apollo-server';
 import { literal, fn, where, col } from 'sequelize';
 
+import CompanyController from '../controller/company';
 import CreditsController from '../controller/credits';
+import DeliveryAreaController from '../controller/deliveryArea';
 import OrderController from '../controller/order';
 import { ORDER_CREATED, ORDER_QTY_STATUS_UPDATED, ORDER_STATUS_UPDATED } from '../controller/order';
 import { orderCompanyLoader, orderUserLoader, orderPaymentMethodLoader } from '../loaders';
 import Company from '../model/company';
 import Coupon from '../model/coupon';
 import Order from '../model/order';
-import OrderProduct  from '../model/orderProduct';
 import User from '../model/user';
 import sequelize  from '../services/connection';
 import pubSub from '../services/pubsub'
 import { sanitizeFilter, getSQLPagination } from '../utilities';
-import { pointFromCoordinates, joinAddress } from '../utilities/address';
+import { pointFromCoordinates } from '../utilities/address';
 import { companyIsOpen, defaultBusinessHours } from '../utilities/company';
 
 export const typeDefs =  gql`
@@ -77,13 +78,15 @@ export const typeDefs =  gql`
 	}
 
 	extend type Mutation {
+		checkDeliveryLocation(companyId: ID!, location: GeoPoint, address: AddressInput, type: String): DeliveryArea!
+
 		checkOrderAddress(order: OrderInput!): Boolean! @isAuthenticated
 		checkOrderProducts(order: OrderInput!): Boolean! @isAuthenticated
 
 		createOrder(data: OrderInput!): Order! @isAuthenticated
 		updateOrder(id: ID!, data: OrderInput!): Order! @hasRole(permission: "orders_edit")
 
-		changeStatus(id: ID!, newStatus: String!): Order!
+		changeOrderStatus(id: ID!, newStatus: String!): Order!
 
 		cancelOrder(id: ID!): Order!
 	}
@@ -209,6 +212,26 @@ export const resolvers =  {
 		}
 	},
 	Mutation: {
+		async checkDeliveryLocation (_, { companyId, location, address, type }) {
+			// fix to update the app afterwards
+			if (!location && address) location = address.location;
+
+			// check if company exists
+			const company = await Company.findByPk(companyId);
+			if (!company) throw new Error('Empresa não encontrada');
+
+			// get enabled company delivery type
+			const ordertype = type || await CompanyController.getDeliveryType(company.get('id'));
+
+			// get closest area to define price
+			const deliveryArea = await DeliveryAreaController.getArea(company, location, ordertype);
+
+			// case delivery area's not found
+			if (!deliveryArea) throw new ApolloError(`${company.displayName} não faz entregas para esse endereço`, 'DELIVERY_LOCATION');
+
+			//return delivery area
+			return deliveryArea;
+		},
 		async checkOrderAddress(_, { order: { address, companyId } }) {
 
 			// load
@@ -252,7 +275,7 @@ export const resolvers =  {
 
 			return true;
 		},
-		createOrder(_, { data }, { company: selectedCompany }) {
+		createOrder(_, { data }, { company: selectedCompany }, ctx) {
 			return sequelize.transaction(async (transaction) => {
 				// check if company exits
 				const company = await Company.findByPk(data.companyId);
@@ -274,6 +297,10 @@ export const resolvers =  {
 					const createdHistory = await CreditsController.checkUserCredits(createdOrder, company, { transaction });
 					data.creditHistoryId = createdHistory.get('id');
 				}
+
+				// if connection is adminOrigin can be set in data
+				if (data.type !== 'takeout' && !ctx.adminOrigin && !ctx.company)
+					data.type = await CompanyController.getDeliveryType(company.get('id'));
 				
 				// create order
 				const createdOrder = await OrderController.create(data, company, { transaction });
@@ -287,29 +314,13 @@ export const resolvers =  {
 				const order = await Order.findByPk(id);
 				if (!order) throw new Error('Pedido não encontrado');
 
-				// allow to change status only using funcion changeStatus
-				if (data.status) delete data.status;
-
-				// sanitize address
-				if (data.address) {
-					const address = joinAddress(data.address);
-					delete data.address;
-					data = { ...data, ...address };
-				}
-
-				// cannot update payment method
-				if (data.paymentMethod) delete data.paymentMethod;
-
 				// update order
-				const updatedOrder = await order.update(data, { transaction });
-
-				// update, create, remove order products
-				if (data.products) await OrderProduct.updateAll(data.products, updatedOrder, transaction);
+				const updatedOrder = await OrderController.update(data, order, { transaction });
 
 				return updatedOrder;
 			});
 		},
-		async changeStatus (_, { id, newStatus }, { user: loggedUser }) {
+		async changeOrderStatus (_, { id, newStatus }, { user: loggedUser }) {
 			const order = await Order.findByPk(id);
 			if (!order) throw new Error('Pedido não encontrado');
 

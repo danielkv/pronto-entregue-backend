@@ -1,7 +1,6 @@
 import EventEmitter from 'events';
 
 import Delivery from "../model/delivery";
-import User from "../model/user";
 import { joinAddress, splitAddress } from "../utilities/address";
 
 class DeliveryController extends EventEmitter {
@@ -25,19 +24,17 @@ class DeliveryController extends EventEmitter {
 		return createdDelivery;
 	}
 
-	async setDeliveryMan(deliveryInstance, userId) {
-		const user = User.cache().findByPk(userId);
-		if (!user) throw new Error('Usuário não encontrado');
-
-		// check if user is delivery man
-		if (user.get('role') !== 'deliveryMan') throw new Error('Esse usuário não é um entregador')
+	async setDeliveryMan(deliveryInstance, userInstance) {
+		// checks if delivery has no deliverMan yet
+		if (deliveryInstance.get('deliveryManId')) throw new Error('Outro entregador que aceitou essa entrega')
 
 		// set deliveryMan user to delivery
-		await deliveryInstance.setDeliveryMan(user);
+		await deliveryInstance.setDeliveryMan(userInstance);
 
-		this.emit('setDeliveryMan', { delivery: deliveryInstance, deliveryMan: user })
+		// emit event
+		this.emit('setDeliveryMan', { delivery: deliveryInstance, deliveryMan: userInstance })
 
-		return user;
+		return userInstance;
 	}
 
 	async createFromOrder(orderInstance, companyInstance, options) {
