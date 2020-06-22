@@ -32,7 +32,8 @@ export default new class DeliveryEventFactory {
 
 			// recurrent job to notify delivery men
 			// it will be removed when some delivery man is set to delivery
-			JobQueue.notifications.add(`notifyDeliveryMen.${deliveryId}`, { deliveryId }, { repeat: { every: repeatEvery, limit: 3, count: 0 }, jobId: `notifyDeliveryMen.${deliveryId}` } )
+			JobQueue.notifications.add(`notifyDeliveryMen.first.${deliveryId}`, { deliveryId } )
+			JobQueue.notifications.add(`notifyDeliveryMen.${deliveryId}`, { deliveryId }, { delay: 0, repeat: { every: 5000, limit: 3, count: 0 } } )
 		});
 
 		/**

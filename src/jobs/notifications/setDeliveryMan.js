@@ -2,6 +2,7 @@ import CompanyController from '../../controller/company';
 import NotificationController from '../../controller/notification';
 import Delivery from '../../model/delivery';
 import Order from '../../model/order';
+import User from '../../model/user';
 import pubSub from '../../services/pubsub';
 import { DESKTOP_TOKEN_META, DEVICE_TOKEN_META, ORDER_UPDATED } from '../../utilities/notifications';
 
@@ -11,7 +12,7 @@ export async function setDeliveryMan({ data: { deliveryId, deliveryManId } }) {
 	if (!delivery) throw new Error('Pedido não encontrado')
 	
 	// check if user exists
-	const user = await Delivery.findByPk(deliveryManId);
+	const user = await User.findByPk(deliveryManId);
 	if (!user) throw new Error('Usuário não encontrado')
 
 	// if is delivery from order
@@ -41,7 +42,7 @@ export async function setDeliveryMan({ data: { deliveryId, deliveryManId } }) {
 
 		// get desktop tokens
 		const desktopTokens = await CompanyController.getUserTokens(companyId, DESKTOP_TOKEN_META);
-		NotificationController.sendDesktop(desktopTokens, { title: 'teste titulo', body: 'mensagem' });
+		NotificationController.sendDesktop(desktopTokens, notificationData);
 
 		// get device tokens
 		const deviceTokens = await CompanyController.getUserTokens(companyId, DEVICE_TOKEN_META);
@@ -51,7 +52,6 @@ export async function setDeliveryMan({ data: { deliveryId, deliveryManId } }) {
 			data: {
 				...notificationData.data,
 				redirect: {
-					force: true,
 					name: 'ProfileRoutes',
 					params: {
 						screen: 'OrdersRollScreen',

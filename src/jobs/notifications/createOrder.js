@@ -18,7 +18,6 @@ export async function createOrder ({ data: { companyId, orderId } }) {
 		priority: 'high',
 		data: {
 			redirect: {
-				force: true,
 				name: 'ProfileRoutes',
 				params: {
 					screen: 'OrdersRollScreen',

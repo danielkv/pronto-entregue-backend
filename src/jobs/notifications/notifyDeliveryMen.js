@@ -1,7 +1,7 @@
 import DeliveryManController from "../../controller/deliveryMan";
+import NotificationController from "../../controller/notification";
 import JobQueue from "../../factory/queue";
 import Delivery from "../../model/delivery";
-import * as notifications from '../../services/notifications';
 
 export async function notifyDeliveryMen(job) {
 	const { deliveryId } = job.data;
@@ -24,17 +24,14 @@ export async function notifyDeliveryMen(job) {
 		body: 'Vá até o endereço para fazer a entrega',
 	}
 
-	// create messages object
-	const messages = notifications.createMessages(tokens, {
+	// send notifications
+	NotificationController.sendDevice(tokens, {
 		...notificationData,
 		priority: 'high',
 		data: {
 			alertData: notificationData
 		}
 	})
-
-	// send messages
-	notifications.send(messages);
 
 	return true;
 }

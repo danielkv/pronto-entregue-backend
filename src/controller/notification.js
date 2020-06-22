@@ -91,20 +91,15 @@ class NotificationControl {
 			...options
 		}
 
-		if (Array.isArray(to))
+		if (Array.isArray(to)) {
+			if (!to.length) return;
 			message.tokens = to;
-		else
+			return fbAdmin.messaging().sendMulticast(message)
+		} else {
+			if (!to) return;
 			message.token = to;
-		
-
-		fbAdmin.messaging().send(message)
-			.then((response) => {
-				// Response is a message ID string.
-				console.log('Successfully sent message:', response);
-			})
-			.catch((error) => {
-				console.log('Error sending message:', error);
-			});
+			return fbAdmin.messaging().send(message)
+		}
 	}
 
 	createDeviceMessages(somePushTokens, data) {
@@ -131,6 +126,8 @@ class NotificationControl {
 	}
 	
 	async sendDevice(tokens, notificationData, options) {
+		if (!tokens.length) return;
+
 		const data = {
 			...notificationData,
 			priority: 'high',
