@@ -5,3 +5,4 @@ export * from './rating';
 export * from './order';
 export * from './address';
 export * from './category';
+export * from './user';

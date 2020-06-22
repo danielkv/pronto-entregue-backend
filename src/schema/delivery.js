@@ -1,17 +1,14 @@
 import { gql }  from 'apollo-server';
 
 import DeliveryController from '../controller/delivery';
-import DeliveryManController from '../controller/deliveryMan';
-import OrderController from '../controller/order';
+import { orderDeliveryLoader, userLoader } from '../loaders';
 import Delivery from '../model/delivery';
-import Order from '../model/order';
 import User from '../model/user';
-import conn from '../services/connection';
 
 export const typeDefs = gql`
 	type Delivery {
 		id: ID!
-		description: Float!
+		description: String!
 		value: Float!
 		status: String!
 		user: User
@@ -27,15 +24,19 @@ export const typeDefs = gql`
 		status: String
 		userId: ID
 		orderId: ID
-		from: Address
-		to: Address
+		from: AddressInput
+		to: AddressInput
+	}
+
+	extend type Order {
+		delivery: Delivery
 	}
 
 	extend type Mutation {
 		createDelivery(data: DeliveryInput!): Delivery!
 		updateDelivery(id: ID!, data: DeliveryInput!): Delivery!
 
-		setDeliveryMan(deliveryId: ID!, userId: ID!): User!
+		setDeliveryMan(deliveryId: ID!, userId: ID!): Delivery!
 
 		callDeliveryMan(deliveryId: ID!): Delivery!
 	}
@@ -43,7 +44,7 @@ export const typeDefs = gql`
 
 export const resolvers = {
 	Mutation: {
-		createDelivery(_, { data }) {
+		/* createDelivery(_, { data }) {
 			return conn.transaction(async transaction => {
 				const createdDelivery = await DeliveryController.create(data, { transaction });
 
@@ -56,37 +57,51 @@ export const resolvers = {
 
 				return createdDelivery;
 			})
-		},
-		async updateDelivery(_, { id, data }) {
+		}, */
+		/* async updateDelivery(_, { id, data }) {
 			const delivery = await Delivery.findByPk(id)
 			if (!delivery) throw new Error('Nenhuma entrega encontrada');
 
 			const updatedDelivery = await Delivery.update(data, { fields: ['value', 'description', 'status'] });
 
 			return updatedDelivery;
-		},
+		}, */
 		async setDeliveryMan(_, { deliveryId, userId }) {
 			// check if delivery exists
 			const delivery = await Delivery.findByPk(deliveryId);
 			if (!delivery) throw new Error('Nenhuma entrega encontrada');
 
 			// check if user exists
-			const user = User.cache().findByPk(userId);
+			const user = await User.cache().findByPk(userId);
 			if (!user) throw new Error('Usuário não encontrado');
 
 			// check if user is delivery man
-			if (DeliveryManController.userIsDeliveryMan(user)) throw new Error('Esse usuário não é um entregador')
+			//if (DeliveryManController.userIsDeliveryMan(user)) throw new Error('Esse usuário não é um entregador')
 
 			// set user to delivery
-			const deliveryMan = await DeliveryController.setDeliveryMan(delivery, user);
+			const updatedDelivery = await DeliveryController.setDeliveryMan(delivery, user);
 
-			return deliveryMan;
+			return updatedDelivery;
 		},
 		async callDeliveryMan(_, { deliveryId }, { user: loggedUser }) {
 			const delivery = await Delivery.findByPk(deliveryId);
 			if (!delivery) throw new Error('Entrega não encontrada');
 
 			DeliveryController.changeStatus(delivery, 'waitingDelivery', {}, { loggedUser })
+		}
+	},
+	Delivery: {
+		deliveryMan(parent) {
+			const userId = parent.get('deliveryManId');
+			return userLoader.load(userId);
+		}
+	},
+	Order: {
+		delivery (parent) {
+			if (parent.type !== 'peDelivery') return;
+			
+			const orderId = parent.id;
+			return orderDeliveryLoader.load(orderId);
 		}
 	}
 }

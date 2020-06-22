@@ -31,19 +31,10 @@ class JobQueueFactory {
 		console.log('Start JobQueue');
 
 		this.createQueues();
-		this.startQueueScheduler();
 		this.startBullBoard();
 
 		this.started = true;
 		console.log(` - JobQueue ready at: ${this.host}:${this.port}\n`);
-	}
-
-	startQueueScheduler() {
-		const queueScheduler = new QueueScheduler('scheduler', { connection: { host: this.host, port: this.port } });
-
-		console.log(' - Queue scheduler started');
-		
-		return queueScheduler;
 	}
 
 	createQueues() {
@@ -70,7 +61,15 @@ class JobQueueFactory {
 		const queues = ['Notifications', 'Mails'];
 
 		const processes = queues.forEach(queue => {
-			new Worker(queue, (job)=>jobsHandlers[job.name](), { connection: { host: this.host, port: this.port } })
+			const handler = (job)=>{
+				// job name pattern = name.id => only name will be used to call fn
+				const splitted = job.name.split('.');
+				const name = splitted[0];
+				const fn = jobsHandlers[name];
+				if (!fn) throw new Error('Job não encontrado');
+				return fn(job)
+			}
+			new Worker(queue, handler, { connection: { host: this.host, port: this.port } })
 		});
 
 		console.log(`${queues.length} Job Workers started\n`)
@@ -78,21 +77,21 @@ class JobQueueFactory {
 		return processes;
 	}
 
-	/* testSchedule() {
+	async removeRepeatebleJob(queueName, name) {
+		const queue = this[queueName];
+		const jobs = await queue.getRepeatableJobs();
+		const jobFound = jobs.find(job => job.name === name);
+		if (jobFound) {
+			const key = jobFound.key;
+			return await queue.removeRepeatableByKey(key);
+		}
+	}
+
+	testSchedule() {
 		console.log('Test schedule started');
 
-		const queue = new Queue('jobtest', { connection: { host: this.host, port: this.port } });
-		
-		new QueueScheduler('jobtest', { connection: { host: this.host, port: this.port } });
-
-		queue.add('teste', { test: 'asd' }, { jobId: '123b', delay: 2000, removeOnComplete: true }).then(job => console.log('created', job.toKey()));
-
-		//queue.getRepeatableJobs().then((jobs)=>console.log('repeateble', jobs));
-
-		//queue.removeRepeatableByKey('teste::::2000').then((job)=>console.log('removed', job));
-
-		new Worker('jobtest', (job)=>{console.log('precessed', job.name)}, { connection: { host: this.host, port: this.port } })
-	} */
+		this.notifications.add(`notifyDeliveryMen.1`, { deliveryId: 151 }, { repeat: { every: 5000, limit: 3, count: 0 }, jobId: `notifyDeliveryMen.1` } )
+	}
 }
 
 const JobQueue = new JobQueueFactory();

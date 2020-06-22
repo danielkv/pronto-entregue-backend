@@ -7,9 +7,16 @@ export default new class DeliveryEventFactory {
 		/**
 		 * create a delivery when order status is changed to preparing
 		 */
-		OrderController.on('changeStatus', async ({ order, company }) => {
+		OrderController.on('changeStatus', async ({ order, newStatus, ctx }) => {
 			// if delivery should be handle by us
-			if (order.get('type') === 'peDelivery') await DeliveryController.createFromOrder(order, company);
+			if (order.get('type') !== 'peDelivery') return;
+
+			if (['preparing', 'waitingDelivery'].includes(newStatus)) {
+				let delivery = await order.getDelivery();
+				if (!delivery) delivery = await DeliveryController.createFromOrder(order);
+				// also change delivery status
+				DeliveryController.changeStatus(delivery, 'waitingDelivery', ctx)
+			}
 		})
 
 		/**
@@ -21,25 +28,26 @@ export default new class DeliveryEventFactory {
 
 			const deliveryId = delivery.get('id');
 
-			const repeatEvery = 1000 * 60 * 5;
+			const repeatEvery = 1000 * 60 * 4; // 4 min
 
 			// recurrent job to notify delivery men
 			// it will be removed when some delivery man is set to delivery
-			JobQueue.notifications.add('notifyDeliveryMen', { deliveryId }, { repeate: { every: repeatEvery }, jobId: `notifyDeliveryMen_${deliveryId}` } )
+			JobQueue.notifications.add(`notifyDeliveryMen.${deliveryId}`, { deliveryId }, { repeat: { every: repeatEvery, limit: 3, count: 0 }, jobId: `notifyDeliveryMen.${deliveryId}` } )
 		});
 
 		/**
 		 * Queue jobs when deliveryMan is set to a delivery
 		 */
-		DeliveryController.on('setDeliveryMan', async ({ delivery })=>{
+		DeliveryController.on('setDeliveryMan', ({ delivery, deliveryMan })=>{
 			const deliveryId = delivery.get('id')
+			const deliveryManId = deliveryMan.get('id')
 
 			// notify user / company delivery man is on the way
-			JobQueue.notifications.add('setDeliveryMan', { deliveryId } )
+			JobQueue.notifications.add('setDeliveryMan', { deliveryId, deliveryManId } )
 
 			// remove recurrent queue for this delivery
-			const job = await JobQueue.notifications.getJob(`notifyDeliveryMen_${deliveryId}`);
-			job.remove();
+			JobQueue.removeRepeatebleJob('notifications', `notifyDeliveryMen.${deliveryId}`);
+			//job.remove();
 		});
 
 		console.log(' - Setup Delivery events')

@@ -1,6 +1,7 @@
 import EventEmitter from 'events';
 
 import Delivery from "../model/delivery";
+import UserMeta from '../model/userMeta';
 import { joinAddress, splitAddress } from "../utilities/address";
 
 class DeliveryController extends EventEmitter {
@@ -34,17 +35,25 @@ class DeliveryController extends EventEmitter {
 		// emit event
 		this.emit('setDeliveryMan', { delivery: deliveryInstance, deliveryMan: userInstance })
 
-		return userInstance;
+		return deliveryInstance;
 	}
 
-	async createFromOrder(orderInstance, companyInstance, options) {
+	async createFromOrder(orderInstance, options) {
 		const orderId = orderInstance.get('id')
+		const company = await orderInstance.getCompany();
+		const user = await orderInstance.getUser({
+			include: [{ model: UserMeta, where: { key: 'phone' } }]
+		});
+
+		const userContact = user.metas.length ? user.metas[0].value : user.get('email');
 
 		const deliveryData = {
-			from: await companyInstance.getAddress(),
+			from: await company.getAddress(),
 			to: splitAddress(orderInstance),
-			description: `Pedido #${orderId} de ${companyInstance.get('displayName')}`,
+			description: `Pedido #${orderId} de ${company.get('displayName')}`,
 			value: orderInstance.get('deliveryPrice'),
+			receiverName: `${user.get('firstName')} ${user.get('lastName')}`,
+			receiverContact: userContact,
 			status: 'waiting',
 			orderId
 		}
@@ -54,7 +63,7 @@ class DeliveryController extends EventEmitter {
 		return createdDelivery;
 	}
 
-	async changeStatus (deliveryInstance, newStatus, options={}, { loggedUser }) {
+	async changeStatus (deliveryInstance, newStatus, ctx, options={}) {
 		// check order old status to compare
 		const oldStatus = deliveryInstance.get('status');
 	
@@ -66,18 +75,18 @@ class DeliveryController extends EventEmitter {
 		const newStatusIndex = availableStatus.findIndex((stat) => stat === newStatus);
 		const orlStatusindex = availableStatus.findIndex((stat) => stat === oldStatus);
 	
+		// check if user can change order status
+		if (!ctx.user.can('delivery_edit')) throw new Error('Você não tem permissões para alterar o status esse pedido');
 		// check if newStatus is available
 		if (newStatusIndex < 0) throw new Error('Esse status não é disponível para essa entrega');
 		// check if can return status
 		if (newStatusIndex < orlStatusindex ) throw new Error('Não é possível retornar pedido ao status anterior');
-		// -> check if user can cancel order
-		if (!loggedUser.can('delivery_edit')) throw new Error('Você não tem permissões para cancelar esse pedido');
 		
 		// update order status
 		const updatedDelivery = await deliveryInstance.update({ status: newStatus }, { ...options, fields: ['status'] });
 	
 		// emit event
-		this.emit('changeStatus', { delivery: updatedDelivery, newStatus, loggedUser });
+		this.emit('changeStatus', { delivery: updatedDelivery, newStatus, ctx });
 	
 		return updatedDelivery;
 	}

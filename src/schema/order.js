@@ -6,7 +6,7 @@ import CreditsController from '../controller/credits';
 import DeliveryAreaController from '../controller/deliveryArea';
 import OrderController from '../controller/order';
 import { ORDER_CREATED, ORDER_QTY_STATUS_UPDATED, ORDER_STATUS_UPDATED } from '../controller/order';
-import { orderCompanyLoader, orderUserLoader, orderPaymentMethodLoader } from '../loaders';
+import { orderCompanyLoader, orderPaymentMethodLoader, userLoader } from '../loaders';
 import Company from '../model/company';
 import Coupon from '../model/coupon';
 import Order from '../model/order';
@@ -16,6 +16,7 @@ import pubSub from '../services/pubsub'
 import { sanitizeFilter, getSQLPagination } from '../utilities';
 import { pointFromCoordinates } from '../utilities/address';
 import { companyIsOpen, defaultBusinessHours } from '../utilities/company';
+import { ORDER_UPDATED } from '../utilities/notifications';
 
 export const typeDefs =  gql`
 	type Order {
@@ -65,6 +66,7 @@ export const typeDefs =  gql`
 
 	type Subscription {
 		orderCreated(companyId: ID!): Order
+		orderUpdated(companyId: ID!): Order
 
 		updateOrderStatus(companyId: ID!): Order!
 		updateOrderStatusQty(companyId: ID!): JSON!
@@ -102,6 +104,14 @@ export const resolvers =  {
 				}
 			)
 		},
+		orderUpdated: {
+			subscribe: withFilter (
+				()=> pubSub.asyncIterator(ORDER_UPDATED),
+				(payload, variables) => {
+					return payload.orderUpdated.companyId == variables.companyId;
+				}
+			)
+		},
 		updateOrderStatusQty: {
 			subscribe: withFilter (
 				()=> pubSub.asyncIterator(ORDER_QTY_STATUS_UPDATED),
@@ -124,7 +134,7 @@ export const resolvers =  {
 			if (parent.user) return parent.user;
 
 			const userId = parent.userId;
-			const user = await orderUserLoader.load(userId);
+			const user = await userLoader.load(userId);
 
 			return user
 		},
@@ -320,13 +330,14 @@ export const resolvers =  {
 				return updatedOrder;
 			});
 		},
-		async changeOrderStatus (_, { id, newStatus }, { user: loggedUser }) {
+		async changeOrderStatus (_, { id, newStatus }, ctx) {
+			// check if order exists
 			const order = await Order.findByPk(id);
 			if (!order) throw new Error('Pedido não encontrado');
 
-			return OrderController.changeStatus(order, newStatus, null, { loggedUser });
+			return OrderController.changeStatus(order, newStatus, ctx);
 		},
-		// deprecated => use changeStatus
+		// deprecated => use changeOrderStatus
 		async cancelOrder(_, { id }, { user }) {
 			const order = await Order.findByPk(id);
 			const orderUser = await order.getUser();

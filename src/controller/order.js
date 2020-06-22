@@ -73,6 +73,9 @@ class OrderController extends EventEmitter {
 	async update (data, orderInstance, options) {
 		if (data.status) delete data.status;
 
+		// cannot update companyId
+		if (data.companyId) delete data.companyId;
+
 		// sanitize address
 		if (data.address) {
 			const address = joinAddress(data.address);
@@ -98,16 +101,17 @@ class OrderController extends EventEmitter {
 	/**
 	 * Change order status, all orders should go trough this function
 	 * 
-	 * @param {*} orderInstance 
-	 * @param {*} newStatus 
-	 * @param {*} options 
+	 * @param {Order} orderInstance 
+	 * @param {String} newStatus 
+	 * @param {Object} ctx Context
+	 * @param {Object} options 
 	 */
-	async changeStatus (orderInstance, newStatus, options={}, { loggedUser }) {
+	async changeStatus (orderInstance, newStatus, ctx, options={} ) {
 	// check order old status to compare
 		const oldStatus = orderInstance.get('status');
 
 		// if new status is the same
-		if (oldStatus === newStatus) return;
+		if (oldStatus === newStatus) return orderInstance;
 
 		// check availability
 		const availableStatus = ['waiting', 'preparing', 'waitingDelivery', 'delivering', 'delivered', 'canceled'];
@@ -117,15 +121,15 @@ class OrderController extends EventEmitter {
 		// check if newStatus is available
 		if (newStatusIndex < 0) throw new Error('Esse status não é disponível para esse pedido');
 		// check if can return status
-		if (!loggedUser.can('master') && newStatusIndex < orlStatusindex ) throw new Error('Não é possível retornar pedido ao status anterior');
+		if (!ctx.user.can('master') && newStatusIndex < orlStatusindex ) throw new Error('Não é possível retornar pedido ao status anterior');
 		// -> check if user can cancel order
-		if (newStatus === 'canceled' && (orderInstance.get('userId') !== loggedUser.get('id') && !loggedUser.can('orders_edit'))) throw new Error('Você não tem permissões para cancelar esse pedido');
+		if (newStatus === 'canceled' && (orderInstance.get('userId') !== ctx.user.get('id') && !ctx.user.can('orders_edit'))) throw new Error('Você não tem permissões para cancelar esse pedido');
 	
 		// update order status
 		const updatedOrder = await orderInstance.update({ status: newStatus }, { ...options, fields: ['status'] });
 
 		// emit event
-		this.emit('changeStatus', { order: updatedOrder, newStatus, loggedUser, options });
+		this.emit('changeStatus', { order: updatedOrder, newStatus, ctx, options });
 
 		return updatedOrder;
 	}

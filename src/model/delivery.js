@@ -24,6 +24,9 @@ Delivery.init({
 		type: Sequelize.DECIMAL(2),
 	},
 
+	receiverName: Sequelize.STRING,
+	receiverContact: Sequelize.STRING,
+
 	nameAddressFrom: Sequelize.STRING,
 	streetAddressFrom: Sequelize.STRING,
 	numberAddressFrom: Sequelize.INTEGER,

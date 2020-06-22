@@ -1,37 +1,10 @@
-import Company from '../../model/company';
-import Order from '../../model/order';
-import User from '../../model/user';
-import UserMeta from '../../model/userMeta';
+import CompanyController from '../../controller/company';
 import * as notifications from '../../services/notifications';
+import { DEVICE_TOKEN_META } from '../../utilities/notifications';
 
 export async function createOrder ({ data: { companyId, orderId } }) {
-	// check if order exists
-	const order = await Order.findByPk(orderId);
-	if (!order) throw new Error("Pedido não encontrado");
-
 	// get company users
-	const tokenMetas = await UserMeta.findAll({
-		where: { key: 'notification_tokens' },
-		include: [
-			{
-				model: User,
-				required: true,
-				include: [{
-					model: Company,
-					where: { id: companyId },
-					required: true
-				}]
-			}
-		]
-	});
-	if (!tokenMetas.length) throw new Error('Nenhum token para enviar notificação');
-
-	// reduce tokens
-	const tokens = tokenMetas.reduce((allTokens, meta) =>{
-		const tokens = JSON.parse(meta.value);
-			
-		return [...allTokens, ...tokens];
-	}, []);
+	const tokens = await CompanyController.getUserTokens(companyId, DEVICE_TOKEN_META)
 
 	//define body and title
 	const notificationData = {

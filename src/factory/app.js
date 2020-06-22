@@ -1,3 +1,4 @@
+import NotificationController from '../controller/notification';
 import JobQueue from '../factory/queue';
 import AppEvents from './events';
 import AppModels from './model';
