@@ -2,9 +2,9 @@ import { gql }  from 'apollo-server';
 import jwt from 'jsonwebtoken';
 import { Op }  from 'sequelize';
 
-import DeliveryManController from '../controller/deliveryMan';
 import { upload } from '../controller/uploads';
 import JobQueue from '../factory/queue';
+import { userAddressesIdsLoader, addressLoader } from '../loaders';
 import Address  from '../model/address';
 import Company  from '../model/company';
 import User  from '../model/user';
@@ -12,7 +12,6 @@ import UserMeta  from '../model/userMeta';
 import conn  from '../services/connection';
 import { salt, getSQLPagination, sanitizeFilter }  from '../utilities';
 import { userCanSetRole, extractRole } from '../utilities/roles';
-import { userAddressesIdsLoader, addressLoader } from '../loaders';
 
 export const typeDefs = gql`
 
@@ -83,9 +82,6 @@ export const typeDefs = gql`
 		createUserAddress (data: AddressInput!): Address! @isAuthenticated
 
 		setUserAddress(addressData: AddressInput!, userId: ID): Address!
-
-		enableDeliveryMan(userId: ID!): Boolean!
-		disableDeliveryMan(userId: ID!): Boolean!
 	}
 
 	extend type Query {
@@ -365,26 +361,6 @@ export const resolvers = {
 			}
 
 			return address;
-		},
-		async enableDeliveryMan(_, { userId }) {
-			// checks if user exists
-			const user = await User.findByPk(userId);
-			if (!user) throw new Error('Usuário não encontrado');
-
-			// active delivery man
-			await DeliveryManController.active(user)
-
-			return true;
-		},
-		async disableDeliveryMan(_, { userId }) {
-			// checks if user exists
-			const user = await User.findByPk(userId);
-			if (!user) throw new Error('Usuário não encontrado');
-
-			// enable delivery man
-			await DeliveryManController.enable(user)
-
-			return true;
 		}
 	},
 	User: {

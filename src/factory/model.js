@@ -193,7 +193,7 @@ class ModelsFactory {
 		Delivery.belongsTo(Order);
 		Order.hasOne(Delivery);
 		Delivery.belongsTo(User, { as: 'deliveryMan' });
-		User.hasOne(Delivery, { as: 'deliveryMan' });
+		User.hasMany(Delivery, { foreignKey: 'deliveryManId' });
 
 		console.log(' - Setup DB Associations')
 	}

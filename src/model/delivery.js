@@ -26,6 +26,7 @@ Delivery.init({
 
 	receiverName: Sequelize.STRING,
 	receiverContact: Sequelize.STRING,
+	senderContact: Sequelize.STRING,
 
 	nameAddressFrom: Sequelize.STRING,
 	streetAddressFrom: Sequelize.STRING,

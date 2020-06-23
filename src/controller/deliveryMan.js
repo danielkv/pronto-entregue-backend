@@ -1,8 +1,9 @@
 import EventEmitter from 'events';
+import { Op } from 'sequelize';
 
 import User from '../model/user';
 import UserMeta from '../model/userMeta';
-import { DELIVERY_MAN_ENABLED_META } from '../utilities/deliveryMan';
+import { DELIVERY_MAN_ENABLED_META, MAX_CONCURRENT_DELIVERIES, DELIVERY_MAN_ROLE } from '../utilities/deliveryMan';
 import { DEVICE_TOKEN_META } from '../utilities/notifications';
 
 class DeliveryManFactory extends EventEmitter {
@@ -11,7 +12,27 @@ class DeliveryManFactory extends EventEmitter {
 	 * @param {*} userInstance 
 	 */
 	userIsDeliveryMan(userInstance) {
-		return userInstance.get('role') === this.DELIVERY_MAN_ROLE;
+		return userInstance.get('role') === DELIVERY_MAN_ROLE;
+	}
+
+	/**
+	 * returns open deliveries that delivery man is assigned
+	 * @param {User} userInstance 
+	 */
+	getOpenDeliveries(userInstance) {
+		return userInstance.getDeliveries({ where: { status: { [Op.notIn]: ['delivered', 'canceled'] } } });
+	}
+
+	/**
+	 * returns true if delivery man can be assigned to one more delivery
+	 * @param {User} userInstance 
+	 */
+	async canAcceptDelivery(userInstance) {
+		const enabled = await this.isEnabled(userInstance);
+		if (!enabled) return false;
+
+		const deliveries = await this.getOpenDeliveries(userInstance);
+		return deliveries.length < MAX_CONCURRENT_DELIVERIES;
 	}
 
 	/**
@@ -34,6 +55,8 @@ class DeliveryManFactory extends EventEmitter {
 	 * Return active (enabled) delivery men (users) tokens
 	 */
 	async getEnabledTokens() {
+
+		//temp
 		const users = await this.getEnabled();
 
 		return users.reduce((tokens, user) => {
@@ -52,17 +75,17 @@ class DeliveryManFactory extends EventEmitter {
 
 		// get meta
 		const meta = await UserMeta.findOne({
-			where: { userId: userInstance.get('id'), key: this.DELIVERY_MAN_ENABLED_META }
+			where: { userId: userInstance.get('id'), key: DELIVERY_MAN_ENABLED_META }
 		})
 
 		// if meta exists, update it
 		if (meta) await meta.update({ value: 'true' });
-		else await userInstance.createMeta({ key: this.DELIVERY_MAN_ENABLED_META, value: 'true' });
+		else await userInstance.createMeta({ key: DELIVERY_MAN_ENABLED_META, value: 'true' });
 
 		// emit envet
 		this.emit('enable', { user: userInstance })
 
-		return true;
+		return userInstance;
 	}
 	/**
 	 * Disable user to receive deliveries
@@ -74,17 +97,17 @@ class DeliveryManFactory extends EventEmitter {
 
 		// get meta
 		const meta = await UserMeta.findOne({
-			where: { userId: userInstance.get('id'), key: this.DELIVERY_MAN_ENABLED_META }
+			where: { userId: userInstance.get('id'), key: DELIVERY_MAN_ENABLED_META }
 		})
 
 		// if meta exists, update it
 		if (meta) await meta.update({ value: 'false' });
 		// if meta does not exist create it
-		else await userInstance.createMeta({ key: this.DELIVERY_MAN_ENABLED_META, value: 'false' });
+		else await userInstance.createMeta({ key: DELIVERY_MAN_ENABLED_META, value: 'false' });
 
 		this.emit('disable', { user: userInstance })
 
-		return true;
+		return userInstance;
 	}
 
 	/**
@@ -97,7 +120,7 @@ class DeliveryManFactory extends EventEmitter {
 
 		// get meta
 		const meta = await UserMeta.findOne({
-			where: { userId: userInstance.get('id'), key: this.DELIVERY_MAN_ENABLED_META }
+			where: { userId: userInstance.get('id'), key: DELIVERY_MAN_ENABLED_META }
 		})
 
 		// if meta exists return meta's value

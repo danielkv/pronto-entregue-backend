@@ -1,4 +1,5 @@
 import crypto  from 'crypto';
+import { isArray, isObject }  from 'lodash';
 import { Op, col, fn, where }  from 'sequelize';
 
 export function doesPathExist(nodes, path) {
@@ -85,7 +86,33 @@ export function sanitizeFilter(_filter = {}, _options = {}) {
 		filter = [where, { createdAt: { [Op.between]: [period.start, period.end] } }]
 	}
 		
-	return filter;
+	return convertKeys(filter);
+}
+
+function convertKeys(value) {
+	
+	const keyMatch = /^\$(.+)$/;
+	
+	if (Array.isArray(value)) {
+		return value.map(arr => convertKeys(arr));
+	} else if (typeof value === 'object' && value !== null) {
+		const newObject = {}
+
+		Object.keys(value).map(key => {
+			const match = key.match(keyMatch);
+			const keyValue = convertKeys(value[key]);
+			
+			if (match && match[1]) {
+				newObject[Op[match[1]]] = keyValue
+			} else {
+				newObject[key] = keyValue;
+			}
+		})
+		
+		return newObject;
+	} else {
+		return value;
+	}
 }
 	
 export function getSQLPagination({ page=null, rowsPerPage=null } = {}) {

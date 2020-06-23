@@ -1,9 +1,12 @@
 import { gql }  from 'apollo-server';
 
 import DeliveryController from '../controller/delivery';
+import DeliveryManController from '../controller/deliveryMan';
 import { orderDeliveryLoader, userLoader } from '../loaders';
 import Delivery from '../model/delivery';
 import User from '../model/user';
+import { sanitizeFilter } from '../utilities';
+import { splitAddress } from '../utilities/address';
 
 export const typeDefs = gql`
 	type Delivery {
@@ -13,9 +16,12 @@ export const typeDefs = gql`
 		status: String!
 		user: User
 		order: Order
-		deliveryMan: User,
+		deliveryMan: DeliveryMan
 		from: Address!
 		to: Address!
+		receiverName: String!
+		receiverContact: String!
+		senderContact: String!
 	}
 
 	input DeliveryInput {
@@ -28,13 +34,30 @@ export const typeDefs = gql`
 		to: AddressInput
 	}
 
+	type DeliveryMan {
+		id: ID
+		user: User
+		canAcceptDelivery: Boolean!
+		isEnabled: Boolean!
+	}
+
 	extend type Order {
 		delivery: Delivery
 	}
 
+	extend type Query {
+		deliveries(filter: JSON): [Delivery]! @hasRole(permission: "deliveryMan")
+		delivery(id: ID!): Delivery! @hasRole(permission: "deliveryMan")
+
+		deliveryMan(userId: ID!): DeliveryMan!
+	}
+
 	extend type Mutation {
 		createDelivery(data: DeliveryInput!): Delivery!
-		updateDelivery(id: ID!, data: DeliveryInput!): Delivery!
+		changeDeliveryStatus(deliveryId: ID!, newStatus: String!): Delivery!
+
+		enableDeliveryMan(userId: ID!): DeliveryMan!
+		disableDeliveryMan(userId: ID!): DeliveryMan!
 
 		setDeliveryMan(deliveryId: ID!, userId: ID!): Delivery!
 
@@ -43,29 +66,41 @@ export const typeDefs = gql`
 `;
 
 export const resolvers = {
+	Query: {
+		deliveries(_, { filter }) {
+			const where = sanitizeFilter(filter, { excludeFilters: ['active'] });
+
+			return Delivery.findAll({ where, order: [['createdAt', 'DESC']] })
+		},
+		deliveryMan(_, { userId }) {
+			return userLoader.load(userId);
+		}
+	},
 	Mutation: {
-		/* createDelivery(_, { data }) {
-			return conn.transaction(async transaction => {
-				const createdDelivery = await DeliveryController.create(data, { transaction });
+		async enableDeliveryMan(_, { userId }) {
+			// check if user exists
+			const user = await User.findByPk(userId);
+			if (!user) throw new Error('Usuário não encontrado');
 
-				if (data.orderId) {
-					const order = await Order.findByPk(data.orderId);
-					if (!order) throw new Error('Pedido não encontrado');
+			return DeliveryManController.enable(user);
+		},
+		async disableDeliveryMan(_, { userId }) {
+			// check if user exists
+			const user = await User.findByPk(userId);
+			if (!user) throw new Error('Usuário não encontrado');
 
-					await OrderController.changeStatus(order, 'waitingDelivery', { transaction });
-				}
-
-				return createdDelivery;
-			})
-		}, */
-		/* async updateDelivery(_, { id, data }) {
-			const delivery = await Delivery.findByPk(id)
-			if (!delivery) throw new Error('Nenhuma entrega encontrada');
-
-			const updatedDelivery = await Delivery.update(data, { fields: ['value', 'description', 'status'] });
+			return DeliveryManController.disable(user);
+		},
+		async changeDeliveryStatus(_, { deliveryId, newStatus }, ctx) {
+			// checks if delivery exists
+			const delivery = await Delivery.findByPk(deliveryId);
+			if (!delivery) throw new Error('Entrega não encontrada')
+			
+			// update status
+			const updatedDelivery = await DeliveryController.changeStatus(delivery, newStatus, ctx);
 
 			return updatedDelivery;
-		}, */
+		},
 		async setDeliveryMan(_, { deliveryId, userId }) {
 			// check if delivery exists
 			const delivery = await Delivery.findByPk(deliveryId);
@@ -93,7 +128,30 @@ export const resolvers = {
 	Delivery: {
 		deliveryMan(parent) {
 			const userId = parent.get('deliveryManId');
+			if (!userId) return;
+
 			return userLoader.load(userId);
+		},
+		to(parent) {
+			return splitAddress(parent, 'deliveryTo', 'To')
+		},
+		from(parent) {
+			return splitAddress(parent, 'deliveryFrom', 'From')
+		}
+	},
+	DeliveryMan: {
+		id(parent) {
+			if (!parent) return;
+			return `_user_${parent.get('id')}`
+		},
+		user(parent) {
+			return parent;
+		},
+		canAcceptDelivery (parent) {
+			return DeliveryManController.canAcceptDelivery(parent);
+		},
+		isEnabled(parent) {
+			return DeliveryManController.isEnabled(parent);
 		}
 	},
 	Order: {
