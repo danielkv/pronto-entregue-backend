@@ -3,14 +3,14 @@ import OrderController from '../../controller/order'
 import Order from '../../model/order';
 import UserMeta from '../../model/userMeta';
 import * as notifications from '../../services/notifications';
-import pubSub from '../../services/pubsub';
+import pubSub, { instanceToData } from '../../services/pubsub';
 import { ORDER_UPDATED } from '../../utilities/notifications';
 
 export async function orderChangeStatus({ data: { userId, orderId, newOrderStatus } }) {
 	const order = await Order.findByPk(orderId);
 	if (!order) throw new Error('Pedido não encontrado');
 
-	pubSub.publish(ORDER_UPDATED, { orderUpdated: order });
+	pubSub.publish(ORDER_UPDATED, { orderUpdated: instanceToData(order) });
 	
 	const ordersStatusQty = await OrderController.getOrderStatusQty(order.get('companyId'));
 	pubSub.publish(ORDER_QTY_STATUS_UPDATED, { updateOrderStatusQty: ordersStatusQty });

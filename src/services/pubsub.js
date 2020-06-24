@@ -1,7 +1,8 @@
 import { RedisPubSub } from 'graphql-redis-subscriptions';
 import Redis from 'ioredis';
+import path from 'path';
 
-import { ORDER_CREATED } from '../controller/order';
+import Order from '../model/order';
 
 const host = process.env.NODE_ENV === 'production' ? 'redisdb.tzx2ao.ng.0001.sae1.cache.amazonaws.com' : process.env.REDISCLOUD_URL;
 const port = 6379;
@@ -15,26 +16,127 @@ const options = {
 	}
 };
 
-const pubsub = new RedisPubSub({
-	reviver(key, value){
-		const isISO8601Z = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*)?)Z$/;
+function reviver (key, value) {
+	const isISO8601Z = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*)?)Z$/;
 
-		switch (key) {
-			case 'createdAt':
-			case 'updatedAt':
-				if (typeof value === 'string' && isISO8601Z.test(value)) {
-					const tempDateNumber = Date.parse(value);
-					if (!isNaN(tempDateNumber)) {
-						return new Date(tempDateNumber);
-					}
+	const parsed = JSON.parse(value);
+	let response;
+	
+	switch (key) {
+		case 'createdAt':
+		case 'updatedAt':
+			if (typeof value === 'string' && isISO8601Z.test(value)) {
+				const tempDateNumber = Date.parse(value);
+				if (!isNaN(tempDateNumber)) {
+					return new Date(tempDateNumber);
 				}
-				return value;
-			default:
-				return value;
-		}
+			}
+			return value;
+		default:
+			
+			console.log( dataToInstance(Order, parsed))
+			
+			response = value;
+
+			return response;
+		
+	}
+}
+
+const pubSub = new RedisPubSub({
+	reviver,
+	/* serializer(source) {
+		return JSON.stringify(source);
 	},
+	deserializer(string) {
+		const data = JSON.parse(string);
+
+		
+		return data;
+	}, */
 	publisher: new Redis(options),
 	subscriber: new Redis(options)
 });
 
-export default pubsub;
+export function instanceToData (instance) {
+	const data = {
+		modelName: instance.constructor.name,
+		data: instance.get({ plain: true })
+	}
+
+	//console.log(JSON.stringify(data));
+	
+	return data
+}
+
+function dataToInstance (model, data) {
+	if (!data) {
+		return data
+	}
+	const include = generateIncludeRecurse(model)
+	const instance = model.build(data, { isNewRecord: false, raw: false, include })
+	restoreTimestamps(data, instance)
+	return instance
+}
+
+function restoreTimestamps (data, instance) {
+	const timestampFields = ['createdAt', 'updatedAt', 'deletedAt']
+	
+	for (const field of timestampFields) {
+		const value = data[field]
+		if (value) {
+			instance.setDataValue(field, new Date(value))
+		}
+	}
+	
+	Object.keys(data).forEach(key => {
+		const value = data[key]
+		
+		if (!value) {
+			return
+		}
+		
+		if (Array.isArray(value)) {
+			try {
+				const nestedInstances = instance.get(key)
+				value.forEach((nestedValue, i) => restoreTimestamps(nestedValue, nestedInstances[i]))
+			} catch (error) { // TODO: Fix issue with JSON and BLOB columns
+				
+			}
+			
+			return
+		}
+		
+		if (typeof value === 'object') {
+			try {
+				const nestedInstance = instance.get(key)
+				Object.values(value).forEach(nestedValue => restoreTimestamps(nestedValue, nestedInstance))
+			} catch (error) { // TODO: Fix issue with JSON and BLOB columns
+				
+			}
+		}
+	})
+}
+
+function generateIncludeRecurse (model, depth = 1) {
+	if (depth > 5) {
+		return []
+	}
+	return Object.entries(model.associations || [])
+		.filter(([as, association]) => {
+			const hasOptions = Object.prototype.hasOwnProperty.call(association, 'options')
+			return hasOptions
+		})
+		.map(([as, association]) => {
+			const associatedModel = model.sequelize.model(association.target.name)
+			return {
+				model: associatedModel,
+				include: generateIncludeRecurse(associatedModel, depth + 1),
+				as
+			}
+		})
+}
+
+//console.log(reviver('order', '{"modelName":"order","data":{"price":27,"discount":0,"id":150,"paymentFee":"0.00","deliveryPrice":"5.00","deliveryTime":0,"type":"peDelivery","status":"waitingDelivery","message":"","nameAddress":"","streetAddress":"Rua João Quartieiro","numberAddress":29,"complementAddress":"","districtAddress":"Centro","zipcodeAddress":88960000,"cityAddress":"Sombrio","stateAddress":"SC","referenceAddress":null,"locationAddress":{"type":"Point","coordinates":[-29.1079952,-49.6347488]},"createdAt":"2020-06-19T16:09:45.000Z","updatedAt":"2020-06-24T14:02:18.000Z","creditHistoryId":null,"userId":3,"companyId":9,"paymentMethodId":9,"couponId":null}}'))
+
+export default pubSub;

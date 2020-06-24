@@ -1,6 +1,8 @@
 import DeliveryController from '../controller/delivery';
 import OrderController from '../controller/order';
 import JobQueue from '../factory/queue';
+import pubSub from '../services/pubsub';
+import { DELIVERY_UPDATED } from '../utilities/delivery';
 
 export default new class DeliveryEventFactory {
 	start () {
@@ -9,14 +11,13 @@ export default new class DeliveryEventFactory {
 		 */
 		OrderController.on('changeStatus', async ({ order, newStatus, ctx }) => {
 			// if delivery should be handle by us
-			if (order.get('type') !== 'peDelivery') return;
-
-			if (['preparing', 'waitingDelivery'].includes(newStatus)) {
-				let delivery = await order.getDelivery();
-				if (!delivery) delivery = await DeliveryController.createFromOrder(order);
-				// also change delivery status
-				DeliveryController.changeStatus(delivery, 'waitingDelivery', ctx)
-			}
+			if (order.get('type') !== 'peDelivery' && newStatus !== 'waiting') return;
+			
+			let delivery = await order.getDelivery();
+			if (!delivery) delivery = await DeliveryController.createFromOrder(order);
+			// also change delivery status
+			DeliveryController.changeStatus(delivery, newStatus, ctx)
+		
 		})
 
 		/**
@@ -24,6 +25,8 @@ export default new class DeliveryEventFactory {
 		 * it is used to notify delivery men around the addressFrom
 		 */
 		DeliveryController.on('changeStatus', ({ delivery, newStatus })=>{
+			pubSub.publish(DELIVERY_UPDATED, { delivery })
+
 			if (newStatus !== 'waitingDelivery') return;
 
 			DeliveryController.notifyDeliveryMen(delivery)

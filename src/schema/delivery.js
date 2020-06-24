@@ -1,12 +1,14 @@
-import { gql }  from 'apollo-server';
+import { gql, withFilter }  from 'apollo-server';
 
 import DeliveryController from '../controller/delivery';
 import DeliveryManController from '../controller/deliveryMan';
 import { orderDeliveryLoader, userLoader } from '../loaders';
 import Delivery from '../model/delivery';
 import User from '../model/user';
+import pubSub from '../services/pubsub';
 import { sanitizeFilter } from '../utilities';
 import { splitAddress } from '../utilities/address';
+import { DELIVERY_UPDATED, DELIVERY_CREATED } from '../utilities/delivery';
 
 export const typeDefs = gql`
 	type Delivery {
@@ -63,9 +65,18 @@ export const typeDefs = gql`
 
 		callDeliveryMan(deliveryId: ID!): Delivery!
 	}
+
+	extend type Subscription {
+		delivery: Delivery!
+	}
 `;
 
 export const resolvers = {
+	Subscription: {
+		delivery: {
+			subscribe: ()=>pubSub.asyncIterator([DELIVERY_UPDATED, DELIVERY_CREATED])
+		}
+	},
 	Query: {
 		deliveries(_, { filter }) {
 			const where = sanitizeFilter(filter, { excludeFilters: ['active'] });

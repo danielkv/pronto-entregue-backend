@@ -97,14 +97,12 @@ class DeliveryController extends EventEmitter {
 		// check availability
 		const availableStatus = ['waiting', 'waitingDelivery', 'delivering', 'delivered', 'canceled'];
 		const newStatusIndex = availableStatus.findIndex((stat) => stat === newStatus);
-		const orlStatusindex = availableStatus.findIndex((stat) => stat === oldStatus);
-	
-		// check if user can change order status
-		if (!ctx.user.can('deliveryMan')) throw new Error('Você não tem permissões para alterar o status esse pedido');
+		const oldStatusindex = availableStatus.findIndex((stat) => stat === oldStatus);
+		
 		// check if newStatus is available
 		if (newStatusIndex < 0) throw new Error('Esse status não é disponível para essa entrega');
 		// check if can return status
-		if (newStatusIndex < orlStatusindex ) throw new Error('Não é possível retornar a entrega ao status anterior');
+		if (newStatusIndex < oldStatusindex && !ctx.user.can('master')) throw new Error('Não é possível retornar a entrega ao status anterior');
 		
 		// update order status
 		const updatedDelivery = await deliveryInstance.update({ status: newStatus }, { ...options, fields: ['status'] });
