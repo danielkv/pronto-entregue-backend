@@ -1,4 +1,5 @@
 import EventEmitter from 'events';
+import { Op } from 'sequelize';
 
 import JobQueue from '../factory/queue';
 import CompanyMeta from '../model/companyMeta';
@@ -87,6 +88,26 @@ class DeliveryController extends EventEmitter {
 		return createdDelivery;
 	}
 
+	/**
+	 * Returns deliveries that are not delivered or canceled
+	 * 
+	 */
+	getOpenDeliveries() {
+		return Delivery.findAll({
+			where: {
+				status: { [Op.notIn]: ['delivered', 'canceled'] }
+			}
+		});
+	}
+
+	/**
+	 * Change delivery status
+	 * 
+	 * @param {Delivery} deliveryInstance 
+	 * @param {String} newStatus 
+	 * @param {Object} ctx 
+	 * @param {Object} options
+	 */
 	async changeStatus (deliveryInstance, newStatus, ctx, options={}) {
 		// check order old status to compare
 		const oldStatus = deliveryInstance.get('status');

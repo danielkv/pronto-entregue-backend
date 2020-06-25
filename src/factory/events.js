@@ -1,11 +1,13 @@
-import DeliveryEventsFactory from '../events/delivery';
-import OrderEventsFactory from '../events/order';
+import DeliveryEvents from '../events/delivery';
+import DeliveryManEvents from '../events/deliveryMan';
+import OrderEvents from '../events/order';
 
 class EventFactory {
 	start() {
 		console.log('Start setup Events')
-		DeliveryEventsFactory.start();
-		OrderEventsFactory.start();
+		DeliveryEvents.start();
+		OrderEvents.start();
+		DeliveryManEvents.start();
 		console.log(' - Events ready\n')
 	}
 }

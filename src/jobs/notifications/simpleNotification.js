@@ -1,13 +1,15 @@
-import * as notifications from '../../services/notifications';
+import NotificationController from '../../controller/notification';
 
-export async function simpleNotification(job) {
-	const tokens = job.data.tokens;
-	delete job.data.tokens;
-	const messages = notifications.createMessages(tokens, {
-		priority: 'high',
-		...job.data,
-	})
-	notifications.send(messages);
+export async function simpleNotification({ data }) {
+	const { deviceTokens, desktopTokens, message } = data;
 
-	return false;
+	if (deviceTokens && deviceTokens) {
+		NotificationController.sendDevice(deviceTokens, message)
+	}
+
+	if (desktopTokens) {
+		NotificationController.sendDesktop(desktopTokens, message)
+	}
+
+	return true;
 }
