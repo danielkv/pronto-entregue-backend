@@ -1,5 +1,4 @@
 import crypto  from 'crypto';
-import { isArray, isObject }  from 'lodash';
 import { Op, col, fn, where }  from 'sequelize';
 
 export function doesPathExist(nodes, path) {
@@ -36,7 +35,7 @@ export function sanitizeFilter(_filter = {}, _options = {}) {
 
 		...options.defaultFilter,
 		
-		..._filter,
+		...convertKeys(_filter),
 	}
 	
 	//verify if user sent showInactive
@@ -86,7 +85,7 @@ export function sanitizeFilter(_filter = {}, _options = {}) {
 		filter = [where, { createdAt: { [Op.between]: [period.start, period.end] } }]
 	}
 		
-	return convertKeys(filter);
+	return filter;
 }
 
 function convertKeys(value) {

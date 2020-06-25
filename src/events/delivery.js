@@ -1,8 +1,9 @@
 import DeliveryController from '../controller/delivery';
 import OrderController from '../controller/order';
 import JobQueue from '../factory/queue';
+import Order from '../model/order';
 import pubSub, { instanceToData } from '../services/pubsub';
-import { DELIVERY_UPDATED } from '../utilities/delivery';
+import { DELIVERY_UPDATED, DELIVERY_CREATED } from '../utilities/delivery';
 
 export default new class DeliveryEventFactory {
 	start () {
@@ -16,21 +17,46 @@ export default new class DeliveryEventFactory {
 			// if delivery should be handle by us
 			if (order.get('type') !== 'peDelivery' && newStatus !== 'waiting') return;
 			
+			// get or create delivery
 			let delivery = await order.getDelivery();
 			if (!delivery) delivery = await DeliveryController.createFromOrder(order);
-			// also change delivery status
-			DeliveryController.changeStatus(delivery, newStatus, ctx, { fromListener: true })
-		
+
+			// also change delivery status if newStatus matches
+			if (['waitingDelivery', 'delivering'].includes(newStatus)) DeliveryController.changeStatus(delivery, newStatus, ctx, { fromListener: true })
 		})
 
 		/**
 		 * Queue jobs when delivery change status to waitingDelivery
 		 * it is used to notify delivery men around the addressFrom
 		 */
-		DeliveryController.on('changeStatus', async ({ delivery, newStatus })=>{
+		DeliveryController.on('changeStatus', async ({ delivery, newStatus, ctx })=>{
 			// send delivery data to subscribers
 			pubSub.publish(DELIVERY_UPDATED, { delivery: instanceToData(delivery) })
 
+			// checks if any order is assign to
+			const orderId = delivery.get('orderId');
+
+			// check if order exits
+			const order = await Order.findByPk(orderId);
+			if (!order) throw new Error('Pedido não encontrado');
+
+			if (newStatus === 'canceled') {
+				// unassign delivery man
+				await delivery.setOrder(null);
+
+				// return order to status waiting delivery
+				if (orderId) {
+					await OrderController.changeStatus(order, 'waitingDelivery', ctx, { fromListener: true });
+					
+					const newDelivery =  await DeliveryController.createFromOrder(order);
+					DeliveryController.changeStatus(newDelivery, 'waitingDelivery', ctx)
+				}
+			}
+
+			// notify company users if delivery is assign to order
+			if (orderId) JobQueue.notifications.add('deliveryChangeStatus', { deliveryId: delivery.get('id'), companyId: order.get('companyId'), newStatus })
+
+			// case new status is waitingDelivery, notify delivery men
 			if (newStatus === 'waitingDelivery') DeliveryController.notifyDeliveryMen(delivery)
 		});
 
@@ -41,12 +67,24 @@ export default new class DeliveryEventFactory {
 			const deliveryId = delivery.get('id')
 			const deliveryManId = deliveryMan.get('id')
 
+			// send delivery data to subscribers
+			pubSub.publish(DELIVERY_UPDATED, { delivery: instanceToData(delivery) });
+
 			// notify user / company delivery man is on the way
 			JobQueue.notifications.add('setDeliveryMan', { deliveryId, deliveryManId } )
 
 			// remove recurrent queue for this delivery
 			JobQueue.removeRepeatebleJob('notifications', `notifyDeliveryMen.${deliveryId}`);
 			//job.remove();
+		});
+
+		/**
+		 * Events after delivery creation
+		 */
+		DeliveryController.on('create', ({ delivery })=>{
+			
+			// send delivery data to subscribers
+			pubSub.publish(DELIVERY_CREATED, { delivery: instanceToData(delivery) })
 		});
 
 		console.log(' - Setup Delivery events')

@@ -7,11 +7,14 @@ import Delivery from '../../model/delivery';
 import { DESKTOP_TOKEN_META, DEVICE_TOKEN_META } from '../../utilities/notifications';
 
 export async function deliveryChangeStatus({ data: { deliveryId, companyId, newStatus } }) {
+	// check if delivery exists
 	const delivery = await Delivery.findByPk(deliveryId);
 	if (!delivery) throw new Error('Entrega não encontrada');
 
-	const orderId = delivery.get('orderId')
+	// get order ID
+	const orderId = delivery.get('orderId');
 
+	// get status readeble (slug => label)
 	const statusLabel = StatusController.statusLabel(newStatus);
 
 	const notificationData = {

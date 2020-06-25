@@ -1,4 +1,4 @@
-import { gql, withFilter }  from 'apollo-server';
+import { gql }  from 'apollo-server';
 
 import DeliveryController from '../controller/delivery';
 import DeliveryManController from '../controller/deliveryMan';

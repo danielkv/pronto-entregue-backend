@@ -1,35 +1,10 @@
-import DeliveryController from '../controller/delivery';
 import OrderController, { ORDER_CREATED, ORDER_QTY_STATUS_UPDATED } from '../controller/order';
 import JobQueue from '../factory/queue';
-import Order from '../model/order';
 import pubSub, { instanceToData } from '../services/pubsub';
 import { ORDER_UPDATED } from '../utilities/notifications';
 
 export default new class OrderEventsFactory {
 	start() {
-		/**
-		 * fired when delivery change status. If delivery has orderId,
-		 * it will copy the status to the order
-		 */
-		DeliveryController.on('changeStatus', async ({ delivery, newStatus, ctx, options })=>{
-			if (options.fromListener) return;
-			
-			// change order status case delivery carries orderId
-			const orderId = delivery.get('orderId');
-			if (orderId && ['delivering', 'delivered', 'canceled'].includes(newStatus)) {
-				const order = await Order.findByPk(orderId);
-				if (order) {
-					// notify company of status change
-					JobQueue.notifications.add('deliveryChangeStatus', { deliveryId: delivery.get('id'), companyId: order.get('companyId'), newStatus })
-
-					if (newStatus === 'canceled') {
-						// notify company
-					} else
-						OrderController.changeStatus(order, newStatus, ctx, { fromListener: true })
-				}
-			}
-		})
-
 		/**
 		 * Queue job to notify  after change order status
 		 */
