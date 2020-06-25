@@ -40,12 +40,12 @@ class DeliveryManFactory extends EventEmitter {
 	 */
 	getEnabled() {
 		return User.findAll({
-			where: { role: 'deliveryMan' },
+			where: { role: 'deliveryMan', active: true },
 			include: [{
 				model: UserMeta,
 				required: true,
 				where: [
-					{ key: [DELIVERY_MAN_ENABLED_META, DEVICE_TOKEN_META] },
+					{ key: DELIVERY_MAN_ENABLED_META, value: 'true' },
 				]
 			}]
 		})
@@ -59,9 +59,12 @@ class DeliveryManFactory extends EventEmitter {
 		//temp
 		const users = await this.getEnabled();
 
-		return users.reduce((tokens, user) => {
-			const tokenMeta = user.metas.find(m => m.key === DEVICE_TOKEN_META);
-			return [...tokens, ...JSON.parse(tokenMeta.value)]
+		const tokensMetas = await UserMeta.findAll({
+			where: { key: DEVICE_TOKEN_META, userId: users.map(u => u.get('id')) }
+		})
+
+		return tokensMetas.reduce((tokens, meta) => {
+			return [...tokens, ...JSON.parse(meta.get('value'))]
 		}, []);
 	}
 
