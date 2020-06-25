@@ -33,12 +33,12 @@ class DeliveryController extends EventEmitter {
 	async notifyDeliveryMen(deliveryInstance) {
 		const deliveryId = deliveryInstance.get('id');
 
-		const repeatEvery = 1000 * 60 * 4; // 4 min
+		const repeatEvery = 1000 * 60 * 1; // 1 min
 
 		// recurrent job to notify delivery men
 		// it will be removed when some delivery man is set to delivery
 		JobQueue.notifications.add(`notifyDeliveryMen.first.${deliveryId}`, { deliveryId } )
-		JobQueue.notifications.add(`notifyDeliveryMen.${deliveryId}`, { deliveryId }, { delay: 0, repeat: { every: 5000, limit: 3, count: 0 } } )
+		JobQueue.notifications.add(`notifyDeliveryMen.${deliveryId}`, { deliveryId }, { delay: 0, repeat: { every: repeatEvery, limit: 3, count: 0 } } )
 	}
 
 	async setDeliveryMan(deliveryInstance, userInstance) {
@@ -108,7 +108,7 @@ class DeliveryController extends EventEmitter {
 		const updatedDelivery = await deliveryInstance.update({ status: newStatus }, { ...options, fields: ['status'] });
 	
 		// emit event
-		this.emit('changeStatus', { delivery: updatedDelivery, newStatus, ctx });
+		this.emit('changeStatus', { delivery: updatedDelivery, newStatus, ctx, options });
 	
 		return updatedDelivery;
 	}

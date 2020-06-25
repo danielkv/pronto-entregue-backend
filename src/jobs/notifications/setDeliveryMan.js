@@ -1,9 +1,11 @@
+import { toString } from 'lodash'
+
 import CompanyController from '../../controller/company';
 import NotificationController from '../../controller/notification';
 import Delivery from '../../model/delivery';
 import Order from '../../model/order';
 import User from '../../model/user';
-import pubSub from '../../services/pubsub';
+import pubSub, { instanceToData } from '../../services/pubsub';
 import { DESKTOP_TOKEN_META, DEVICE_TOKEN_META, ORDER_UPDATED } from '../../utilities/notifications';
 
 export async function setDeliveryMan({ data: { deliveryId, deliveryManId } }) {
@@ -27,16 +29,16 @@ export async function setDeliveryMan({ data: { deliveryId, deliveryManId } }) {
 		const companyId = order.get('companyId');
 
 		// send notification to subscribed clients
-		pubSub.publish(ORDER_UPDATED, { orderUpdated: order });
+		pubSub.publish(ORDER_UPDATED, { orderUpdated: instanceToData(order), companyId });
 
 		// generate data
 		const notificationData = {
 			title: 'Um entregador aceitou um pedido',
-			body: `O entregador ${user.get('firstName')} irá retirar o pedido ${orderId} em instantes`,
+			body: `O entregador ${user.get('firstName')} irá retirar o pedido #${orderId} em instantes`,
 			data: {
-				orderId: orderId,
-				deliveryManId,
-				deliveryId
+				orderId: toString(orderId),
+				deliveryManId: toString(deliveryManId),
+				deliveryId: toString(deliveryId),
 			}
 		}
 

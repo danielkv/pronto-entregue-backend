@@ -2,6 +2,7 @@ import EventEmitter from 'events';
 import { QueryTypes } from "sequelize";
 
 import OrderProduct from "../model/orderProduct";
+import UserMeta from '../model/userMeta';
 import connection from "../services/connection";
 import { joinAddress } from "../utilities/address";
 
@@ -10,7 +11,7 @@ export const ORDER_CREATED = 'ORDER_CREATED';
 export const ORDER_QTY_STATUS_UPDATED = 'ORDER_QTY_STATUS_UPDATED';
 export const ORDER_STATUS_UPDATED = 'ORDER_STATUS_UPDATED';
 
-class OrderController extends EventEmitter {
+class OrderControl extends EventEmitter {
 
 	async getOrderStatusQty (companyId) {
 		const result = await connection.query(
@@ -60,6 +61,21 @@ class OrderController extends EventEmitter {
 		this.emit('create', { order, company: companyInstance });
 	
 		return order;
+	}
+
+	/**
+	 * Returns notification tokens of order user
+	 * 
+	 * @param {ID} userId 
+	 * @param {String} metaType 
+	 */
+	async getUserTokens(userId, metaType) {
+		const pushTokenMeta = await UserMeta.findOne({
+			where: { userId, key: metaType }
+		})
+		if (!pushTokenMeta) return [];
+
+		return JSON.parse(pushTokenMeta.value);
 	}
 
 	/**
@@ -135,4 +151,6 @@ class OrderController extends EventEmitter {
 	}
 }
 
-export default new OrderController();
+const OrderController = new OrderControl();
+
+export default OrderController;

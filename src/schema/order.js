@@ -12,7 +12,7 @@ import Coupon from '../model/coupon';
 import Order from '../model/order';
 import User from '../model/user';
 import sequelize  from '../services/connection';
-import pubSub from '../services/pubsub'
+import pubSub, { instanceToData } from '../services/pubsub'
 import { sanitizeFilter, getSQLPagination } from '../utilities';
 import { pointFromCoordinates } from '../utilities/address';
 import { companyIsOpen, defaultBusinessHours } from '../utilities/company';
@@ -108,7 +108,7 @@ export const resolvers =  {
 			subscribe: withFilter (
 				()=> pubSub.asyncIterator(ORDER_UPDATED),
 				(payload, variables) => {
-					return payload.orderUpdated.companyId == variables.companyId;
+					return payload.companyId == variables.companyId;
 				}
 			)
 		},
@@ -349,7 +349,7 @@ export const resolvers =  {
 			const updatedOrder = await order.update({ status: 'canceled' });
 
 			// emit event for update subscriptions
-			pubSub.publish(ORDER_STATUS_UPDATED, { updateOrderStatus: updatedOrder });
+			pubSub.publish(ORDER_STATUS_UPDATED, { updateOrderStatus: instanceToData(updatedOrder) });
 
 			return updatedOrder;
 		}

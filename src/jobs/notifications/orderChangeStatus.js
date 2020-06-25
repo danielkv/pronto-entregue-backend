@@ -1,46 +1,31 @@
-import { ORDER_QTY_STATUS_UPDATED } from '../../controller/order';
-import OrderController from '../../controller/order'
+import NotificationController from '../../controller/notification';
+import OrderController from '../../controller/order';
 import Order from '../../model/order';
-import UserMeta from '../../model/userMeta';
-import * as notifications from '../../services/notifications';
-import pubSub, { instanceToData } from '../../services/pubsub';
-import { ORDER_UPDATED } from '../../utilities/notifications';
+import { DEVICE_TOKEN_META } from '../../utilities/notifications';
 
 export async function orderChangeStatus({ data: { userId, orderId, newOrderStatus } }) {
 	const order = await Order.findByPk(orderId);
 	if (!order) throw new Error('Pedido não encontrado');
 
-	pubSub.publish(ORDER_UPDATED, { orderUpdated: instanceToData(order) });
-	
-	const ordersStatusQty = await OrderController.getOrderStatusQty(order.get('companyId'));
-	pubSub.publish(ORDER_QTY_STATUS_UPDATED, { updateOrderStatusQty: ordersStatusQty });
+	const deviceTokens = OrderController.getUserTokens(userId, DEVICE_TOKEN_META);
 
 	const notificationData = orderCustomerNotificationData(order, newOrderStatus)
 	if (!notificationData) throw new Error('Não há mensagem')
-
-	// get user meta
-	const pushTokenMeta = await UserMeta.findOne({
-		where: { userId, key: 'notification_tokens' }
-	})
-	if (!pushTokenMeta) return;
-	const tokens = JSON.parse(pushTokenMeta.value);
-
-	const messages = notifications.createMessages(tokens, {
+	
+	NotificationController.sendDevice(deviceTokens, {
 		...notificationData,
-		priority: 'high',
 		data: {
+			...notificationData.data,
 			redirect: {
-				name: 'OrderRoutes',
+				name: 'ProfileRoutes',
 				params: {
-					screen: 'OrderScreen',
-					params: { orderId }
+					screen: 'OrdersRollScreen',
+					params: { refetchOrders: true }
 				}
 			},
 			alertData: notificationData
 		}
-	})
-
-	notifications.send(messages);
+	});
 
 	return false;
 }

@@ -1,7 +1,7 @@
 import DeliveryController from '../controller/delivery';
 import OrderController from '../controller/order';
 import JobQueue from '../factory/queue';
-import pubSub from '../services/pubsub';
+import pubSub, { instanceToData } from '../services/pubsub';
 import { DELIVERY_UPDATED } from '../utilities/delivery';
 
 export default new class DeliveryEventFactory {
@@ -9,14 +9,17 @@ export default new class DeliveryEventFactory {
 		/**
 		 * create a delivery when order status is changed to preparing
 		 */
-		OrderController.on('changeStatus', async ({ order, newStatus, ctx }) => {
+		OrderController.on('changeStatus', async ({ order, newStatus, ctx, options }) => {
+			// avoid infinite loop
+			if (options.fromListener) return;
+
 			// if delivery should be handle by us
 			if (order.get('type') !== 'peDelivery' && newStatus !== 'waiting') return;
 			
 			let delivery = await order.getDelivery();
 			if (!delivery) delivery = await DeliveryController.createFromOrder(order);
 			// also change delivery status
-			DeliveryController.changeStatus(delivery, newStatus, ctx)
+			DeliveryController.changeStatus(delivery, newStatus, ctx, { fromListener: true })
 		
 		})
 
@@ -24,12 +27,11 @@ export default new class DeliveryEventFactory {
 		 * Queue jobs when delivery change status to waitingDelivery
 		 * it is used to notify delivery men around the addressFrom
 		 */
-		DeliveryController.on('changeStatus', ({ delivery, newStatus })=>{
-			pubSub.publish(DELIVERY_UPDATED, { delivery })
+		DeliveryController.on('changeStatus', async ({ delivery, newStatus })=>{
+			// send delivery data to subscribers
+			pubSub.publish(DELIVERY_UPDATED, { delivery: instanceToData(delivery) })
 
-			if (newStatus !== 'waitingDelivery') return;
-
-			DeliveryController.notifyDeliveryMen(delivery)
+			if (newStatus === 'waitingDelivery') DeliveryController.notifyDeliveryMen(delivery)
 		});
 
 		/**
