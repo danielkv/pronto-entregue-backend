@@ -4,7 +4,7 @@ import fs from 'fs';
 import path from 'path';
 
 const basename = path.basename(__filename);
-const db = {};
+const DB = {};
 
 fs
 	.readdirSync(__dirname)
@@ -13,7 +13,7 @@ fs
 	})
 	.forEach(file => {
 		const model = require(path.join(__dirname, file)).default
-		db[model.name] = model;
+		DB[model.name] = model;
 	});
 
 /* Object.keys(db).forEach(modelName => {
@@ -22,4 +22,4 @@ fs
 	}
 }); */
 
-export default db;
+export default DB;

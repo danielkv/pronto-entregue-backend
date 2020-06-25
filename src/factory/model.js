@@ -7,37 +7,10 @@ import path from 'path';
 
 import { authenticate } from '../controller/authentication';
 import { setupDataBase } from '../controller/setupDB';
-import Address from '../model/address';
-import Category from '../model/category';
-import Company from '../model/company';
-import CompanyMeta from '../model/companyMeta';
-import CompanyPaymentMethod from '../model/companyPaymentMethod';
-import CompanyType from '../model/companyType';
-import CompanyUser from '../model/companyUser';
-import Coupon from '../model/coupon';
-import CreditBalance from '../model/creditBalance';
-import CreditHistory from '../model/creditHistory';
-import Delivery from '../model/delivery';
-import DeliveryArea from '../model/deliveryArea';
-import Options from '../model/option';
-import OptionsGroup from '../model/optionsGroup';
-import Order from '../model/order';
-import OrderOptions from '../model/orderOptions';
-import orderOptionsGroup  from '../model/orderOptionsGroup';
-import OrderProduct from '../model/orderProduct';
-import PaymentMethod from '../model/paymentMethod';
-import PeDeliveryArea from '../model/peDeliveryArea';
-import Product from '../model/product';
-import Rating from '../model/rating';
-import Role from '../model/role';
-import Sale from '../model/sale';
+import DB from '../model';
 import CreditHistoryTriggerFactory from '../model/triggers/credit_history';
 import UserTriggerFactory from '../model/triggers/user';
-import User from '../model/user';
-import UserMeta from '../model/userMeta';
-import ViewArea from '../model/viewArea';
 import AppRouter from './router';
-import UserAddress from '../model/UserAddresses';
 
 class ModelsFactory {
 	start() {
@@ -84,116 +57,117 @@ class ModelsFactory {
 	}
 
 	setupAssociations() {
+		//console.log(models);
 		// Company Relations
-		Company.hasMany(CompanyMeta);
-		Company.belongsToMany(User, { through: CompanyUser });
-		Company.belongsToMany(PaymentMethod, { through: CompanyPaymentMethod });
-		Company.belongsToMany(User, { through: CompanyUser });
-		Company.belongsTo(CompanyType);
-		CompanyType.hasMany(Company);
-		Company.belongsTo(Address);
+		DB.company.hasMany(DB.companyMeta);
+		DB.company.belongsToMany(DB.user, { through: DB.companyRelation });
+		DB.company.belongsToMany(DB.paymentMethod, { through: DB.companyPaymentMethod });
+		DB.company.belongsToMany(DB.user, { through: DB.companyRelation });
+		DB.company.belongsTo(DB.companyType);
+		DB.companyType.hasMany(DB.company);
+		DB.company.belongsTo(DB.address);
 		
 		// Delivery Areas
-		Company.hasMany(DeliveryArea);
-		Company.hasMany(ViewArea);
-		Company.hasMany(PeDeliveryArea);
+		DB.company.hasMany(DB.deliveryArea);
+		DB.company.hasMany(DB.viewArea);
+		DB.company.hasMany(DB.peDeliveryArea);
 
 		// categories relations
-		Category.belongsTo(Company);
-		Company.hasMany(Category);
+		DB.category.belongsTo(DB.company);
+		DB.company.hasMany(DB.category);
 
 		// rating relations
-		Rating.belongsTo(Company);
-		Company.hasMany(Rating);
-		Rating.belongsTo(Order);
-		Order.hasOne(Rating);
-		Rating.belongsTo(User);
-		User.hasMany(Rating);
+		DB.rating.belongsTo(DB.company);
+		DB.company.hasMany(DB.rating);
+		DB.rating.belongsTo(DB.order);
+		DB.order.hasOne(DB.rating);
+		DB.rating.belongsTo(DB.user);
+		DB.user.hasMany(DB.rating);
 
 		// Role relations
-		Role.hasMany(CompanyUser);
-		CompanyUser.belongsTo(Role);
+		DB.role.hasMany(DB.companyRelation);
+		DB.companyRelation.belongsTo(DB.role);
 
 		// Statement relations
-		CreditHistory.belongsTo(User);
-		CreditHistory.hasOne(Order);
-		Order.belongsTo(CreditHistory);
-		User.hasMany(CreditHistory);
+		DB.creditHistory.belongsTo(DB.user);
+		DB.creditHistory.hasOne(DB.order);
+		DB.order.belongsTo(DB.creditHistory);
+		DB.user.hasMany(DB.creditHistory);
 
 		// CreditBalance relations
-		User.hasOne(CreditBalance);
-		CreditBalance.belongsTo(User);
+		DB.user.hasOne(DB.creditBalance);
+		DB.creditBalance.belongsTo(DB.user);
 
 		// PaymentMethod
-		PaymentMethod.belongsToMany(Company, { through: CompanyPaymentMethod });
+		DB.paymentMethod.belongsToMany(DB.company, { through: DB.companyPaymentMethod });
 
 		// User relations
-		User.hasMany(UserMeta);
-		User.hasMany(Order);
-		User.belongsToMany(Company, { through: CompanyUser });
-		User.belongsToMany(Address, { through: UserAddress });
+		DB.user.hasMany(DB.userMeta);
+		DB.user.hasMany(DB.order);
+		DB.user.belongsToMany(DB.company, { through: DB.companyRelation });
+		DB.user.belongsToMany(DB.address, { through: DB.userAddress });
 
 		//UserMeta
-		UserMeta.belongsTo(User);
+		DB.userMeta.belongsTo(DB.user);
 
 		//Category relations
-		Product.belongsTo(Category);
-		Category.hasMany(Product);
+		DB.product.belongsTo(DB.category);
+		DB.category.hasMany(DB.product);
 
 		//Product relations
-		Product.belongsTo(Company);
-		Company.hasMany(Product);
-		Product.hasOne(OrderProduct, { as: 'productRelated' });
-		Product.hasMany(OptionsGroup);
+		DB.product.belongsTo(DB.company);
+		DB.company.hasMany(DB.product);
+		DB.product.hasOne(DB.orderProduct, { as: 'productRelated' });
+		DB.product.hasMany(DB.optionsGroup);
 
 		//OptionsGroup relations
-		OptionsGroup.hasMany(Options);
-		OptionsGroup.belongsTo(OptionsGroup, { foreignKey: 'maxSelectRestrain', as: 'groupRestrained' });
-		OptionsGroup.hasOne(OptionsGroup, { foreignKey: 'maxSelectRestrain', as: 'restrainedBy' });
-		OptionsGroup.belongsTo(Product);
+		DB.optionsGroup.hasMany(DB.option);
+		DB.optionsGroup.belongsTo(DB.optionsGroup, { foreignKey: 'maxSelectRestrain', as: 'groupRestrained' });
+		DB.optionsGroup.hasOne(DB.optionsGroup, { foreignKey: 'maxSelectRestrain', as: 'restrainedBy' });
+		DB.optionsGroup.belongsTo(DB.product);
 
 		//Options relations
-		Options.belongsTo(OptionsGroup);
+		DB.option.belongsTo(DB.optionsGroup);
 
 		// Order relations
-		Order.belongsTo(User);
-		Company.hasMany(Order);
-		Order.belongsTo(Company);
-		Order.hasMany(OrderProduct, { as: 'products' });
-		OrderProduct.hasMany(orderOptionsGroup, { as: 'optionsGroups', onDelete: 'cascade' });
-		orderOptionsGroup.hasMany(OrderOptions, { as: 'options', onDelete: 'cascade' });
-		Order.belongsTo(PaymentMethod);
+		DB.order.belongsTo(DB.user);
+		DB.company.hasMany(DB.order);
+		DB.order.belongsTo(DB.company);
+		DB.order.hasMany(DB.orderProduct, { as: 'products' });
+		DB.orderProduct.hasMany(DB.orderOptionsGroup, { as: 'optionsGroups', onDelete: 'cascade' });
+		DB.orderOptionsGroup.hasMany(DB.orderOptions, { as: 'options', onDelete: 'cascade' });
+		DB.order.belongsTo(DB.paymentMethod);
 
 		//  Order Product relations
-		OrderProduct.belongsTo(Product, { as: 'productRelated' });
-		orderOptionsGroup.belongsTo(OptionsGroup, { as: 'optionsGroupRelated' });
-		OrderOptions.belongsTo(Options, { as: 'optionRelated' });
+		DB.orderProduct.belongsTo(DB.product, { as: 'productRelated' });
+		DB.orderOptionsGroup.belongsTo(DB.optionsGroup, { as: 'optionsGroupRelated' });
+		DB.orderOptions.belongsTo(DB.option, { as: 'optionRelated' });
 
 		// Coupon relations
-		Coupon.belongsToMany(Product, { through: 'coupon_products' });
-		Product.belongsToMany(Coupon, { through: 'coupon_products' });
-		Coupon.belongsToMany(Company, { through: 'coupon_companies' });
-		Company.belongsToMany(Coupon, { through: 'coupon_companies' });
-		Coupon.belongsToMany(User, { through: 'coupon_users' });
-		User.belongsToMany(Coupon, { through: 'coupon_users' });
-		Coupon.hasMany(Order);
-		Order.belongsTo(Coupon);
+		DB.coupon.belongsToMany(DB.product, { through: 'coupon_products' });
+		DB.product.belongsToMany(DB.coupon, { through: 'coupon_products' });
+		DB.coupon.belongsToMany(DB.company, { through: 'coupon_companies' });
+		DB.company.belongsToMany(DB.coupon, { through: 'coupon_companies' });
+		DB.coupon.belongsToMany(DB.user, { through: 'coupon_users' });
+		DB.user.belongsToMany(DB.coupon, { through: 'coupon_users' });
+		DB.coupon.hasMany(DB.order);
+		DB.order.belongsTo(DB.coupon);
 		/* Coupon.belongsToMany(User, { through: 'user_coupons' });
 		User.belongsToMany(Coupon, { through: 'user_coupons' }); */
 
 		// favorites
-		User.belongsToMany(Product, { through: 'favorite_products', as: 'favoriteProducts' });
-		Product.belongsToMany(User, { through: 'favorite_products', as: 'favoritedBy' });
+		DB.user.belongsToMany(DB.product, { through: 'favorite_products', as: 'favoriteProducts' });
+		DB.product.belongsToMany(DB.user, { through: 'favorite_products', as: 'favoritedBy' });
 
 		// Sales relations
-		Sale.belongsTo(Product);
-		Product.hasMany(Sale);
+		DB.sale.belongsTo(DB.product);
+		DB.product.hasMany(DB.sale);
 
 		// Deliveries
-		Delivery.belongsTo(Order);
-		Order.hasOne(Delivery);
-		Delivery.belongsTo(User, { as: 'deliveryMan' });
-		User.hasMany(Delivery, { foreignKey: 'deliveryManId' });
+		DB.delivery.belongsTo(DB.order);
+		DB.order.hasOne(DB.delivery);
+		DB.delivery.belongsTo(DB.user, { as: 'deliveryMan' });
+		DB.user.hasMany(DB.delivery, { foreignKey: 'deliveryManId' });
 
 		console.log(' - Setup DB Associations')
 	}
