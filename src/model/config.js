@@ -6,6 +6,7 @@ class Config extends Sequelize.Model {}
 Config.init({
 	key: Sequelize.STRING,
 	value: Sequelize.STRING,
+	type: Sequelize.STRING,
 }, {
 	timestamps: false,
 	modelName: 'config',
