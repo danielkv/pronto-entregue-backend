@@ -9,7 +9,7 @@ export const typeDefs =  gql`
 		center: GeoPoint
 		active: Boolean!
 		radius: Float
-		distance: Int
+		distance: Float
 		price: Float!
 		createdAt: DateTime!
 		updatedAt: DateTime!
