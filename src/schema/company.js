@@ -404,6 +404,7 @@ export const resolvers =  {
 		async distance(parent, { location }) {
 			if (parent.get('distance')) return parent.get('distance')
 			
+			// deprecated
 			const companyAddress = await Address.cache().findByPk(parent.get('addressId'));
 
 			return (calculateDistance({
