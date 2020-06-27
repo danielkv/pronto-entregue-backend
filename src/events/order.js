@@ -1,6 +1,8 @@
+import ConfigController from '../controller/config';
 import OrderController, { ORDER_CREATED, ORDER_QTY_STATUS_UPDATED } from '../controller/order';
 import JobQueue from '../factory/queue';
 import pubSub, { instanceToData } from '../services/pubsub';
+import { ORDER_NOTIFICATION_LIMIT, ORDER_NOTIFICATION_INTERVAL } from '../utilities/config';
 import { ORDER_UPDATED } from '../utilities/notifications';
 
 export default new class OrderEventsFactory {
@@ -12,6 +14,9 @@ export default new class OrderEventsFactory {
 			const orderId = order.get('id');
 			const userId = order.get('userId');
 			const companyId = order.get('companyId');
+
+			// remove recurrent notification
+			JobQueue.removeRepeatebleJob('notifications', `createOrder.${orderId}`);
 
 			// send order data to subscriptions
 			pubSub.publish(ORDER_UPDATED, { orderUpdated: instanceToData(order), companyId });
@@ -27,12 +32,21 @@ export default new class OrderEventsFactory {
 		/**
 		 * Notify company (pubsub subscriptions) when order is created
 		 */
-		OrderController.on('create', ({ order, company })=>{
-			// publish pubsub
-			pubSub.publish(ORDER_CREATED, { orderCreated: instanceToData(order) });
+		OrderController.on('create', async ({ order, company })=>{
+			const orderId = order.get('id')
+			const companyId = company.get('id');
 
+			// publish pubsub
+			pubSub.publish(ORDER_CREATED, { orderCreated: instanceToData(order), companyId });
+
+			// setup data and config
+			const limit = await ConfigController.get(ORDER_NOTIFICATION_LIMIT)
+			const interval = await ConfigController.get(ORDER_NOTIFICATION_INTERVAL)
+			const data = { companyId, orderId }
+			
 			// queue order notifications
-			JobQueue.notifications.add('createOrder', { companyId: company.companyId, orderId: order.id })
+			JobQueue.notifications.add(`createOrder.first.${orderId}`, data)
+			JobQueue.notifications.add(`createOrder.${orderId}`, data, { repeat: { limit:3, every: 5000, count: 0 } })
 		});
 
 		console.log(' - Setup Order events')

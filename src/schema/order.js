@@ -143,6 +143,8 @@ export const resolvers =  {
 			if (parent.paymentMethod) return parent.paymentMethod;
 
 			const paymentMethodId = parent.paymentMethodId;
+			if (!paymentMethodId) return;
+
 			return orderPaymentMethodLoader.load(paymentMethodId);
 		},
 

@@ -47,7 +47,7 @@ Order.init({
 		}
 	},
 	status: {
-		type: Sequelize.ENUM('waiting', 'preparing', 'waitingDelivery', 'delivering', 'delivered', 'canceled'),
+		type: Sequelize.ENUM('waiting', 'preparing', 'waitingPickUp', 'waitingDelivery', 'delivering', 'delivered', 'canceled'),
 		defaultValue: 'waiting',
 	},
 	message: Sequelize.TEXT,
