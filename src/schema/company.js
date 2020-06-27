@@ -1,6 +1,8 @@
 import { gql }  from 'apollo-server';
 import { Op, fn, col, where, literal, QueryTypes } from 'sequelize';
 
+import CompanyController from '../controller/company';
+import DeliveryAreaController from '../controller/deliveryArea';
 import { getOrderStatusQty } from '../controller/order';
 import { upload } from '../controller/uploads';
 import JobQueue from '../factory/queue';
@@ -8,7 +10,6 @@ import { deliveryTimeLoader, businessHoursLoader, rateLoader, addressLoader } fr
 import Address from '../model/address';
 import Company  from '../model/company';
 import CompanyMeta  from '../model/companyMeta';
-import CompanyType from '../model/companyType';
 import OrderProduct from '../model/orderProduct';
 import Product from '../model/product';
 import Rating  from '../model/rating';
@@ -17,7 +18,7 @@ import conn  from '../services/connection';
 import { getSQLPagination, sanitizeFilter }  from '../utilities';
 import { pointFromCoordinates, CompanyAreaAttribute, CompanyAreaSelect } from '../utilities/address';
 import { calculateDistance } from '../utilities/address'
-import { companyIsOpen, isOpenAttribute } from '../utilities/company';
+import { companyIsOpen, isOpenAttribute, DELIVERY_TYPE_META } from '../utilities/company';
 
 export const typeDefs =  gql`
 	type Company {
@@ -66,9 +67,12 @@ export const typeDefs =  gql`
 		countCategories(filter: Filter): Int!
 		categories(filter: Filter, pagination: Pagination): [Category]!
 
-		distance(location: GeoPoint!): Float! #kilometers
+		distance(location: GeoPoint): Float! #kilometers
 		typePickUp(location: GeoPoint): Boolean!
 		typeDelivery(location: GeoPoint): Boolean!
+
+		delivery: DeliveryArea
+		pickup: ViewArea
 	}
 
 	type ProductBestSeller {
@@ -123,24 +127,10 @@ export const resolvers =  {
 		 * DEVE SER USADO APENAS NO APP
 		 */
 		searchCompaniesOnApp(_, { search, location }) {
-			const where = sanitizeFilter({ search }, { search: ['name', 'displayName', '$companyType.name$'] });
-			
-			return Company.findAll({
-				attributes: {
-					include: [
-						CompanyAreaAttribute('typeDelivery', location),
-						CompanyAreaAttribute('typePickUp', location),
-						[fn('SUM', col('ratings.rate')), 'totalRate']
-					]
-				},
-				where: { ...where,	active: true, published: true },
-				having: { [Op.or]: [{ typeDelivery: true }, { typePickUp: true }] },
-				include: [Rating, CompanyType],
-				order: [[col('totalRate'), 'DESC'], [col('company.name'), 'ASC']],
-				group: 'company.id',
-				subQuery: false,
-				limit: 10
-			});
+			const filter = { search, published: true };
+			const where = sanitizeFilter(filter, { search: ['name', 'displayName', '$companyType.name$'] });
+
+			return CompanyController.getCompanies(where, location);
 		},
 		async sendNewCompanyNoticiation(_, { companyId }) {
 			JobQueue.notifications.add('createCompany', { companyId })
@@ -193,29 +183,11 @@ export const resolvers =  {
 
 			return Company.count({ where });
 		},
-		companies(_, { filter, pagination, location }) {
-			let where = sanitizeFilter(filter, { excludeFilters: ['location'], search: ['name', 'displayName'], table: 'company' });
+		companies(_, { filter={}, pagination, location }) {
+			if (location) filter.published = true;
+			const where = sanitizeFilter(filter, { excludeFilters: ['location'], search: ['name', 'displayName'], table: 'company' });
 
-			const sql = {
-				where,
-				...getSQLPagination(pagination),
-			};
-			
-			// only on App
-			if (location) {
-				sql.where = [{ published: true }, where]
-				sql.attributes = { include: [CompanyAreaAttribute('typeDelivery', location), CompanyAreaAttribute('typePickUp', location), isOpenAttribute('metas.value')] }
-				sql.having = { [Op.or]: [{ typeDelivery: true }, { typePickUp: true }] }
-				sql.include = [Address, { model: CompanyMeta, where: { key: 'businessHours' } }];
-
-				const userPoint = pointFromCoordinates(location.coordinates);
-
-				sql.subQuery = false;
-				
-				sql.order = [[col('isOpen'), 'DESC'], [fn('ST_Distance_Sphere', userPoint, col('address.location')), 'ASC']]
-			}
-		
-			return Company.findAll(sql);
+			return CompanyController.getCompanies(where, location, pagination)
 		},
 		async company(_, { id }) {
 			// check if company exists
@@ -226,19 +198,47 @@ export const resolvers =  {
 		},
 	},
 	Company: {
-		typePickUp(parent, { location }) {
-			if (parent.get('typePickUp')) return parent.get('typePickUp')
-			if (!location) return false;
+		async delivery(parent, _, __, { variableValues }) {
+			const location = variableValues.location || null;
+			if (!location) return null;
 
-			return conn.query(CompanyAreaSelect('typePickUp', location,`'${parent.get('id')}'`), { type: QueryTypes.SELECT })
-				.then(([{ result }])=>result);
+			const orderType = await CompanyController.getConfig(parent.get('id'), DELIVERY_TYPE_META);
+
+			// get closest area to define price
+			if (orderType && orderType === 'peDelivery')
+				return await DeliveryAreaController.getPeArea(parent, location, orderType);
+
+			if (parent.deliveryAreas && parent.deliveryAreas.length)
+				return parent.deliveryAreas[0];
+			
+			return null;
 		},
-		typeDelivery(parent, { location }) {
-			if (parent.get('typeDelivery')) return parent.get('typeDelivery')
-			if (!location) return false;
+		pickup(parent) {
+			if (parent.viewAreas && parent.viewAreas.length)
+				return parent.viewAreas[0];
+			
+			return null;
+		},
+		// deprecated
+		typePickUp(parent) {
+			if (parent.viewAreas && parent.viewAreas.length)
+				return true;
+			
+			return false;
+		},
+		// deprecated
+		async typeDelivery(parent, _, __, { variableValues }) {
+			const location = variableValues.location || null;
+			if (!location) return null;
 
-			return conn.query(CompanyAreaSelect('typeDelivery', location,`'${parent.get('id')}'`), { type: QueryTypes.SELECT })
-				.then(([{ result }])=>result);
+			const orderType = await CompanyController.getConfig(parent.get('id'), DELIVERY_TYPE_META);
+
+			if ( parent.deliveryAreas && parent.deliveryAreas.length ) return true;
+
+			// get closest area to define price
+			if ((orderType && orderType === 'peDelivery') &&  ( parent.viewAreas && parent.viewAreas.length) ) return true;
+			
+			return false;
 		},
 		address(parent) {
 			const addressId = parent.get('addressId');
@@ -402,6 +402,8 @@ export const resolvers =  {
 			return rateLoader.load(companyId)
 		},
 		async distance(parent, { location }) {
+			if (parent.get('distance')) return parent.get('distance')
+			
 			const companyAddress = await Address.cache().findByPk(parent.get('addressId'));
 
 			return (calculateDistance({

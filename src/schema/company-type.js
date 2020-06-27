@@ -1,12 +1,13 @@
 import { gql }  from 'apollo-server';
 import { Op, literal, where } from 'sequelize';
 
+import CompanyController from '../controller/company';
 import { upload }  from '../controller/uploads';
 import Company from '../model/company';
 import CompanyType from '../model/companyType';
 import Product from '../model/product';
 import { sanitizeFilter, getSQLPagination } from '../utilities';
-import { CompanyAreaSelect, whereCompanyDeliveryArea } from '../utilities/address';
+import { CompanyAreaSelect } from '../utilities/address';
 
 export const typeDefs =  gql`
 	type CompanyType {
@@ -132,20 +133,14 @@ export const resolvers =  {
 	CompanyType: {
 		// deprecated
 		companies(parent, { location, onlyPublished=true }) {
-			if (!location) return parent.getCompanies();
+			
 
-			const where = { active: true }
+			const where = { active: true, companyTypeId: parent.get('id') }
 			if (onlyPublished === true) where.published = true;
 
-			return parent.getCompanies({
-				where: {
-					[Op.and]: [
-						whereCompanyDeliveryArea(location, 'company'),
-						where
-					],
-				}
-			});
+			return CompanyController.getCompanies(where, location)
 		},
+		
 		countCompanies(parent, { onlyPublished=true }) {
 			const where = { active: true }
 			if (onlyPublished === true) where.published = true;

@@ -1,6 +1,8 @@
 import moment from "moment";
 import { literal } from "sequelize";
 
+export const DELIVERY_TYPE_META = 'deliveryType';
+
 export function defaultPlan() {
 	// type perorder or permonth
 	return { type: 'perorder', value: .07, ordersLimit: 0, exceeded: .15, valueType: 'pct' };

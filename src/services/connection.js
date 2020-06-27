@@ -19,6 +19,5 @@ export default new Sequelize(process.env.MYSQL_DB, process.env.MYSQL_USER, proce
 	/* logging(str, object) {
 		console.log(object.type, object.where);
 	}, */
-	//
 	timezone: '-03:00'
 });
