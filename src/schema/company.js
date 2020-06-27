@@ -1,5 +1,5 @@
 import { gql }  from 'apollo-server';
-import { Op, fn, col, where, literal, QueryTypes } from 'sequelize';
+import { Op, fn, col, where, literal } from 'sequelize';
 
 import CompanyController from '../controller/company';
 import DeliveryAreaController from '../controller/deliveryArea';
@@ -16,9 +16,8 @@ import Rating  from '../model/rating';
 import User from '../model/user';
 import conn  from '../services/connection';
 import { getSQLPagination, sanitizeFilter }  from '../utilities';
-import { pointFromCoordinates, CompanyAreaAttribute, CompanyAreaSelect } from '../utilities/address';
 import { calculateDistance } from '../utilities/address'
-import { companyIsOpen, isOpenAttribute, DELIVERY_TYPE_META } from '../utilities/company';
+import { companyIsOpen, DELIVERY_TYPE_META } from '../utilities/company';
 
 export const typeDefs =  gql`
 	type Company {
@@ -308,6 +307,7 @@ export const resolvers =  {
 		async isOpen(parent) {
 			if (parent.get('isOpen')) return parent.get('isOpen');
 
+			// deprecated
 			const businessHours = await businessHoursLoader.load(parent.get('id'));
 			return companyIsOpen(businessHours);
 		},
