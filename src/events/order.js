@@ -25,8 +25,9 @@ export default new class OrderEventsFactory {
 			const ordersStatusQty = await OrderController.getOrderStatusQty(companyId);
 			pubSub.publish(ORDER_QTY_STATUS_UPDATED, { updateOrderStatusQty: ordersStatusQty });
 
-			// queue notifications for updated order status
-			JobQueue.notifications.add('orderChangeStatus', { userId, orderId, newOrderStatus: newStatus })
+			// notify client status changed
+			if (['preparing', 'waitingPickUp', 'delivering'].includes(newStatus))
+				JobQueue.notifications.add('orderChangeStatus', { userId, orderId, newOrderStatus: newStatus })
 		});
 
 		/**

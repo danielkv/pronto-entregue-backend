@@ -22,6 +22,7 @@ export async function createOrder (job) {
 		body: `Chegou pedido (#${orderId})`,
 		data: {
 			action: 'orderCreated',
+			variant: 'warning',
 			orderId: _.toString(orderId),
 			companyId: _.toString(companyId)
 		}

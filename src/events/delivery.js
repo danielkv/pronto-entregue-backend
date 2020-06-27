@@ -4,6 +4,7 @@ import JobQueue from '../factory/queue';
 import Order from '../model/order';
 import pubSub, { instanceToData } from '../services/pubsub';
 import { DELIVERY_UPDATED, DELIVERY_CREATED } from '../utilities/delivery';
+import { ORDER_UPDATED } from '../utilities/notifications';
 
 export default new class DeliveryEventFactory {
 	start () {
@@ -35,26 +36,29 @@ export default new class DeliveryEventFactory {
 
 			// checks if any order is assign to
 			const orderId = delivery.get('orderId');
+			if (!orderId) return;
 
 			// check if order exits
 			const order = await Order.findByPk(orderId);
 			if (!order) throw new Error('Pedido não encontrado');
+
+			// send delivery data to subscribers
+			pubSub.publish(ORDER_UPDATED, { orderUpdated: instanceToData(order), companyId: order.get('companyId') })
 
 			if (newStatus === 'canceled') {
 				// unassign delivery man
 				await delivery.setOrder(null);
 
 				// return order to status waiting delivery
-				if (orderId) {
-					await OrderController.changeStatus(order, 'waitingDelivery', ctx, { fromListener: true });
-					
-					const newDelivery =  await DeliveryController.createFromOrder(order);
-					DeliveryController.changeStatus(newDelivery, 'waitingDelivery', ctx)
-				}
+				await OrderController.changeStatus(order, 'waitingDelivery', ctx, { fromListener: true });
+				
+				const newDelivery =  await DeliveryController.createFromOrder(order);
+				DeliveryController.changeStatus(newDelivery, 'waitingDelivery', ctx)
 			}
 
 			// notify company users if delivery is assign to order
-			if (orderId) JobQueue.notifications.add('deliveryChangeStatus', { deliveryId: delivery.get('id'), companyId: order.get('companyId'), newStatus })
+			if (newStatus !== 'delivering')
+				JobQueue.notifications.add('deliveryChangeStatus', { deliveryId: delivery.get('id'), companyId: order.get('companyId'), newStatus })
 
 			// case new status is waitingDelivery, notify delivery men
 			if (newStatus === 'waitingDelivery') DeliveryController.notifyDeliveryMen(delivery)

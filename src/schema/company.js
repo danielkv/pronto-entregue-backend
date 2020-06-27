@@ -222,6 +222,8 @@ export const resolvers =  {
 		typePickUp(parent) {
 			if (parent.viewAreas && parent.viewAreas.length)
 				return true;
+
+			
 			
 			return false;
 		},

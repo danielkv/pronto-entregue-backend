@@ -7,7 +7,7 @@ export async function orderChangeStatus({ data: { userId, orderId, newOrderStatu
 	const order = await Order.findByPk(orderId);
 	if (!order) throw new Error('Pedido não encontrado');
 
-	const deviceTokens = OrderController.getUserTokens(userId, DEVICE_TOKEN_META);
+	const deviceTokens = await OrderController.getUserTokens(userId, DEVICE_TOKEN_META);
 
 	const notificationData = orderCustomerNotificationData(order, newOrderStatus)
 	if (!notificationData) throw new Error('Não há mensagem')
@@ -17,10 +17,10 @@ export async function orderChangeStatus({ data: { userId, orderId, newOrderStatu
 		data: {
 			...notificationData.data,
 			redirect: {
-				name: 'ProfileRoutes',
+				name: 'OrderRoutes',
 				params: {
-					screen: 'OrdersRollScreen',
-					params: { refetchOrders: true }
+					screen: 'OrderScreen',
+					params: { orderId }
 				}
 			},
 			alertData: notificationData
