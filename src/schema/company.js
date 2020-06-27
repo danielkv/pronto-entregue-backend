@@ -420,11 +420,11 @@ export const resolvers =  {
 			// deprecated
 			const companyAddress = await Address.cache().findByPk(parent.get('addressId'));
 
-			return (calculateDistance({
+			return calculateDistance({
 				latitude: location.coordinates[0], longitude: location.coordinates[1]
 			},{
 				latitude: companyAddress.location.coordinates[0], longitude: companyAddress.location.coordinates[1]
-			}) / 1000).toFixed(2);
+			});
 		}
 	}
 }
