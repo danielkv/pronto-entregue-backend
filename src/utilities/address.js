@@ -64,6 +64,7 @@ export function parseAddresses(results) {
 	return addresses;
 }
 
+// deprecated
 export function CompanyAreaSelect(type, { coordinates }, company='`company`.`id`') {
 	if (!coordinates) throw new Error('Endereço não encontrado');
 	const userPoint = pointFromCoordinates(coordinates, true);
@@ -74,6 +75,7 @@ export function CompanyAreaSelect(type, { coordinates }, company='`company`.`id`
 	return `(SELECT COUNT(id) > 0 as result FROM \`${tableName}\` WHERE active AND companyId = ${company} AND ST_Distance_Sphere(${userPoint}, center) <= radius)`
 }
 
+// deprecated
 export function CompanyAreaAttribute(type, location, companyTable) {
 
 	return [literal(CompanyAreaSelect(type, location, companyTable)), type]

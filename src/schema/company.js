@@ -1,5 +1,5 @@
 import { gql }  from 'apollo-server';
-import { Op, fn, col, where, literal } from 'sequelize';
+import { Op, fn, col, where, literal, QueryTypes } from 'sequelize';
 
 import CompanyController from '../controller/company';
 import DeliveryAreaController from '../controller/deliveryArea';
@@ -16,7 +16,7 @@ import Rating  from '../model/rating';
 import User from '../model/user';
 import conn  from '../services/connection';
 import { getSQLPagination, sanitizeFilter }  from '../utilities';
-import { calculateDistance } from '../utilities/address'
+import { calculateDistance, CompanyAreaSelect } from '../utilities/address'
 import { companyIsOpen, DELIVERY_TYPE_META } from '../utilities/company';
 
 export const typeDefs =  gql`
@@ -219,13 +219,18 @@ export const resolvers =  {
 			return null;
 		},
 		// deprecated
-		typePickUp(parent) {
+		typePickUp(parent, { location }) {
 			if (parent.viewAreas && parent.viewAreas.length)
 				return true;
 
+			// legacy verifications
+			if (!location) return false;
+
+			return conn.query(CompanyAreaSelect('typePickUp', location,`'${parent.get('id')}'`), { type: QueryTypes.SELECT })
+				.then(([{ result }])=>result);
 			
 			
-			return false;
+			//return false;
 		},
 		// deprecated
 		async typeDelivery(parent, _, __, { variableValues }) {
@@ -238,8 +243,14 @@ export const resolvers =  {
 
 			// get closest area to define price
 			if ((orderType && orderType === 'peDelivery') &&  ( parent.viewAreas && parent.viewAreas.length) ) return true;
+
+			// legacy verifications
+			if (!location) return false;
+
+			return await conn.query(CompanyAreaSelect('typeDelivery', location,`'${parent.get('id')}'`), { type: QueryTypes.SELECT })
+				.then(([{ result }])=>result);
 			
-			return false;
+			//return false;
 		},
 		address(parent) {
 			const addressId = parent.get('addressId');

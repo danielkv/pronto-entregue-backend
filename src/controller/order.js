@@ -130,7 +130,7 @@ class OrderControl extends EventEmitter {
 		if (oldStatus === newStatus) return orderInstance;
 
 		// check availability
-		const availableStatus = ['waiting', 'preparing', 'waitingDelivery', 'delivering', 'delivered', 'canceled'];
+		const availableStatus = ['waiting', 'preparing', 'waitingDelivery', 'waitingPickUp', 'delivering', 'delivered', 'canceled'];
 		const newStatusIndex = availableStatus.findIndex((stat) => stat === newStatus);
 		const orlStatusindex = availableStatus.findIndex((stat) => stat === oldStatus);
 
