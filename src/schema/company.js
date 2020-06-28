@@ -2,6 +2,7 @@ import { gql }  from 'apollo-server';
 import { Op, fn, col, where, literal, QueryTypes } from 'sequelize';
 
 import CompanyController from '../controller/company';
+import ConfigController from '../controller/config';
 import DeliveryAreaController from '../controller/deliveryArea';
 import { getOrderStatusQty } from '../controller/order';
 import { upload } from '../controller/uploads';
@@ -18,6 +19,7 @@ import conn  from '../services/connection';
 import { getSQLPagination, sanitizeFilter }  from '../utilities';
 import { calculateDistance, CompanyAreaSelect } from '../utilities/address'
 import { companyIsOpen, DELIVERY_TYPE_META } from '../utilities/company';
+import { DELIVERY_GLOBAL_ACTIVE } from '../utilities/config';
 
 export const typeDefs =  gql`
 	type Company {
@@ -201,11 +203,15 @@ export const resolvers =  {
 			const location = variableValues.location || null;
 			if (!location) return null;
 
-			const orderType = await CompanyController.getConfig(parent.get('id'), DELIVERY_TYPE_META);
+			const deliveryGlobalActive = await ConfigController.get(DELIVERY_GLOBAL_ACTIVE);
 
-			// get closest area to define price
-			if (orderType && orderType === 'peDelivery')
-				return await DeliveryAreaController.getPeArea(parent, location, orderType);
+			if (deliveryGlobalActive) {
+				const orderType = await CompanyController.getConfig(parent.get('id'), DELIVERY_TYPE_META);
+
+				// get closest area to define price
+				if (orderType && orderType === 'peDelivery')
+					return await DeliveryAreaController.getPeArea(parent, location, orderType);
+			}
 
 			if (parent.deliveryAreas && parent.deliveryAreas.length)
 				return parent.deliveryAreas[0];
@@ -233,19 +239,25 @@ export const resolvers =  {
 			//return false;
 		},
 		// deprecated
-		async typeDelivery(parent, _, __, { variableValues }) {
-			const location = variableValues.location || null;
-			if (!location) return null;
+		async typeDelivery(parent, args, __, { variableValues }) {
+			const location = variableValues.location || args.location;
+			if (!location) return false;
 
-			const orderType = await CompanyController.getConfig(parent.get('id'), DELIVERY_TYPE_META);
+			const deliveryGlobalActive = await ConfigController.get(DELIVERY_GLOBAL_ACTIVE);
 
-			if ( parent.deliveryAreas && parent.deliveryAreas.length ) return true;
+			if (deliveryGlobalActive) {
+				const orderType = await CompanyController.getConfig(parent.get('id'), DELIVERY_TYPE_META);
 
-			// get closest area to define price
-			if ((orderType && orderType === 'peDelivery') &&  ( parent.viewAreas && parent.viewAreas.length) ) return true;
+				if ( parent.deliveryAreas && parent.deliveryAreas.length ) return true;
+
+				// get closest area to define price
+				if ((orderType && orderType === 'peDelivery')) {
+					return await conn.query(CompanyAreaSelect('typePickUp', location,`'${parent.get('id')}'`), { type: QueryTypes.SELECT })
+						.then(([{ result }])=>result);
+				}
+			}
 
 			// legacy verifications
-			if (!location) return false;
 
 			return await conn.query(CompanyAreaSelect('typeDelivery', location,`'${parent.get('id')}'`), { type: QueryTypes.SELECT })
 				.then(([{ result }])=>result);

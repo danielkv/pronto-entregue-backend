@@ -30,6 +30,8 @@ class ConfigControl {
 				return _.toNumber(value);
 			case 'json':
 				return JSON.parse(value);
+			case 'boolean':
+				return value === 'true';
 			default:
 				return value;
 		}
@@ -41,6 +43,7 @@ class ConfigControl {
 	 */
 	async get(key) {
 		const row = await DB.config.findOne({ where: { key } })
+		if (!row) return null;
 		return this.deserealize(row.get('value'), row.get('type'))
 	}
 	

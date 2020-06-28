@@ -9,6 +9,8 @@ import pubSub from '../services/pubsub';
 import { sanitizeFilter } from '../utilities';
 import { splitAddress } from '../utilities/address';
 import { DELIVERY_UPDATED, DELIVERY_CREATED } from '../utilities/delivery';
+import ConfigController from '../controller/config';
+import { DELIVERY_GLOBAL_ACTIVE } from '../utilities/config';
 
 export const typeDefs = gql`
 	type Delivery {
@@ -52,6 +54,8 @@ export const typeDefs = gql`
 		delivery(id: ID!): Delivery! @hasRole(permission: "deliveryMan")
 
 		deliveryMan(userId: ID!): DeliveryMan!
+
+		deliveryGlobalActive: Boolean!
 	}
 
 	extend type Mutation {
@@ -78,6 +82,9 @@ export const resolvers = {
 		}
 	},
 	Query: {
+		deliveryGlobalActive() {
+			return ConfigController.get(DELIVERY_GLOBAL_ACTIVE);
+		},
 		deliveries(_, { filter }) {
 			const where = sanitizeFilter(filter, { excludeFilters: ['active'] });
 
