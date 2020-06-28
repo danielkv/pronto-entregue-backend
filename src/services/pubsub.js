@@ -1,15 +1,12 @@
 import { RedisPubSub } from 'graphql-redis-subscriptions';
 import Redis from 'ioredis';
-import path from 'path';
 
+import redisConfig from '../config/redis'
 import models from '../model';
 
-const host = process.env.NODE_ENV === 'production' ? 'redisdb.tzx2ao.ng.0001.sae1.cache.amazonaws.com' : process.env.REDISCLOUD_URL;
-const port = 6379;
-
 const options = {
-	host,
-	port,
+	host: redisConfig.host,
+	port: redisConfig.port,
 	retryStrategy: times => {
 		// reconnect after
 		return Math.min(times * 50, 2000);

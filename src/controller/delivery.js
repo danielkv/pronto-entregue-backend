@@ -31,15 +31,13 @@ class DeliveryController extends EventEmitter {
 	/**
 	 * Starts sending delivery men notifications
 	 */
-	async notifyDeliveryMen(deliveryInstance) {
+	async notifyDeliveryMen(deliveryInstance, interval, limit) {
 		const deliveryId = deliveryInstance.get('id');
-
-		const repeatEvery = 1000 * 60 * 1; // 1 min
 
 		// recurrent job to notify delivery men
 		// it will be removed when some delivery man is set to delivery
 		JobQueue.notifications.add(`notifyDeliveryMen.first.${deliveryId}`, { deliveryId } )
-		JobQueue.notifications.add(`notifyDeliveryMen.${deliveryId}`, { deliveryId }, { delay: 0, repeat: { every: repeatEvery, limit: 3, count: 0 } } )
+		JobQueue.notifications.add(`notifyDeliveryMen.${deliveryId}`, { deliveryId }, { delay: 0, repeat: { every: interval, limit, count: 0 } } )
 	}
 
 	async setDeliveryMan(deliveryInstance, userInstance) {

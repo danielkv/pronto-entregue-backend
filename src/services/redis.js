@@ -2,7 +2,6 @@ import Redis from 'ioredis';
 
 //const host = process.env.NODE_ENV === 'production' ? 'redisdb.tzx2ao.ng.0001.sae1.cache.amazonaws.com' : process.env.REDISCLOUD_URL;
 const host = process.env.REDISCLOUD_URL;
-
 const port = 6379;
 
 const redisService = new Redis({

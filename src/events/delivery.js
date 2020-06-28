@@ -1,8 +1,10 @@
+import ConfigController from '../controller/config';
 import DeliveryController from '../controller/delivery';
 import OrderController from '../controller/order';
 import JobQueue from '../factory/queue';
 import Order from '../model/order';
 import pubSub, { instanceToData } from '../services/pubsub';
+import { DELIVERY_NOTIFICATION_LIMIT, DELIVERY_NOTIFICATION_INTERVAL } from '../utilities/config';
 import { DELIVERY_UPDATED, DELIVERY_CREATED } from '../utilities/delivery';
 import { ORDER_UPDATED } from '../utilities/notifications';
 
@@ -61,7 +63,11 @@ export default new class DeliveryEventFactory {
 				JobQueue.notifications.add('deliveryChangeStatus', { deliveryId: delivery.get('id'), companyId: order.get('companyId'), newStatus })
 
 			// case new status is waitingDelivery, notify delivery men
-			if (newStatus === 'waitingDelivery') DeliveryController.notifyDeliveryMen(delivery)
+			if (newStatus === 'waitingDelivery') {
+				const limit = await ConfigController.get(DELIVERY_NOTIFICATION_LIMIT);
+				const interval = await ConfigController.get(DELIVERY_NOTIFICATION_INTERVAL);
+				DeliveryController.notifyDeliveryMen(delivery, interval, limit)
+			}
 		});
 
 		/**

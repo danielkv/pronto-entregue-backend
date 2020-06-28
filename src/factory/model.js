@@ -70,7 +70,6 @@ class ModelsFactory {
 		// Delivery Areas
 		DB.company.hasMany(DB.deliveryArea);
 		DB.company.hasMany(DB.viewArea);
-		DB.company.hasMany(DB.peDeliveryArea);
 
 		// categories relations
 		DB.category.belongsTo(DB.company);

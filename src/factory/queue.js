@@ -1,13 +1,15 @@
 import { setQueues, router as boardRouter } from 'bull-board'
 import { Queue, Worker, QueueScheduler } from 'bullmq'
 
+import redisConfig from '../config/redis';
 import * as jobsHandlers from '../jobs';
 import AppRouter from './router';
 
+
 class JobQueueFactory {
 	constructor () {
-		this.host = process.env.NODE_ENV === 'production' ? 'redisdb.tzx2ao.ng.0001.sae1.cache.amazonaws.com' : process.env.REDISCLOUD_URL;
-		this.port = 6379;
+		this.host = redisConfig.host
+		this.port = redisConfig.port;
 		
 		this.started = false;
 		this.queues = null;
