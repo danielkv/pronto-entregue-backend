@@ -61,8 +61,8 @@ class ModelsFactory {
 		// Company Relations
 		DB.company.hasMany(DB.companyMeta);
 		DB.company.belongsToMany(DB.user, { through: DB.companyRelation });
+		//DB.company.belongsToMany(DB.user, { through: DB.companyRelation });
 		DB.company.belongsToMany(DB.paymentMethod, { through: DB.companyPaymentMethod });
-		DB.company.belongsToMany(DB.user, { through: DB.companyRelation });
 		DB.company.belongsTo(DB.companyType);
 		DB.companyType.hasMany(DB.company);
 		DB.company.belongsTo(DB.address);

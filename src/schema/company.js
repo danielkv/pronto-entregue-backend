@@ -4,7 +4,7 @@ import { Op, fn, col, where, literal, QueryTypes } from 'sequelize';
 import CompanyController from '../controller/company';
 import ConfigController from '../controller/config';
 import DeliveryAreaController from '../controller/deliveryArea';
-import OrderController, { getOrderStatusQty } from '../controller/order';
+import OrderController from '../controller/order';
 import { upload } from '../controller/uploads';
 import JobQueue from '../factory/queue';
 import { deliveryTimeLoader, businessHoursLoader, rateLoader, addressLoader } from '../loaders';
