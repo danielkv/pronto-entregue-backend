@@ -29,6 +29,12 @@ export async function notifyDeliveryMen(job) {
 		...notificationData,
 		priority: 'high',
 		data: {
+			redirect: {
+				name: 'ProfileRoutes',
+				params: {
+					screen: 'DeliveriesScreen'
+				}
+			},
 			alertData: notificationData
 		}
 	})
