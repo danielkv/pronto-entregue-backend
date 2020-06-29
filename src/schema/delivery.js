@@ -1,5 +1,6 @@
 import { gql }  from 'apollo-server';
 
+import ConfigController from '../controller/config';
 import DeliveryController from '../controller/delivery';
 import DeliveryManController from '../controller/deliveryMan';
 import { orderDeliveryLoader, userLoader } from '../loaders';
@@ -8,9 +9,8 @@ import User from '../model/user';
 import pubSub from '../services/pubsub';
 import { sanitizeFilter } from '../utilities';
 import { splitAddress } from '../utilities/address';
-import { DELIVERY_UPDATED, DELIVERY_CREATED } from '../utilities/delivery';
-import ConfigController from '../controller/config';
 import { DELIVERY_GLOBAL_ACTIVE } from '../utilities/config';
+import { DELIVERY_UPDATED, DELIVERY_CREATED } from '../utilities/delivery';
 
 export const typeDefs = gql`
 	type Delivery {
@@ -50,7 +50,8 @@ export const typeDefs = gql`
 	}
 
 	extend type Query {
-		deliveries(filter: JSON): [Delivery]! @hasRole(permission: "deliveryMan")
+		countDeliveries(filter: JSON): Int! @hasRole(permission: "deliveryMan")
+		deliveries(filter: JSON, pagination: Pagination): [Delivery]! @hasRole(permission: "deliveryMan")
 		delivery(id: ID!): Delivery! @hasRole(permission: "deliveryMan")
 
 		deliveryMan(userId: ID!): DeliveryMan!
@@ -85,10 +86,15 @@ export const resolvers = {
 		deliveryGlobalActive() {
 			return ConfigController.get(DELIVERY_GLOBAL_ACTIVE);
 		},
-		deliveries(_, { filter }) {
+		countDeliveries(_, { filter }) {
 			const where = sanitizeFilter(filter, { excludeFilters: ['active'] });
 
-			return Delivery.findAll({ where, order: [['createdAt', 'DESC']] })
+			return DeliveryController.getDeliveries(where).then(res=>res.length);
+		},
+		deliveries(_, { filter, pagination }) {
+			const where = sanitizeFilter(filter, { excludeFilters: ['active'] });
+
+			return DeliveryController.getDeliveries(where, pagination);
 		},
 		deliveryMan(_, { userId }) {
 			return userLoader.load(userId);

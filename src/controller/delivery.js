@@ -5,6 +5,7 @@ import JobQueue from '../factory/queue';
 import CompanyMeta from '../model/companyMeta';
 import Delivery from "../model/delivery";
 import UserMeta from '../model/userMeta';
+import { getSQLPagination } from '../utilities';
 import { joinAddress, splitAddress } from "../utilities/address";
 
 class DeliveryController extends EventEmitter {
@@ -84,6 +85,26 @@ class DeliveryController extends EventEmitter {
 		const createdDelivery = await this.create(deliveryData, options);
 
 		return createdDelivery;
+	}
+
+	/**
+	 * Returns filtered deliveries
+	 * @param {Object} where 
+	 * @param {Object} pagination 
+	 */
+	getDeliveries(where, pagination) {
+		const query = {
+			where,
+			order: [['createdAt', 'DESC']]
+		}
+
+		if (pagination) {
+			const queryPagination = getSQLPagination(pagination);
+			query.offset = queryPagination.offset;
+			query.limit = queryPagination.limit;
+		}
+
+		return Delivery.findAll(query)
 	}
 
 	/**
