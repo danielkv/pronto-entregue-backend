@@ -1,7 +1,7 @@
 import { gql }  from 'apollo-server';
 import moment from 'moment';
 
-import { calculateCompanies } from '../controller/reports';
+import CompaniesReportController from '../controller/companiesReport';
 import Company from '../model/company';
 import CompanyMeta from '../model/companyMeta';
 import Coupon from '../model/coupon';
@@ -72,7 +72,7 @@ export const typeDefs =  gql`
 export const resolvers =  {
 	Query: {
 		async companiesReport(_, { companiesIds=null, filter }) {
-			const ordersWhere = filter ? sanitizeFilter(filter) : null;
+			const ordersWhere = filter ? sanitizeFilter(filter, { excludeFilters: ['active'] }) : null;
 			const companyWhere = companiesIds ? { id: companiesIds } : null;
 
 			const companies = await Company.findAll({
@@ -93,7 +93,7 @@ export const resolvers =  {
 				]
 			})
 
-			return calculateCompanies(companies);
+			return CompaniesReportController.calculate(companies);
 		}
 	},
 	CompaniesReport: {

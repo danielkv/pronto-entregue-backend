@@ -1,3 +1,4 @@
+import DataLoader from 'dataloader';
 import EventEmitter from 'events';
 import { Op } from 'sequelize';
 
@@ -8,7 +9,21 @@ import UserMeta from '../model/userMeta';
 import { getSQLPagination } from '../utilities';
 import { joinAddress, splitAddress } from "../utilities/address";
 
-class DeliveryController extends EventEmitter {
+class DeliveryControl extends EventEmitter {
+
+	constructor () {
+		super();
+
+		this.loader = new DataLoader(async (keys) =>{
+			const allDeliveries = await Delivery.findAll({
+				where: { deliveryManId: keys }
+			});
+
+			return keys.map(key => {
+				return allDeliveries.filter(m => m.deliveryManId === key)
+			})
+		})
+	}
 
 	async create(data, options) {
 	// check if buyer is defined
@@ -154,4 +169,6 @@ class DeliveryController extends EventEmitter {
 	}
 }
 
-export default new DeliveryController();
+const DeliveryController = new DeliveryControl();
+
+export default DeliveryController;

@@ -66,7 +66,7 @@ export function sanitizeFilter(_filter = {}, _options = {}) {
 		}
 	}
 		
-	if (filter.createdAt && !filter.period) {
+	if (filter.createdAt && typeof filter.createdAt !== 'object' && !filter.period) {
 		const createdAt = filter.createdAt;
 		delete filter.createdAt;
 			

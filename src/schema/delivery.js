@@ -49,6 +49,10 @@ export const typeDefs = gql`
 		delivery: Delivery
 	}
 
+	extend type User {
+		deliveries(filter: JSON): [Delivery]!
+	}
+
 	extend type Query {
 		countDeliveries(filter: JSON): Int! @hasRole(permission: "deliveryMan")
 		deliveries(filter: JSON, pagination: Pagination): [Delivery]! @hasRole(permission: "deliveryMan")
@@ -184,6 +188,18 @@ export const resolvers = {
 			
 			const orderId = parent.id;
 			return orderDeliveryLoader.load(orderId);
+		}
+	},
+	User: {
+		deliveries(parent, { filter }) {
+			const userId = parent.get('id');
+			
+			if (filter) {
+				const where = sanitizeFilter({ deliveryManId: userId, ...filter }, { excludeFilters: ['active'] })
+				return DeliveryController.getDeliveries(where);
+			}
+
+			return DeliveryController.loader.load(userId);
 		}
 	}
 }
