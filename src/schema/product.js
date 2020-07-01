@@ -43,8 +43,6 @@ export const typeDefs =  gql`
 		favoritedBy(pagination: Pagination): [User]!
 		
 		category: Category!
-		company: Company!
-
 		
 
 		sale: Sale
@@ -316,12 +314,6 @@ export const resolvers =  {
 				...getSQLPagination(pagination)
 			});
 		},
-		company(parent) {
-			if (parent.company) return parent.company;
-
-			return Company.cache().findByPk(parent.get('companyId'));
-		},
-		
 
 		async sale(parent) {
 			if (parent.sales) return parent.sales[0];

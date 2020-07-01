@@ -40,7 +40,7 @@ class DeliveryAreaControl {
 		const [deliveryArea] = await companyInstamce.getDeliveryAreas({
 			order: [['radius', 'ASC']],
 			limit: 1,
-			where: where(fn('ST_Distance_Sphere', userPoint, col('center')), '<=', literal('radius')),
+			where: [{ active: true }, where(fn('ST_Distance_Sphere', userPoint, col('center')), '<=', literal('radius'))],
 		});
 
 		return deliveryArea;

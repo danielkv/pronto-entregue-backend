@@ -76,6 +76,10 @@ export const typeDefs =  gql`
 		pickup: ViewArea
 	}
 
+	extend type Product {
+		company(location: GeoPoint): Company!
+	}
+
 	type ProductBestSeller {
 		id: ID!
 		name: String!
@@ -115,7 +119,7 @@ export const typeDefs =  gql`
 	}
 
 	extend type Query {
-		company(id: ID!): Company!
+		company(id: ID!, location: GeoPoint): Company!
 		countCompanies(filter: JSON): Int! @hasRole(permission: "master")
 		companies(filter: JSON, pagination: Pagination, location: GeoPoint): [Company]!
 		ordersStatusQty(companyId: ID!): JSON!
@@ -190,12 +194,9 @@ export const resolvers =  {
 
 			return CompanyController.getCompanies(where, location, pagination)
 		},
-		async company(_, { id }) {
+		async company(_, { id, location }) {
 			// check if company exists
-			const company = await Company.cache().findByPk(id);
-			if (!company) throw new Error('Empresa não encontrada');
-
-			return company;
+			return CompanyController.getCompany(id, location)
 		},
 	},
 	Company: {
@@ -438,5 +439,14 @@ export const resolvers =  {
 				latitude: companyAddress.location.coordinates[0], longitude: companyAddress.location.coordinates[1]
 			});
 		}
+	},
+	Product: {
+		company(parent, { location }) {
+			if (parent.company) return parent.company;
+
+			const companyId = parent.get('companyId');
+
+			return CompanyController.getCompany(companyId, location)
+		},
 	}
 }

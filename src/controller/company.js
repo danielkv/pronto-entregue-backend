@@ -1,6 +1,8 @@
+import DataLoader from "dataloader";
 import moment from "moment";
 import Sequelize from "sequelize";
 
+import { remap } from "../loaders/remap";
 import DB from "../model";
 import Company from "../model/company";
 import CompanyMeta from "../model/companyMeta";
@@ -11,6 +13,17 @@ import { pointFromCoordinates } from "../utilities/address";
 import { DELIVERY_TYPE_META } from "../utilities/company";
 
 class CompanyControl {
+	constructor() {
+		this.loader = new DataLoader(async keys => {
+			const companies = await DB.company.findAll({
+				where: { id: keys }
+			})
+
+			return remap(keys, companies);
+		})
+
+	}
+
 	/**
 	 * Returns delivery type is enabled in company: delivery | peDelivery
 	 * @param {ID} companyId 
@@ -52,6 +65,23 @@ class CompanyControl {
 		}, []);
 	}
 
+	async getCompany(id, location) {
+		let company;
+
+		if (location) {
+			let query = { where: { id } }
+			this.includeQueryLocation(location, query)
+
+			company = await DB.company.findOne(query);
+		} else {
+			company = await this.loader.load(id);
+		}
+
+		if (!company) throw new Error('Estabelecimetno não encontrado')
+
+		return company;
+	}
+
 	/**
 	 * Return companies
 	 * 
@@ -59,7 +89,7 @@ class CompanyControl {
 	 * @param {Object} location 
 	 */
 	getCompanies(where, location, pagination) {
-		const query = {
+		let query = {
 			attributes: { include: [this.isOpenAttribute('metas.value')] },
 			where,
 			include: [DB.companyType, { model: DB.companyMeta, where: { key: 'businessHours' }, required: false }],
@@ -76,34 +106,50 @@ class CompanyControl {
 		}
 
 		if (location) {
-			const userPoint = pointFromCoordinates(location.coordinates);
-
-			query.include = [
-				...query.include,
-				DB.address,
-
-				this.includeArea(userPoint, 'deliveryArea', 'deliveryAreas'),
-				this.includeArea(userPoint, 'viewArea', 'viewAreas')
-			]
-
-			const addToQuery = {
-				[Sequelize.Op.or]: [
-					Sequelize.where(Sequelize.col('deliveryAreas.id'), Sequelize.Op.not, null),
-					Sequelize.where(Sequelize.col('viewAreas.id'), Sequelize.Op.not, null)
-				]
-			}
-
-			if (query.where)
-				query.where = [query.where, addToQuery];
-			else
-				query.where = addToQuery
-
-			query.attributes.include = [...query.attributes.include, [Sequelize.fn('ST_Distance_Sphere', userPoint, Sequelize.col('address.location')), 'distance']]
+			query = this.includeQueryLocation(location, query);
 
 			query.order = [[Sequelize.col('isOpen'), 'DESC'], [Sequelize.col('distance'), 'ASC']]
 		}
 			
 		return DB.company.findAll(query);
+	}
+
+	/**
+	 * Include location in Sequelize query
+	 * @param {Object} query 
+	 * @param {GeoPoint} location 
+	 */
+	includeQueryLocation(location, query={}) {
+		const userPoint = pointFromCoordinates(location.coordinates);
+
+		const include = query.include ? query.include : []
+
+		query.include = [
+			...include,
+			DB.address,
+
+			this.includeArea(userPoint, 'deliveryArea', 'deliveryAreas'),
+			this.includeArea(userPoint, 'viewArea', 'viewAreas')
+		]
+
+		const addToQuery = {
+			[Sequelize.Op.or]: [
+				Sequelize.where(Sequelize.col('deliveryAreas.id'), Sequelize.Op.not, null),
+				Sequelize.where(Sequelize.col('viewAreas.id'), Sequelize.Op.not, null)
+			]
+		}
+
+		if (query.where)
+			query.where = [query.where, addToQuery];
+		else
+			query.where = addToQuery
+
+		const attributesInclude = query.attributes && query.attributes.include ? query.attributes.include : []
+		query.attributes = { include: [...attributesInclude, [Sequelize.fn('ST_Distance_Sphere', userPoint, Sequelize.col('address.location')), 'distance']] }
+
+		query.subQuery = false;
+
+		return query;
 	}
 
 	/**
