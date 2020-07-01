@@ -20,7 +20,7 @@ class CompanyControl {
 			})
 
 			return remap(keys, companies);
-		})
+		}, { cache: false })
 
 	}
 

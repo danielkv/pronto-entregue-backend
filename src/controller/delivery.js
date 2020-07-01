@@ -22,7 +22,7 @@ class DeliveryControl extends EventEmitter {
 			return keys.map(key => {
 				return allDeliveries.filter(m => m.deliveryManId === key)
 			})
-		})
+		}, { cache: false })
 	}
 
 	async create(data, options) {
