@@ -13,9 +13,9 @@ const databaseConfig = {
 		max: 5,
 		match: [/max_user_connections/g]
 	},
-	/* logging(str, object) {
-		console.log(object.type, object.where);
-	}, */
+	logging(str, object) {
+		console.log('\n', str);
+	},
 	timezone: '-03:00',
 };
 

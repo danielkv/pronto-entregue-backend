@@ -1,11 +1,51 @@
+import DataLoader from "dataloader";
 import _ from "lodash";
-import { where, fn, col, literal } from "sequelize";
+import Sequelize from "sequelize";
 
+import DB from "../model";
 import { pointFromCoordinates, calculateDistance } from "../utilities/address";
 import { DELIVERY_PRICE_PER_KM, DELIVERY_PE_MIN_PRICE } from "../utilities/config";
 import ConfigController from "./config";
 
 class DeliveryAreaControl {
+
+	constructor () {
+		this.deliveryLoader = new DataLoader(async keys=>{
+			const companyIds = keys.map(k => k.companyId);
+			const location = keys[0].location;
+			if (!location) throw new Error('Não é possível retornar uma área de entrega sem uma localização');
+			const userPoint = pointFromCoordinates(location.coordinates);
+
+			const areas = await DB.deliveryArea.findAll({
+				where: [
+					{ companyId: companyIds, active: true },
+					Sequelize.where(Sequelize.fn('ST_Distance_Sphere', userPoint, Sequelize.col(`center`)), '<=', Sequelize.col(`radius`)),
+				],
+				order: [[Sequelize.col('companyId'), 'ASC'], [Sequelize.col('radius'), 'ASC']]
+			})
+
+			const grouped = _.groupBy(areas, 'companyId');
+			return companyIds.map(id => grouped[id] || []);
+		}, { cache: false, cacheKeyFn: (value)=>JSON.stringify(value) })
+
+		this.viewLoader = new DataLoader(async keys=>{
+			const companyIds = keys.map(k => k.companyId);
+			const location = keys[0].location;
+			if (!location) throw new Error('Não é possível retornar uma área de vizualização sem uma localização');
+			const userPoint = pointFromCoordinates(location.coordinates);
+
+			const areas = await DB.viewArea.findAll({
+				where: [
+					{ companyId: companyIds, active: true },
+					Sequelize.where(Sequelize.fn('ST_Distance_Sphere', userPoint, Sequelize.col(`center`)), '<=', Sequelize.col(`radius`)),
+				],
+				order: [[Sequelize.col('companyId'), 'ASC'], [Sequelize.col('radius'), 'ASC']]
+			})
+
+			const grouped = _.groupBy(areas, 'companyId');
+			return companyIds.map(id => grouped[id] || []);
+		}, { cache: false, cacheKeyFn: (value)=>JSON.stringify(value) })
+	}
 	
 	/**
 	 * Get area that will be used as price selectorto make the delivery
@@ -16,13 +56,12 @@ class DeliveryAreaControl {
 	 * @param {String} type 
 	 */
 	async getArea(companyInstamce, userLocation, type='delivery') {
-		
 		let area;
 
 		if (type === 'peDelivery')
 			area = await this.getPeArea(companyInstamce, userLocation);
 		else
-			area = await this.getCompanyArea(companyInstamce, userLocation);
+			[area] = await this.getCompanyAreas(companyInstamce, userLocation);
 
 		return area;
 	}
@@ -34,16 +73,9 @@ class DeliveryAreaControl {
 	 * @param {Company} companyInstamce 
 	 * @param {*} userLocation 
 	 */
-	async getCompanyArea(companyInstamce, userLocation) {
-		const userPoint = pointFromCoordinates(userLocation.coordinates);
-
-		const [deliveryArea] = await companyInstamce.getDeliveryAreas({
-			order: [['radius', 'ASC']],
-			limit: 1,
-			where: [{ active: true }, where(fn('ST_Distance_Sphere', userPoint, col('center')), '<=', literal('radius'))],
-		});
-
-		return deliveryArea;
+	getCompanyAreas(companyInstamce, userLocation) {
+		const companyId = companyInstamce.get('id');
+		return this.deliveryLoader.load({ companyId, location: userLocation })
 	}
 
 	/**
@@ -54,6 +86,12 @@ class DeliveryAreaControl {
 	 * @param {Object} userLocation 
 	 */
 	async getPeArea(companyInstamce, userLocation) {
+
+		const companyId = companyInstamce.get('id');
+
+		const viewAreas = await this.viewLoader.load({ companyId, location: userLocation })
+		if (!viewAreas.length) return null;
+
 		// get company address
 		const companyAddress = await companyInstamce.getAddress();
 
@@ -69,6 +107,7 @@ class DeliveryAreaControl {
 		return {
 			id: _.uniqueId('peDelivery_'),
 			name: 'peDelivery',
+			type: 'peDelivery',
 			distance,
 			price
 		};

@@ -202,22 +202,20 @@ export const resolvers =  {
 	Company: {
 		async delivery(parent, _, __, { variableValues }) {
 			const location = variableValues.location || null;
-			if (!location) return null;
+			if (!location) throw new Error('Não é possível retornar uma área de entrega sem definir uma localização');
 
+			// get delivery type global configuration
 			const deliveryGlobalActive = await ConfigController.get(DELIVERY_GLOBAL_ACTIVE);
 
-			if (deliveryGlobalActive) {
-				const orderType = await CompanyController.getConfig(parent.get('id'), DELIVERY_TYPE_META);
-
-				// get closest area to define price
-				if (orderType && orderType === 'peDelivery')
-					return await DeliveryAreaController.getPeArea(parent, location, orderType);
-			}
-
-			if (parent.deliveryAreas && parent.deliveryAreas.length)
+			if (!deliveryGlobalActive && parent.deliveryAreas && parent.deliveryAreas.length)
 				return parent.deliveryAreas[0];
+
 			
-			return null;
+			const orderType = !deliveryGlobalActive ? 'delivery' : await CompanyController.getConfig(parent.get('id'), DELIVERY_TYPE_META);
+
+			// get closest area to define price
+			
+			return await DeliveryAreaController.getArea(parent, location, orderType);
 		},
 		pickup(parent) {
 			if (parent.viewAreas && parent.viewAreas.length)
@@ -427,8 +425,12 @@ export const resolvers =  {
 			const companyId = parent.get('id');
 			return rateLoader.load(companyId)
 		},
-		async distance(parent, { location }) {
+		async distance(parent, _, __, { variableValues }) {
 			if (parent.get('distance')) return parent.get('distance')
+
+			const { location } = variableValues;
+
+			if (!location) throw new Error('Distância não pode ser retornada sem uma localização')
 			
 			// deprecated
 			const companyAddress = await Address.cache().findByPk(parent.get('addressId'));

@@ -1,8 +1,20 @@
+import DataLoader from "dataloader";
 import _ from "lodash";
 
+import { remap } from "../loaders/remap";
 import DB from "../model";
 
 class ConfigControl {
+
+	constructor() {
+		this.loader = new DataLoader(async keys => {
+			const configs = await DB.config.findAll({
+				where: { key: keys }
+			});
+
+			return remap(keys, configs, 'key');
+		}, { cache: false })
+	}
 	/**
 	 * Transform config value type to save on DB
 	 * @param {String} value 
@@ -42,8 +54,9 @@ class ConfigControl {
 	 * @param {String} key 
 	 */
 	async get(key) {
-		const row = await DB.config.findOne({ where: { key } })
+		const row = await this.loader.load(key);
 		if (!row) return null;
+		
 		return this.deserealize(row.get('value'), row.get('type'))
 	}
 	

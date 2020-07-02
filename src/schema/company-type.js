@@ -133,10 +133,10 @@ export const resolvers =  {
 	CompanyType: {
 		// deprecated
 		companies(parent, { location, onlyPublished=true }) {
-			
-
 			const where = { active: true, companyTypeId: parent.get('id') }
 			if (onlyPublished === true) where.published = true;
+
+			CompanyController.queryLoader.load({ id: 1, location: ['a', 'b'] })
 
 			return CompanyController.getCompanies(where, location)
 		},

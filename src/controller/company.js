@@ -15,13 +15,33 @@ import { DELIVERY_TYPE_META } from "../utilities/company";
 class CompanyControl {
 	constructor() {
 		this.loader = new DataLoader(async keys => {
-			const companies = await DB.company.findAll({
-				where: { id: keys }
-			})
+			const location = keys[0].location;
+			const ids = keys.map(k => k.id)
 
-			return remap(keys, companies);
+			let query = { where: { id: ids } }
+
+			if (location) query = this.includeQueryLocation(location, query, false)
+
+			const companies = await DB.company.findAll(query)
+
+			return remap(ids, companies);
 		}, { cache: false })
 
+
+		this.configLoader = new DataLoader(async values => {
+			const companyIds = values.map(k => k.companyId);
+			const keys = values.map(k => k.key);
+			const configs = await DB.companyMeta.findAll({
+				where: { key: keys, companyId: companyIds }
+			});
+
+			return values.map(v =>{
+				const config = configs.find(c => c.companyId === v.companyId && c.key === v.key);
+				if (config) return config;
+
+				return null;
+			});
+		}, { cache: false })
 	}
 
 	/**
@@ -66,16 +86,7 @@ class CompanyControl {
 	}
 
 	async getCompany(id, location) {
-		let company;
-
-		if (location) {
-			let query = { where: { id } }
-			this.includeQueryLocation(location, query)
-
-			company = await DB.company.findOne(query);
-		} else {
-			company = await this.loader.load(id);
-		}
+		const company = await this.loader.load({ id, location });
 
 		if (!company) throw new Error('Estabelecimetno não encontrado')
 
@@ -119,7 +130,7 @@ class CompanyControl {
 	 * @param {Object} query 
 	 * @param {GeoPoint} location 
 	 */
-	includeQueryLocation(location, query={}) {
+	includeQueryLocation(location, query={}, filterLocation=true) {
 		const userPoint = pointFromCoordinates(location.coordinates);
 
 		const include = query.include ? query.include : []
@@ -132,17 +143,19 @@ class CompanyControl {
 			this.includeArea(userPoint, 'viewArea', 'viewAreas')
 		]
 
-		const addToQuery = {
-			[Sequelize.Op.or]: [
-				Sequelize.where(Sequelize.col('deliveryAreas.id'), Sequelize.Op.not, null),
-				Sequelize.where(Sequelize.col('viewAreas.id'), Sequelize.Op.not, null)
-			]
-		}
+		if (filterLocation) {
+			const addToQuery = {
+				[Sequelize.Op.or]: [
+					Sequelize.where(Sequelize.col('deliveryAreas.id'), Sequelize.Op.not, null),
+					Sequelize.where(Sequelize.col('viewAreas.id'), Sequelize.Op.not, null)
+				]
+			}
 
-		if (query.where)
-			query.where = [query.where, addToQuery];
-		else
-			query.where = addToQuery
+			if (query.where)
+				query.where = [query.where, addToQuery];
+			else
+				query.where = addToQuery
+		}
 
 		const attributesInclude = query.attributes && query.attributes.include ? query.attributes.include : []
 		query.attributes = { include: [...attributesInclude, [Sequelize.fn('ST_Distance_Sphere', userPoint, Sequelize.col('address.location')), 'distance']] }
@@ -157,7 +170,7 @@ class CompanyControl {
 	 * @param {String} key 
 	 */
 	async getConfig(companyId, key) {
-		const row = await DB.companyMeta.findOne({ where: { key, companyId } })
+		const row = await this.configLoader.load({ key, companyId })
 		if (!row) return;
 		
 		return row.get('value');

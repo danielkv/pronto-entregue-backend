@@ -6,6 +6,7 @@ export const typeDefs =  gql`
 	type DeliveryArea {
 		id: ID!
 		name: String
+		type: String!
 		center: GeoPoint
 		active: Boolean!
 		radius: Float
@@ -72,5 +73,12 @@ export const resolvers =  {
 			// remove it
 			return deliveryArea.destroy();
 		},
+	},
+	DeliveryArea: {
+		type(parent) {
+			if (parent.type) return parent.type;
+			
+			return 'delivery';
+		}
 	}
 }
