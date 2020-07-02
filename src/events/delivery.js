@@ -18,7 +18,7 @@ export default new class DeliveryEventFactory {
 			if (options.fromListener) return;
 
 			// if delivery should be handle by us
-			if (order.get('type') !== 'peDelivery' && newStatus !== 'waiting') return;
+			if (order.get('type') !== 'peDelivery' || ['waitingPickUp', 'delivering', 'delivered', 'canceled'].includes(newStatus)) return;
 			
 			// get or create delivery
 			let delivery = await order.getDelivery();

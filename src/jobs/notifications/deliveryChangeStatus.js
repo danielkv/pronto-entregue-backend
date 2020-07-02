@@ -19,7 +19,7 @@ export async function deliveryChangeStatus({ data: { deliveryId, companyId, newS
 
 	const notificationData = {
 		title: 'Status alterado',
-		body: `O entregador alterou o status da entrega #${delivery.orderId} para ${statusLabel}`,
+		body: `O entregador alterou o status da entrega do pedido #${orderId} para ${statusLabel}`,
 		data: {
 			action: 'statusChange',
 			orderId: _.toString(orderId),

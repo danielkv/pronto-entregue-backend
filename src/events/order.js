@@ -26,7 +26,7 @@ export default new class OrderEventsFactory {
 			pubSub.publish(ORDER_QTY_STATUS_UPDATED, { updateOrderStatusQty: ordersStatusQty });
 
 			// notify client status changed
-			if (['preparing', 'waitingPickUp', 'delivering'].includes(newStatus))
+			if (['preparing', 'waitingPickUp', 'delivering', 'canceled'].includes(newStatus))
 				JobQueue.notifications.add('orderChangeStatus', { userId, orderId, newOrderStatus: newStatus })
 		});
 
