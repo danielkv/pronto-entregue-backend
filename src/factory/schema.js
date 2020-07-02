@@ -31,6 +31,7 @@ import { typeDefs as Report, resolvers as reportResolvers }  from '../schema/rep
 import { typeDefs as Role, resolvers as roleResolvers }  from '../schema/role';
 import { typeDefs as Sale, resolvers as saleResolvers }  from '../schema/sale';
 import { typeDefs as GoogleSocialLogin, resolvers as googleResolvers }  from '../schema/social_login';
+import { typeDefs as Sounds, resolvers as soundResolvers }  from '../schema/sounds';
 import { typeDefs as User, resolvers as userResolvers }  from '../schema/user';
 import { typeDefs as ViewArea, resolvers as viewAreaResolvers }  from '../schema/view_area';
 
@@ -108,8 +109,8 @@ const resolvers = {
 export default new class GraphQlSchemaFactory {
 	create() {
 		const schema = makeExecutableSchema({
-			typeDefs: [typeDefs, Delivery, PeDeliveryArea, Report, CompanyPlan, ViewArea, Notification, Address, Sale, CreditHistory, CompanyType, BusinessHour, Rating, Emails, Coupon, Category, Company, Option, OptionsGroup, OrderOptions, OrderOptionsGroup, OrderProduct, Order, PaymentMethod, Product, Role, DeliveryArea, User, Phone, Meta, GoogleSocialLogin],
-			resolvers: merge(resolvers, deliveryResolvers, peDeliveryAreaResolvers, reportResolvers, companyPlanResolvers, viewAreaResolvers, NotificationResolvers, saleResolvers, addressResolvers, creditHistoryResolvers ,companyTypeResolvers, businessHourResolvers, ratingResolvers, emailsResolvers, couponResolvers, categoryResolvers, companyResolvers, optionResolvers, optionsGroupResolvers, orderOptionResolvers, orderOptionsGroupResolvers, orderProductResolvers, orderResolvers, paymentMethodResolvers, productResolvers, roleResolvers, deliveryAreaResolvers, userResolvers, phoneResolvers, metaResolvers, googleResolvers),
+			typeDefs: [typeDefs, Delivery, Sounds, PeDeliveryArea, Report, CompanyPlan, ViewArea, Notification, Address, Sale, CreditHistory, CompanyType, BusinessHour, Rating, Emails, Coupon, Category, Company, Option, OptionsGroup, OrderOptions, OrderOptionsGroup, OrderProduct, Order, PaymentMethod, Product, Role, DeliveryArea, User, Phone, Meta, GoogleSocialLogin],
+			resolvers: merge(resolvers, deliveryResolvers, soundResolvers, peDeliveryAreaResolvers, reportResolvers, companyPlanResolvers, viewAreaResolvers, NotificationResolvers, saleResolvers, addressResolvers, creditHistoryResolvers ,companyTypeResolvers, businessHourResolvers, ratingResolvers, emailsResolvers, couponResolvers, categoryResolvers, companyResolvers, optionResolvers, optionsGroupResolvers, orderOptionResolvers, orderOptionsGroupResolvers, orderProductResolvers, orderResolvers, paymentMethodResolvers, productResolvers, roleResolvers, deliveryAreaResolvers, userResolvers, phoneResolvers, metaResolvers, googleResolvers),
 			directiveResolvers: directives,
 		})
 

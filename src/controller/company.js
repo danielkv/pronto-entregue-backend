@@ -25,7 +25,7 @@ class CompanyControl {
 			const companies = await DB.company.findAll(query)
 
 			return remap(ids, companies);
-		}, { cache: false })
+		}, { cache: false, cacheKeyFn: (value)=>JSON.stringify(value) })
 
 
 		this.configLoader = new DataLoader(async values => {
