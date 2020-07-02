@@ -1,10 +1,10 @@
 import { where, literal } from 'sequelize';
 
+import NotificationController from '../../controller/notification';
 import Address from '../../model/address';
 import Company from '../../model/company';
 import User from '../../model/user';
 import UserMeta from '../../model/userMeta';
-import * as notifications from '../../services/notifications';
 
 export async function createCompany({ data: { companyId } }) {
 	// check if company exits
@@ -49,11 +49,6 @@ export async function createCompany({ data: { companyId } }) {
 	const notificationData = {
 		title: `${comanyData.companyName} já chegou no App 👏👏`,
 		body: 'Aproveita e dá uma olhada no cardápio',
-	}
-
-	// create messages object
-	const messages = notifications.createMessages(tokens, {
-		...notificationData,
 		priority: 'high',
 		data: {
 			redirect: {
@@ -65,8 +60,7 @@ export async function createCompany({ data: { companyId } }) {
 			},
 			alertData: notificationData
 		}
-	})
-	
-	// send messages
-	notifications.send(messages);
+	}
+
+	NotificationController.sendDevice(tokens, notificationData)
 }

@@ -1,5 +1,4 @@
 export * from './createCompany'
-export * from './createDelivery'
 export * from './createOrder'
 export * from './orderChangeStatus'
 export * from './notifyDeliveryMen'
