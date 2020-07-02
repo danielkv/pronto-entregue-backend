@@ -70,12 +70,12 @@ export async function createOrder (job) {
 		}
 
 		// get master desktop tokens
-		const masterDesktopTokens = UserController.getTokens('master', DESKTOP_TOKEN_META);
+		const masterDesktopTokens = await UserController.getTokens('master', DESKTOP_TOKEN_META);
 		// send notifications
 		NotificationController.sendDesktop(masterDesktopTokens, notificationMasterData)
 		
 		// get master device tokens
-		const masterDeviceTokens = UserController.getTokens('master', DEVICE_TOKEN_META);
+		const masterDeviceTokens = await UserController.getTokens('master', DEVICE_TOKEN_META);
 		// send notifications
 		NotificationController.sendDevice(masterDeviceTokens, {
 			...notificationMasterData,

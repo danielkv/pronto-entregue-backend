@@ -20,7 +20,7 @@ class DeliveryManFactory extends EventEmitter {
 	 * @param {User} userInstance 
 	 */
 	getOpenDeliveries(userInstance) {
-		return userInstance.getDeliveries({ where: { status: { [Op.notIn]: ['delivered', 'canceled'] } } });
+		return userInstance.getDeliveries({ where: { status: ['wainting', 'waitingDelivery', 'delivering'] } });
 	}
 
 	/**

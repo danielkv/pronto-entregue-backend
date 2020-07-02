@@ -36,7 +36,7 @@ class CompanyControl {
 			});
 
 			return values.map(v =>{
-				const config = configs.find(c => c.companyId === v.companyId && c.key === v.key);
+				const config = configs.find(c => c.companyId == v.companyId && c.key == v.key);
 				if (config) return config;
 
 				return null;

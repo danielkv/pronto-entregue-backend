@@ -54,8 +54,10 @@ export default new class DeliveryEventFactory {
 				// return order to status waiting delivery
 				await OrderController.changeStatus(order, 'waitingDelivery', ctx, { fromListener: true });
 				
-				const newDelivery =  await DeliveryController.createFromOrder(order);
-				DeliveryController.changeStatus(newDelivery, 'waitingDelivery', ctx)
+				if (!ctx.user.can('adm')) {
+					const newDelivery =  await DeliveryController.createFromOrder(order);
+					DeliveryController.changeStatus(newDelivery, 'waitingDelivery', ctx)
+				}
 			}
 
 			// notify company users if delivery is assign to order

@@ -19,7 +19,7 @@ export const resolvers =  {
 			const sound = await CompanyController.getConfig(companyId, 'notificationSound');
 			if (!sound) return NotificationSoundsController.availableSounds()[0]
 			
-			return sound;
+			return JSON.parse(sound);
 		}
 	}
 }
