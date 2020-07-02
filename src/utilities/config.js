@@ -8,3 +8,6 @@ export const DELIVERY_GLOBAL_ACTIVE = 'delivery_global_active'
 // ORDERS
 export const ORDER_NOTIFICATION_LIMIT = 'order_notification_limit'
 export const ORDER_NOTIFICATION_INTERVAL = 'order_notification_interval'
+
+// NOTIFICATIONS
+export const NOTIFICATIONS_ENABLED = 'notifications_enabled'

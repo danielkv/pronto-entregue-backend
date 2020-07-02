@@ -3,7 +3,9 @@ import path from 'path';
 import { Op } from "sequelize";
 
 
+import DB from '../model';
 import UserMeta from "../model/userMeta";
+import { NOTIFICATIONS_ENABLED } from '../utilities/config';
 import { DESKTOP_TOKEN_META, DEVICE_TOKEN_META } from "../utilities/notifications";
 
 const { Expo } = require('expo-server-sdk');
@@ -18,6 +20,15 @@ class NotificationControl {
 		this.messaging = fbAdmin.messaging();
 
 		this.expo = new Expo();
+	}
+
+	async isEnabled() {
+		const enabledConfig =  await DB.config.findOne({ where: { key: NOTIFICATIONS_ENABLED } });
+
+		if (enabledConfig.value === 'true')
+			return true;
+
+		return false
 	}
 	
 	getMetaKey(type) {
@@ -52,7 +63,7 @@ class NotificationControl {
 		return true;
 	}
 	
-	async removeToken(_, { token, type }) {
+	async removeToken(token, type) {
 		const metaKey = this.getMetaKey(type);
 		
 		// check if meta exists
@@ -66,14 +77,20 @@ class NotificationControl {
 		
 		// remove token
 		tokens.splice(tokenIndex, 1);
-		
+		const newValue = JSON.stringify(tokens);
 		// save tokens
-		await meta.update({ value: JSON.stringify(tokens) });
+		await meta.update({ value: newValue });
 		
 		return true;
 	}
 	
-	sendDesktop(to, { title, body, data }, options={}) {
+	async sendDesktop(to, { title, body, data }, options={}) {
+		const enabled = await this.isEnabled();
+		if (!enabled) {
+			console.log('Notificações desativadas\n', `Não foram enviadas para ${Array.isArray(to) ? to.length : '1'} desktops`)
+			return;
+		}
+
 		const message = {
 			data,
 			notification: {
@@ -126,6 +143,12 @@ class NotificationControl {
 	}
 	
 	async sendDevice(tokens, notificationData, options) {
+		const enabled = await this.isEnabled();
+		if (!enabled) {
+			console.log('Notificações desativadas\n', `Enviadas para ${tokens.length} dispositivos móveis`)
+			return;
+		}
+
 		if (!tokens.length) return;
 
 		const data = {
