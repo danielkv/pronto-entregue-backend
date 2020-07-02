@@ -47,7 +47,7 @@ export default new class OrderEventsFactory {
 			
 			// queue order notifications
 			JobQueue.notifications.add(`createOrder.first.${orderId}`, data)
-			JobQueue.notifications.add(`createOrder.${orderId}`, data, { repeat: { limit:3, every: 5000, count: 0 } })
+			JobQueue.notifications.add(`createOrder.${orderId}`, data, { repeat: { limit, every: interval, count: 0 } })
 		});
 
 		console.log(' - Setup Order events')

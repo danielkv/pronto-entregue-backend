@@ -85,7 +85,7 @@ export const typeDefs = gql`
 	}
 
 	extend type Query {
-		countUsers(filter: Filter): Int! @hasRole(permission: "master")
+		countUsers(filter: JSON): Int! @hasRole(permission: "master")
 		users(filter: JSON, pagination: Pagination): [User]! @hasRole(permission: "master")
 		user(id: ID!): User! @hasRole(permission: "master", checkSameUser: true)
 		me: User! @isAuthenticated
