@@ -145,7 +145,7 @@ class NotificationControl {
 	async sendDevice(tokens, notificationData, options) {
 		const enabled = await this.isEnabled();
 		if (!enabled) {
-			console.log('Notificações desativadas\n', `Enviadas para ${tokens.length} dispositivos móveis`)
+			console.log('Notificações desativadas\n', `Não foram enviadas para ${tokens.length} dispositivos móveis`)
 			return;
 		}
 

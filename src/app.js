@@ -1,6 +1,6 @@
 import 'dotenv/config';
-import AppFactory  from './factory/app';
+import AppService  from './factory/app';
 
-AppFactory.start();
+AppService.start();
 
-AppFactory.startJobsProcessors();
+AppService.startJobsProcessors();

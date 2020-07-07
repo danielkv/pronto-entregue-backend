@@ -4,7 +4,7 @@ import AppModels from './model';
 import AppRouter from './router';
 import AppServer from './server';
 
-export default new class AppFactory {
+export default new class AppService {
 	start() {
 		AppModels.start();
 		AppEvents.start();

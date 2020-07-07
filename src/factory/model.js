@@ -12,7 +12,7 @@ import CreditHistoryTriggerFactory from '../model/triggers/credit_history';
 import UserTriggerFactory from '../model/triggers/user';
 import AppRouter from './router';
 
-class ModelsFactory {
+class ModelsService {
 	start() {
 		console.log('Start setup DB models')
 		this.setupAssociations();
@@ -172,6 +172,6 @@ class ModelsFactory {
 	}
 }
 
-const AppModels = new ModelsFactory();
+const AppModels = new ModelsService();
 
 export default AppModels;

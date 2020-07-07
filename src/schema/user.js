@@ -121,7 +121,6 @@ export const resolvers = {
 			if (!user) throw new Error('Usuário não encontrada');
 			return user;
 		},
-		
 	},
 	Mutation: {
 		searchUsers(_, { search, exclude = [], companies }) {

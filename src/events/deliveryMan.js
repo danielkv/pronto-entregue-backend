@@ -16,8 +16,8 @@ export default new class DeliveryManEvents {
 			if (enabledDeliveryMan.length) return;
 
 			// get tokens
-			const deviceTokens = await UserController.getTokens('master', DEVICE_TOKEN_META);
-			const desktopTokens = await UserController.getTokens('master', DESKTOP_TOKEN_META);
+			const deviceTokens = await UserController.getTokensByRole('master', DEVICE_TOKEN_META);
+			const desktopTokens = await UserController.getTokensByRole('master', DESKTOP_TOKEN_META);
 
 			// create message
 			const message = {

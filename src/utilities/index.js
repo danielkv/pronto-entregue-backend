@@ -1,5 +1,6 @@
 import crypto  from 'crypto';
-import { Op, col, fn, where }  from 'sequelize';
+import _ from 'lodash';
+import Sequelize, { Op, col, fn, where }  from 'sequelize';
 
 export function doesPathExist(nodes, path) {
 	if (!nodes) {
@@ -90,25 +91,36 @@ export function sanitizeFilter(_filter = {}, _options = {}) {
 
 function convertKeys(value) {
 	
-	const keyMatch = /^\$(.+)$/;
-	
 	if (Array.isArray(value)) {
 		return value.map(arr => convertKeys(arr));
 	} else if (typeof value === 'object' && value !== null) {
 		const newObject = {}
+		const keyMatch = /^\$(.+)$/;
 
 		Object.keys(value).map(key => {
 			const match = key.match(keyMatch);
 			const keyValue = convertKeys(value[key]);
 			
-			if (match && match[1]) {
-				newObject[Op[match[1]]] = keyValue
+			if (match && match[1] && Op[match[1]]) {
+				newObject[Op[match[1]]] = keyValue;
 			} else {
 				newObject[key] = keyValue;
 			}
 		})
 		
 		return newObject;
+	} else if (_.isString(value)) {
+		const keyMatch = /^\$(.+)\((.+)\)$/;
+
+		const match = value.match(keyMatch);
+		
+		if (match && match[1] && match[2]) {
+			const fn = Sequelize.fn(match[1], match[2]);
+			return fn
+		} else {
+			return value;
+		}
+
 	} else {
 		return value;
 	}
