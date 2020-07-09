@@ -84,7 +84,7 @@ class ModelsService {
 		DB.user.hasMany(DB.rating);
 
 		// Role relations
-		DB.role.hasMany(DB.companyRelation);
+		DB.role.hasOne(DB.companyRelation);
 		DB.companyRelation.belongsTo(DB.role);
 
 		// Statement relations

@@ -20,6 +20,7 @@ import { getSQLPagination, sanitizeFilter }  from '../utilities';
 import { calculateDistance, CompanyAreaSelect } from '../utilities/address'
 import { companyIsOpen, DELIVERY_TYPE_META } from '../utilities/company';
 import { DELIVERY_GLOBAL_ACTIVE } from '../utilities/config';
+import DB from '../model';
 
 export const typeDefs =  gql`
 	type Company {
@@ -199,6 +200,11 @@ export const resolvers =  {
 			return CompanyController.getCompany(id, location)
 		},
 	},
+	CompanyRelation: {
+		role(parent) {
+			return DB.role.findByPk(parent.get('roleId'));
+		}
+	},
 	Company: {
 		async delivery(parent, _, __, { variableValues }) {
 			const location = variableValues.location || null;
@@ -271,7 +277,7 @@ export const resolvers =  {
 		userRelation: (parent) => {
 			if (!parent.companyRelation) throw new Error('Nenhum usuário selecionado');
 
-			return parent.companyRelation.get();
+			return parent.companyRelation;
 		},
 		countUsers: (parent, { filter }) => {
 			const _filter = sanitizeFilter(filter, { search: ['firstName', 'lastName', 'email'] });

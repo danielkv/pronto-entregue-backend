@@ -15,9 +15,9 @@ export function userCanSetRole(role = 'customer', user) {
 }
 
 export async function extractRole(role='customer') {
-	if (['master', 'adm', 'deliveryMan'].includes(role)) return { roleName: role, role: null };
+	if (['master', 'customer', 'deliveryMan'].includes(role)) return { roleName: role, role: null };
 
-	const roleModel = await Role.findByPk(parseInt(role));
+	const roleModel = await Role.findOne({ where: { name: role } });
 	if (!roleModel) throw new Error('Função não encontrada');
 
 	return {

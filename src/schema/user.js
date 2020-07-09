@@ -17,6 +17,7 @@ export const typeDefs = gql`
 
 	type CompanyRelation {
 		active: Boolean!
+		role: Role!
 	}
 
 	type User {
