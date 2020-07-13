@@ -1,4 +1,5 @@
 import fbAdmin from 'firebase-admin';
+import _ from "lodash";
 import path from 'path';
 import { Op } from "sequelize";
 
@@ -89,6 +90,13 @@ class NotificationControl {
 		if (!enabled) {
 			console.log('Notificações desativadas\n', `Não foram enviadas para ${Array.isArray(to) ? to.length : '1'} desktops`)
 			return;
+		}
+
+		if (data) {
+			Object.keys(data).map(key=>{
+				const value = data[key];
+				if (!_.isString(value)) data[key] = _.toString(value);
+			})
 		}
 
 		const message = {

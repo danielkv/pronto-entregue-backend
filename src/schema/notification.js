@@ -20,7 +20,7 @@ export const typeDefs =  gql`
 		pushNotificationToken(userId: ID!, token: String!, type: String): Boolean!
 		removeNotificationToken(token: String!, type: String): Boolean!
 	
-		sendNotification(filter: JSON, title: String!, body: String!): UsersTokens!
+		sendNotification(to: [ID], filter: JSON, title: String!, body: String!): UsersTokens!
 	}
 `;
 
@@ -42,17 +42,28 @@ export const resolvers =  {
 		},
 	},
 	Mutation: {
-		async sendNotification(_, { filter, title, body }) {
-			const where = sanitizeFilter(filter, { excludeFilters: ['types'] });
+		async sendNotification(_, { to, filter, title, body }) {
+			if (!to) {
+				const where = sanitizeFilter(filter, { excludeFilters: ['types'] });
 
-			const users = await UserController.filterUsers(where);
+				const users = await UserController.filterUsers(where);
 
-			const deviceTokens = !filter.types || filter.types.includes('device') ? await UserController.getTokensById(users.map(u=>u.id), DEVICE_TOKEN_META) : [];
-			const desktopTokens =  !filter.types || filter.types.includes('desktop') ? await UserController.getTokensById(users.map(u=>u.id), DESKTOP_TOKEN_META) : [];
+				to = users.map(u=>u.id);
+			}
+			
+			const deviceTokens = !filter.types || filter.types.includes('device') ? await UserController.getTokensById(to, DEVICE_TOKEN_META) : [];
+			const desktopTokens =  !filter.types || filter.types.includes('desktop') ? await UserController.getTokensById(to, DESKTOP_TOKEN_META) : [];
 
 			const message = {
 				title,
-				body
+				body,
+				data: {
+					alertOn: ['selected', 'received'],
+					alertData: {
+						title,
+						body,
+					}
+				}
 			}
 
 			JobQueue.notifications.add('simpleNotification', { desktopTokens, deviceTokens, message })
