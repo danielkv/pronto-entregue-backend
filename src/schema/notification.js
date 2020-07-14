@@ -13,7 +13,7 @@ export const typeDefs =  gql`
 	}
 
 	extend type Query {
-		countTokensUsers(filter: JSON): UsersTokens!
+		countTokensUsers(to: [ID], filter: JSON): UsersTokens!
 	}
 
 	extend type Mutation {
@@ -26,19 +26,23 @@ export const typeDefs =  gql`
 
 export const resolvers =  {
 	Query: {
-		async countTokensUsers(_, { filter }) {
-			const where = sanitizeFilter(filter, { excludeFilters: ['types'] });
+		async countTokensUsers(_, { to, filter }) {
+			if (!to) {
+				const where = sanitizeFilter(filter, { excludeFilters: ['types'] });
 
-			const users = await UserController.filterUsers(where);
+				const users = await UserController.filterUsers(where);
 
-			const deviceTokens = !filter.types || filter.types.includes('device') ? await UserController.getTokensById(users.map(u=>u.id), DEVICE_TOKEN_META) : [];
-			const desktopTokens =  !filter.types || filter.types.includes('desktop') ? await UserController.getTokensById(users.map(u=>u.id), DESKTOP_TOKEN_META) : [];
+				to = users.map(u=>u.id);
+			}
+			
+			const deviceTokens = !filter.types || filter.types.includes('device') ? await UserController.getTokensById(to, DEVICE_TOKEN_META) : [];
+			const desktopTokens =  !filter.types || filter.types.includes('desktop') ? await UserController.getTokensById(to, DESKTOP_TOKEN_META) : [];
+
 
 			return {
 				device: deviceTokens.length,
 				desktop: desktopTokens.length
 			}
-
 		},
 	},
 	Mutation: {
