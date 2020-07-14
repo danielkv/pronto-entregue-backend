@@ -26,13 +26,17 @@ export const typeDefs =  gql`
 
 export const resolvers =  {
 	Query: {
-		async countTokensUsers(_, { to, filter }) {
-			if (!to) {
-				const where = sanitizeFilter(filter, { excludeFilters: ['types'] });
+		async countTokensUsers(_, { filter }) {
+			let to;
+
+			if (!filter.to) {
+				const where = sanitizeFilter(filter, { excludeFilters: ['types', 'to'] });
 
 				const users = await UserController.filterUsers(where);
 
 				to = users.map(u=>u.id);
+			} else {
+				to = filter.to;
 			}
 			
 			const deviceTokens = !filter.types || filter.types.includes('device') ? await UserController.getTokensById(to, DEVICE_TOKEN_META) : [];
@@ -46,13 +50,17 @@ export const resolvers =  {
 		},
 	},
 	Mutation: {
-		async sendNotification(_, { to, filter, title, body }) {
-			if (!to) {
-				const where = sanitizeFilter(filter, { excludeFilters: ['types'] });
+		async sendNotification(_, { filter, title, body }) {
+			let to;
+
+			if (!filter.to) {
+				const where = sanitizeFilter(filter, { excludeFilters: ['types', 'to'] });
 
 				const users = await UserController.filterUsers(where);
 
 				to = users.map(u=>u.id);
+			} else {
+				to = filter.to;
 			}
 			
 			const deviceTokens = !filter.types || filter.types.includes('device') ? await UserController.getTokensById(to, DEVICE_TOKEN_META) : [];
