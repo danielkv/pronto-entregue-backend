@@ -26,6 +26,7 @@ export const typeDefs = gql`
 		receiverName: String!
 		receiverContact: String!
 		senderContact: String!
+		createdAt: DateTime!
 	}
 
 	input DeliveryInput {
