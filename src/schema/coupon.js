@@ -163,7 +163,7 @@ export const resolvers = {
 		async checkCoupon(_, { couponName, order }) {
 			const coupon = await Coupon.findOne({
 				order: [['startsAt', 'DESC']],
-				include: [Company, Product, User],
+				//include: [Company, Product, User],
 
 				where: {
 					name: { [Op.like]: couponName.trim() },

@@ -73,9 +73,10 @@ class Coupon extends Sequelize.Model {
 		}
 
 		// check maxPurchases
-		if (this.get('maxPurchases') > 0) {
-			const countOrders = this.countOrders();
-			if (countOrders >= this.get('maxPurchases')) throw new Error('Esse cupom atingiu o limite de pedidos');
+		const maxPurchases = this.get('maxPurchases');
+		if (maxPurchases > 0) {
+			const countOrders = await this.countOrders();
+			if (countOrders >= maxPurchases) throw new Error('Esse cupom atingiu o limite de pedidos');
 		}
 
 		// check maxPerUser
