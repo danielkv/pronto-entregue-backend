@@ -13,6 +13,11 @@ Product.init({
 	description: Sequelize.STRING,
 	sku: Sequelize.STRING(100),
 	image: Sequelize.TEXT,
+	minDeliveryTime: Sequelize.INTEGER, // in hours
+	scheduleEnabled: {
+		type: Sequelize.BOOLEAN,
+		defaultValue: false,
+	},
 	active: {
 		type: Sequelize.BOOLEAN,
 		defaultValue: true,

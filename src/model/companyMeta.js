@@ -67,6 +67,7 @@ CompanyMeta.init({
 		}
 	},
 	value: Sequelize.TEXT,
+	type: Sequelize.STRING,
 	unique: {
 		type: Sequelize.BOOLEAN,
 		defaultValue: 0,

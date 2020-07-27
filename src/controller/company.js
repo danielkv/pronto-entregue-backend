@@ -2,13 +2,14 @@ import DataLoader from "dataloader";
 import moment from "moment";
 import Sequelize from "sequelize";
 
+import * as CompanyDefault from '../default/company';
 import { remap } from "../loaders/remap";
 import DB from "../model";
 import Company from "../model/company";
 import CompanyMeta from "../model/companyMeta";
 import User from "../model/user";
 import UserMeta from "../model/userMeta";
-import { getSQLPagination } from "../utilities";
+import { getSQLPagination, deserealizeConfig, serealizeConfig } from "../utilities";
 import { pointFromCoordinates } from "../utilities/address";
 import { DELIVERY_TYPE_META } from "../utilities/company";
 
@@ -28,15 +29,15 @@ class CompanyControl {
 		}, { cache: false, cacheKeyFn: (value)=>JSON.stringify(value) })
 
 
-		this.configLoader = new DataLoader(async values => {
+		this.metaLoader = new DataLoader(async values => {
 			const companyIds = values.map(k => k.companyId);
 			const keys = values.map(k => k.key);
-			const configs = await DB.companyMeta.findAll({
+			const metas = await DB.companyMeta.findAll({
 				where: { key: keys, companyId: companyIds }
 			});
 
-			return values.map(v =>{
-				const config = configs.find(c => c.companyId == v.companyId && c.key == v.key);
+			return values.map(v => {
+				const config = metas.find(c => c.companyId == v.companyId && c.key == v.key);
 				if (config) return config;
 
 				return null;
@@ -166,14 +167,48 @@ class CompanyControl {
 	}
 
 	/**
-	 * Returns transformed values from config table
+	 * Set and return values from config table
+	 * @param {String} key 
+	 */
+	async setConfig(companyId, key, value, type) {
+		const meta = await DB.companyMeta.findOne({ where: { companyId, key } })
+		if (!meta) {
+			const valueSave = serealizeConfig(value, type);
+			const created = await DB.companyMeta.create({ key, companyId, value: valueSave, type });
+			return deserealizeConfig(created.value, type);
+		} else {
+			const typeSave = type ? type : meta.type;
+			const valueSave = serealizeConfig(value, typeSave);
+			const updated = await meta.update({ key, value: valueSave, type: typeSave });
+			return updated.value;
+		}
+	}
+
+	/**
+	 * Returns values from config table
 	 * @param {String} key 
 	 */
 	async getConfig(companyId, key) {
-		const row = await this.configLoader.load({ key, companyId })
-		if (!row) return;
+		const config = await this.metaLoader.load({ key, companyId })
+		if (config) {
+			let typeDeserialize = config.type;
+			if (!config.type) {
+				switch (key) {
+					case 'businessHours':
+						typeDeserialize = 'json'
+						break;
+					default:
+						typeDeserialize = 'string'
+				}
+			}
+			return deserealizeConfig(config.value, typeDeserialize);
+		}
+
+		//check for default value
+		const defaultValue = CompanyDefault[key];
+		if (defaultValue) return defaultValue();
 		
-		return row.get('value');
+		return;
 	}
 
 	includeArea(userPoint, model, type) {

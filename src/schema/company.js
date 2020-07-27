@@ -8,6 +8,7 @@ import OrderController from '../controller/order';
 import { upload } from '../controller/uploads';
 import JobQueue from '../factory/queue';
 import { deliveryTimeLoader, businessHoursLoader, rateLoader, addressLoader } from '../loaders';
+import DB from '../model';
 import Address from '../model/address';
 import Company  from '../model/company';
 import CompanyMeta  from '../model/companyMeta';
@@ -20,7 +21,6 @@ import { getSQLPagination, sanitizeFilter }  from '../utilities';
 import { calculateDistance, CompanyAreaSelect } from '../utilities/address'
 import { companyIsOpen, DELIVERY_TYPE_META } from '../utilities/company';
 import { DELIVERY_GLOBAL_ACTIVE } from '../utilities/config';
-import DB from '../model';
 
 export const typeDefs =  gql`
 	type Company {
@@ -117,6 +117,9 @@ export const typeDefs =  gql`
 		searchCompanies(search: String!, exclude: [ID]): [Company]! @hasRole(permission: "companies_edit")
 		createCompany(data: CompanyInput!): Company! @hasRole(permission: "companies_edit")
 		updateCompany(id: ID!, data: CompanyInput!): Company! @hasRole(permission: "companies_edit")
+
+		#configurations
+		setCompanyConfig(companyId: ID!, key: String!, value: JSON!, type: String): JSON!
 	}
 
 	extend type Query {
@@ -124,6 +127,9 @@ export const typeDefs =  gql`
 		countCompanies(filter: JSON): Int! @hasRole(permission: "master")
 		companies(filter: JSON, pagination: Pagination, location: GeoPoint): [Company]!
 		ordersStatusQty(companyId: ID!): JSON!
+
+		#configurations
+		getCompanyConfig(companyId: ID!, keys: [String!]!): JSON!
 	}
 `;
 
@@ -178,6 +184,9 @@ export const resolvers =  {
 				
 				return updatedCompany;
 			})
+		},
+		setCompanyConfig(_, { companyId, key, value, type }) {
+			return CompanyController.setConfig(companyId, key, value, type);
 		}
 	},
 	Query: {
@@ -199,6 +208,18 @@ export const resolvers =  {
 			// check if company exists
 			return CompanyController.getCompany(id, location)
 		},
+		async getCompanyConfig(parent, { companyId, keys }) {
+			const configs = await Promise.all(keys.map(key=>CompanyController.getConfig(companyId, key)));
+			const configCollection = {};
+
+			for (let i=0; i<configs.length; i++) {
+				const value = configs[i];
+				const key = keys[i];
+				configCollection[key] = value
+			}
+
+			return configCollection;
+		}
 	},
 	CompanyRelation: {
 		role(parent) {

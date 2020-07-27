@@ -4,14 +4,16 @@ import DB from '../model';
 import { getSQLPagination } from '../utilities';
 import reduceTokensMetas from '../utilities/reduceTokensMetas';
 
-class UserController extends EventEmitter {
+class UserControl extends EventEmitter {
 
 	/**
 	 * Return tokens
 	 * @param {Array} ids
 	 * @param {Object} pagination 
 	 */
-	static async getTokensById(ids, metaType) {
+	async getTokensById(ids, metaType) {
+		if (!metaType) throw new Error('metaType não definido');
+		
 		const query = {
 			where: { userId: ids, key: metaType },
 		}
@@ -26,7 +28,7 @@ class UserController extends EventEmitter {
 	 * @param {Object} where
 	 * @param {Object} pagination 
 	 */
-	static filterUsers(where, pagination) {
+	filterUsers(where, pagination) {
 		const query = {
 			where,
 			include: [{ model: DB.order, required: false }],
@@ -41,7 +43,7 @@ class UserController extends EventEmitter {
 	 * @param {String} role filter role
 	 * @param {String} metaType filter meta key
 	 */
-	static async getTokensByRole(role, metaType) {
+	async getTokensByRole(role, metaType) {
 		const metas = await DB.userMeta.findAll({
 			where: { key: metaType },
 			include: {
@@ -55,5 +57,7 @@ class UserController extends EventEmitter {
 	}
 
 }
+
+const UserController = new UserControl();
 
 export default UserController;

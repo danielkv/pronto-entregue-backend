@@ -2,6 +2,40 @@ import crypto  from 'crypto';
 import _ from 'lodash';
 import Sequelize, { Op, col, fn, where }  from 'sequelize';
 
+/**
+ * Transform config value type to save on DB
+ * @param {String} value 
+ * @param {String} type 
+ */
+export function serealizeConfig (value, type) {
+	switch(type) {
+		case 'json':
+			return JSON.stringify(value);
+		default:
+			return _.toString(value);
+	}
+}
+
+/**
+ * Transform config value type
+ * @param {String} value 
+ * @param {String} type 
+ */
+export function deserealizeConfig (value, type) {
+	switch(type) {
+		case 'integer':
+			return _.toInteger(value);
+		case 'float':
+			return _.toNumber(value);
+		case 'json':
+			return JSON.parse(value);
+		case 'boolean':
+			return value === 'true';
+		default:
+			return value;
+	}
+}
+
 export function doesPathExist(nodes, path) {
 	if (!nodes) {
 		return false;

@@ -24,7 +24,6 @@ export const typeDefs =  gql`
 		user: User!
 		paymentFee: Float!
 		deliveryPrice: Float!
-		deliveryTime: Int!
 		price: Float!
 		subtotal: Float!
 		type: String!
@@ -34,6 +33,9 @@ export const typeDefs =  gql`
 		createdAt: DateTime!
 		updatedAt: DateTime!
 		paymentMethod: PaymentMethod
+		
+		scheduledTo: DateTime
+		deliveryTime: Int!
 		
 		company: Company!
 		address: Address
@@ -53,6 +55,8 @@ export const typeDefs =  gql`
 		discount: Float
 		price: Float
 		message: String
+
+		scheduledTo: DateTime
 		
 		address: AddressInput
 

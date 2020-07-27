@@ -11,3 +11,4 @@ export const ORDER_NOTIFICATION_INTERVAL = 'order_notification_interval'
 
 // NOTIFICATIONS
 export const NOTIFICATIONS_ENABLED = 'notifications_enabled'
+export const TIME_BEFORE_SCHEDULED_ORDER_NOTIFICATION = 'time_before_scheduled_order_notification'

@@ -4,6 +4,8 @@ import AppModels from './model';
 import AppRouter from './router';
 import AppServer from './server';
 
+import 'moment/locale/pt-br';
+
 export default new class AppService {
 	start() {
 		AppModels.start();

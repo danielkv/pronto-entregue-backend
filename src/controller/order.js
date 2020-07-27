@@ -87,6 +87,9 @@ class OrderControl extends EventEmitter {
 	 */
 
 	async update (data, orderInstance, options) {
+		const oldOrder = orderInstance.get();
+		
+		// don't allow update status
 		if (data.status) delete data.status;
 
 		// cannot update companyId
@@ -109,7 +112,7 @@ class OrderControl extends EventEmitter {
 		if (data.products) await OrderProduct.updateAll(data.products, updatedOrder, options.transaction || null);
 
 		// emit event
-		this.emit('update', { order: updatedOrder });
+		this.emit('update', { oldOrder, order: updatedOrder });
 
 		return updatedOrder;
 	}
@@ -125,12 +128,13 @@ class OrderControl extends EventEmitter {
 	async changeStatus (orderInstance, newStatus, ctx, options={} ) {
 	// check order old status to compare
 		const oldStatus = orderInstance.get('status');
+		const oldOrder = orderInstance.get();
 
 		// if new status is the same
 		if (oldStatus === newStatus) return orderInstance;
 
 		// check availability
-		const availableStatus = ['waiting', 'preparing', 'waitingDelivery', 'waitingPickUp', 'delivering', 'delivered', 'canceled'];
+		const availableStatus = ['waiting', 'scheduled', 'preparing', 'waitingDelivery', 'waitingPickUp', 'delivering', 'delivered', 'canceled'];
 		const newStatusIndex = availableStatus.findIndex((stat) => stat === newStatus);
 		const orlStatusindex = availableStatus.findIndex((stat) => stat === oldStatus);
 
@@ -145,9 +149,54 @@ class OrderControl extends EventEmitter {
 		const updatedOrder = await orderInstance.update({ status: newStatus }, { ...options, fields: ['status'] });
 
 		// emit event
-		this.emit('changeStatus', { order: updatedOrder, newStatus, ctx, options });
+		this.emit('changeStatus', { oldOrder, order: updatedOrder, oldStatus, newStatus, ctx, options });
 
 		return updatedOrder;
+	}
+
+	/**
+	 * Return title and body for status changes notifications
+	 */
+
+	getNotificationMessage(orderId, newStatus) {
+		const finalTexts = ['Parece estar delicioso! 😋', 'Se faltar um pouco, foi culpa minha 😂😂', 'Deveria ter pedido um desse também... 😔', 'Se atrasar é porque comi. 😖']
+		const pickUpFinals = ['Corre pra pegar o pedido 🏃🏃', 'Hmm, tá aqui do lado, não sei se aguento 🤭', 'Só vim buscar que eu guardo pra você 👊']
+	
+		const selectedFinalTextPickUp = pickUpFinals[Math.floor(Math.random() * pickUpFinals.length)];
+		const selectedFinalText = finalTexts[Math.floor(Math.random() * finalTexts.length)];
+		
+		switch(newStatus) {
+			case 'preparing':
+				return {
+					title: 'Seu pedido mudou de status',
+					body: `O Pedido #${orderId} está sendo preparado. ${selectedFinalText}`
+				};
+			case 'scheduled':
+				return {
+					title: 'Seu pedido já foi recebido',
+					body: `O Pedido #${orderId} já foi agendado pelo estabelecimento. Pode ficar tranquilo que vamos te avisar próximo do horário que você agendou.`
+				};
+			case 'waitingPickUp':
+				return {
+					title: 'Seu pedido está pronto',
+					body: `O pedido #${orderId} está aguardando a retirada. ${selectedFinalTextPickUp}`
+				};
+			case 'delivering':
+				return {
+					title: 'Seu pedido está a caminho',
+					body: `O pedido #${orderId} já está a caminho do seu endereço. ${selectedFinalText}`
+				};
+			case 'delivered':
+				return null;
+			case 'canceled':
+				return {
+					title: 'Seu pedido foi marcado como cancelado',
+					body: `O pedido #${orderId} foi cancelado. 😭`
+				};
+			case 'waiting':
+			default:
+				return null;
+		}
 	}
 }
 

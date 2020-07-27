@@ -2,7 +2,7 @@ import { gql }  from 'apollo-server';
 import { Op, fn, literal, col } from 'sequelize';
 
 import { categoryKey, loadProductKey } from '../cache/keys';
-import { upload }  from '../controller/uploads';
+import ProductController from '../controller/product';
 import { productSaleLoader, optionsGroupsLoader } from '../loaders';
 import Category from '../model/category';
 import Company from '../model/company';
@@ -43,7 +43,9 @@ export const typeDefs =  gql`
 		favoritedBy(pagination: Pagination): [User]!
 		
 		category: Category!
-		
+
+		minDeliveryTime: Int
+		scheduleEnabled: Boolean
 
 		sale: Sale
 	}
@@ -60,6 +62,8 @@ export const typeDefs =  gql`
 		categoryId: ID
 		optionsGroups: [OptionsGroupInput]
 		sale: SaleInput
+		minDeliveryTime: Int
+		scheduleEnabled: Boolean
 	}
 
 	extend type Query {
@@ -120,44 +124,24 @@ export const resolvers =  {
 				include: [Company]
 			});
 		},
-		createProduct(_, { data }, { company }) {
+		createProduct(_, { data }, ctx) {
 			return conn.transaction(async (transaction) => {
-				if (data.file) data.image = await upload(company.name, await data.file);
-
-				// check if selected category exists
-				const category = await Category.findByPk(data.categoryId)
-				if (!category) throw new Error('Categoria não encontrada');
-
-				// create product
-				const product = await Product.cache().create({ ...data, companyId: company.get('id') }, { transaction })
-
-				// create options groups
-				if (data.optionsGroups) await OptionsGroup.updateAll(data.optionsGroups, product, transaction);
-
-				// sales
-				if (data.sale) await product.createSale(data.sale, { transaction });
+				// update product
+				const product = await ProductController.update(product, data, { transaction }, ctx);
 					
 				return product;
 			})
 		},
-		updateProduct(_, { id, data }, { company }) {
+		updateProduct(_, { id, data }, ctx) {
 			return conn.transaction(async (transaction) => {
-				// product image
-				if (data.file) data.image = await upload(company.name, await data.file);
-
 				// check if product exists
 				const product = await Product.findByPk(id);
 				if (!product) throw new Error('Produto não encontrado');
 
 				// update product
-				const productUpdated = await product.cache().update(data, { fields: ['name', 'description', 'sku', 'price', 'fromPrice', 'order', 'active', 'image', 'type', 'categoryId'], transaction });
+				const productUpdated = await ProductController.update(product, data, { transaction }, ctx);
 
-				// create, update, remove options groups
-				if (data.optionsGroups) await OptionsGroup.updateAll(data.optionsGroups, productUpdated, transaction);
-
-				// sales
-				if (data.sale) await productUpdated.createSale(data.sale, { transaction });
-
+				// return
 				return productUpdated;
 			})
 		},

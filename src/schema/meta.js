@@ -11,7 +11,7 @@ export const typeDefs = gql`
 
 	input MetaInput {
 		id: ID
-		action: String! #create | update | delete
+		action: String #create | update | delete
 		key: String
 		value: String
 	}
