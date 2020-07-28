@@ -28,7 +28,6 @@ class CompanyControl {
 			return remap(ids, companies);
 		}, { cache: false, cacheKeyFn: (value)=>JSON.stringify(value) })
 
-
 		this.metaLoader = new DataLoader(async values => {
 			const companyIds = values.map(k => k.companyId);
 			const keys = values.map(k => k.key);
@@ -169,6 +168,19 @@ class CompanyControl {
 	/**
 	 * Set and return values from config table
 	 * @param {String} key 
+	 */
+	setConfigs(companyId, data) {
+		return Promise.all(data.map(config => {
+			return this.setConfig(companyId, config.key, config.value, config.type)
+		}))
+	}
+
+	/**
+	 * Set and return values from config table
+	 * @param {*} companyId 
+	 * @param {*} key 
+	 * @param {*} value 
+	 * @param {*} type 
 	 */
 	async setConfig(companyId, key, value, type) {
 		const meta = await DB.companyMeta.findOne({ where: { companyId, key } })

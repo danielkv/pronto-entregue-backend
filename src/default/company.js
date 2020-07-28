@@ -1,3 +1,13 @@
+import NotificationSoundsController from "../controller/notificationsSounds";
+
+export function allowBuyClosed() {
+	return false;
+}
+
+export function notificationSound() {
+	return NotificationSoundsController.availableSounds()[0]
+}
+
 export function deliveryHoursEnabled() {
 	return false;
 }

@@ -120,6 +120,7 @@ export const typeDefs =  gql`
 
 		#configurations
 		setCompanyConfig(companyId: ID!, key: String!, value: JSON!, type: String): JSON!
+		setCompanyConfigs(companyId: ID!, data: [JSON!]!): JSON!
 	}
 
 	extend type Query {
@@ -129,7 +130,7 @@ export const typeDefs =  gql`
 		ordersStatusQty(companyId: ID!): JSON!
 
 		#configurations
-		getCompanyConfig(companyId: ID!, keys: [String!]!): JSON!
+		companyConfig(companyId: ID!, keys: [String!]!): JSON!
 	}
 `;
 
@@ -187,6 +188,9 @@ export const resolvers =  {
 		},
 		setCompanyConfig(_, { companyId, key, value, type }) {
 			return CompanyController.setConfig(companyId, key, value, type);
+		},
+		setCompanyConfigs(_, { companyId, data }) {
+			return CompanyController.setConfigs(companyId, data);
 		}
 	},
 	Query: {
@@ -208,7 +212,7 @@ export const resolvers =  {
 			// check if company exists
 			return CompanyController.getCompany(id, location)
 		},
-		async getCompanyConfig(parent, { companyId, keys }) {
+		async companyConfig(parent, { companyId, keys }) {
 			const configs = await Promise.all(keys.map(key=>CompanyController.getConfig(companyId, key)));
 			const configCollection = {};
 
