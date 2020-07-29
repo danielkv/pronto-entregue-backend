@@ -56,6 +56,35 @@ class CompanyControl {
 	}
 
 	/**
+	 * Return company available Hours
+	 * @param {ID} companyId  
+	 */
+	async getDeliveryAvailability(companyId) {
+		const deliveryHoursEnabled = await this.getConfig(companyId, 'deliveryHoursEnabled');
+		let availableHours;
+
+		if (deliveryHoursEnabled) {
+			availableHours = await this.getConfig(companyId, 'deliveryHours');
+		} else {
+			availableHours = await this.getConfig(companyId, 'businessHours');
+		}
+
+		return availableHours;
+	}
+
+	/**
+	 * Return company available Hours for especific date
+	 * @param {ID} companyId  
+	 */
+	async getDeliveryAvailabilityForDate(companyId, date) {
+		const day = moment(date);
+		const dayOfWeek = day.format('d');
+		const availableHours = this.getDeliveryAvailability(companyId);
+
+		return availableHours[dayOfWeek].hours;
+	}
+
+	/**
 	 * Return user tokens of the company
 	 * 
 	 * @param {ID} companyId

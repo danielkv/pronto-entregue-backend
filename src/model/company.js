@@ -8,6 +8,7 @@ import conn from '../services/connection';
  */
 
 class Company extends Sequelize.Model {}
+
 Company.init({
 	name: Sequelize.STRING,
 	displayName: Sequelize.STRING,
