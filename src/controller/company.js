@@ -9,7 +9,7 @@ import Company from "../model/company";
 import CompanyMeta from "../model/companyMeta";
 import User from "../model/user";
 import UserMeta from "../model/userMeta";
-import { getSQLPagination, deserealizeConfig, serealizeConfig } from "../utilities";
+import { getSQLPagination, deserializeConfig, serealizeConfig } from "../utilities";
 import { pointFromCoordinates } from "../utilities/address";
 import { DELIVERY_TYPE_META } from "../utilities/company";
 
@@ -216,7 +216,7 @@ class CompanyControl {
 		if (!meta) {
 			const valueSave = serealizeConfig(value, type);
 			const created = await DB.companyMeta.create({ key, companyId, value: valueSave, type });
-			return deserealizeConfig(created.value, type);
+			return deserializeConfig(created.value, type);
 		} else {
 			const typeSave = type ? type : meta.type;
 			const valueSave = serealizeConfig(value, typeSave);
@@ -238,11 +238,14 @@ class CompanyControl {
 					case 'businessHours':
 						typeDeserialize = 'json'
 						break;
+					case 'deliveryTime':
+						typeDeserialize = 'string'
+						break;
 					default:
 						typeDeserialize = 'string'
 				}
 			}
-			return deserealizeConfig(config.value, typeDeserialize);
+			return deserializeConfig(config.value, typeDeserialize);
 		}
 
 		//check for default value

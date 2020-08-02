@@ -21,7 +21,7 @@ export function serealizeConfig (value, type) {
  * @param {String} value 
  * @param {String} type 
  */
-export function deserealizeConfig (value, type) {
+export function deserializeConfig (value, type) {
 	switch(type) {
 		case 'integer':
 			return _.toInteger(value);

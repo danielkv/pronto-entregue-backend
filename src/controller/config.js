@@ -34,7 +34,7 @@ class ConfigControl {
 	 * @param {String} value 
 	 * @param {String} type 
 	 */
-	deserealize(value, type) {
+	deserialize(value, type) {
 		switch(type) {
 			case 'integer':
 				return _.toInteger(value);
@@ -57,7 +57,7 @@ class ConfigControl {
 		const row = await this.loader.load(key);
 		if (!row) return null;
 		
-		return this.deserealize(row.get('value'), row.get('type'))
+		return this.deserialize(row.get('value'), row.get('type'))
 	}
 	
 	/**

@@ -1,6 +1,7 @@
 
 import { gql }  from 'apollo-server';
 
+import DB from '../model';
 import GMaps from '../services/googleMapsClient';
 import { parseAddresses } from '../utilities/address';
 
@@ -41,9 +42,18 @@ export const typeDefs = gql`
 		createAddress(data: AddressInput!, userId: ID): Address!
 	}
 
+	extend type Query {
+		address(id: ID!): Address!
+	}
+
 `;
 
-export const resolvers =  {
+export const resolvers = {
+	Query: {
+		address(_, { id }) {
+			return DB.address.findByPk(id);
+		}
+	},
 	Mutation: {
 		async searchAddress(_, { search }) {
 			const { data: { results } } = await GMaps.geocode({
