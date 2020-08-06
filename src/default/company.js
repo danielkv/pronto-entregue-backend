@@ -1,5 +1,9 @@
 import NotificationSoundsController from "../controller/notificationsSounds";
 
+export function allowBuyClosedTimeBefore() {
+	return 0;
+}
+
 export function allowBuyClosed() {
 	return false;
 }

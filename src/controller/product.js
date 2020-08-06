@@ -4,6 +4,7 @@ import DB from "../model";
 import { upload } from "./uploads";
 
 class ProductController extends EventEmitter {
+
 	/**
 	 * Create product in DataBase
 	 * @param {Object} data 

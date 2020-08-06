@@ -22,7 +22,7 @@ export const typeDefs =  gql`
 	type Product {
 		id: ID!
 		name: String!
-		description: String!
+		description: String
 		sku: String
 		image: String!
 		order: Int!

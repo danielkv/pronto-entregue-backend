@@ -59,25 +59,3 @@ export function companyIsOpen(businessHours) {
 		return now.isBetween(from, to, ['hour', 'minute']);
 	})
 }
-
-export function isOpenAttribute(column='') {
-	const now = moment();
-	const weekDay = now.format('d');
-
-	const objectDay = `JSON_EXTRACT(${column}, '$[${weekDay}]')`;
-
-	const hour1 = `JSON_EXTRACT(${objectDay}, '$.hours[0]')`;
-	const hour2 = `JSON_EXTRACT(${objectDay}, '$.hours[2]')`;
-
-	const from1 = `TIME( JSON_UNQUOTE(JSON_EXTRACT(${hour1}, '$.from') ))`;
-	const to1 = `TIME( JSON_UNQUOTE(JSON_EXTRACT(${hour1}, '$.to') ))`;
-
-	const from2 = `TIME( JSON_UNQUOTE(JSON_EXTRACT(${hour2}, '$.from') ))`;
-	const to2 = `TIME( JSON_UNQUOTE(JSON_EXTRACT(${hour2}, '$.to') ))`;
-
-	const timeNow = 'TIME(now())';
-
-	const isOpen = literal(`IF(IF(${hour1} IS NOT NULL, ${timeNow} BETWEEN ${from1} AND ${to1}, false) OR IF(${hour2} IS NOT NULL, ${timeNow} BETWEEN ${from2} AND ${to2}, false), true, false)`)
-
-	return [isOpen, 'isOpen'];
-}

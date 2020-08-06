@@ -1,6 +1,6 @@
 import DataLoader from "dataloader";
 import moment from "moment";
-import Sequelize from "sequelize";
+import Sequelize, { fn } from "sequelize";
 
 import * as CompanyDefault from '../default/company';
 import { remap } from "../loaders/remap";
@@ -19,7 +19,20 @@ class CompanyControl {
 			const location = keys[0].location;
 			const ids = keys.map(k => k.id)
 
-			let query = { where: { id: ids } }
+			let query = {
+			/* 	attributes: {
+					include: [
+						[Sequelize.fn('COMPANY_NEXT_OPEN_DATE', Sequelize.col('metas.value'), Sequelize.fn('NOW')), 'nextOpen'],
+						[Sequelize.fn('COMPANY_NEXT_CLOSE_DATE', Sequelize.col('metas.value')), 'nextClose'],
+						[Sequelize.fn('COMPANY_ALLOW_BUY_CLOSED_BY_ID', Sequelize.col('company.id')), 'allowBuyClosed']
+					]
+				}, */
+				where: { id: ids },
+				/* include: [
+					{ model: DB.companyMeta, where: { key: 'businessHours' }, required: false }
+				] */
+			}
+			
 
 			if (location) query = this.includeQueryLocation(location, query, false)
 
@@ -114,14 +127,35 @@ class CompanyControl {
 		}, []);
 	}
 
-	async getCompany(id, location) {
+	async companiesLoader(id, location) {
 		const company = await this.loader.load({ id, location });
 
 		if (!company) throw new Error('Estabelecimetno não encontrado')
 
 		return company;
 	}
+	
+	getCompany(id, location) {
+		
+		let query = {
+			attributes: {
+				include: [
+					[Sequelize.fn('COMPANY_NEXT_OPEN_DATE', Sequelize.col('metas.value'), Sequelize.fn('NOW')), 'nextOpen'],
+					[Sequelize.fn('COMPANY_NEXT_CLOSE_DATE', Sequelize.col('metas.value')), 'nextClose'],
+					[Sequelize.fn('COMPANY_ALLOW_BUY_CLOSED_BY_ID', Sequelize.col('company.id')), 'allowBuyClosed']
+				]
+			},
+			where: { id },
+			include: [
+				{ model: DB.companyMeta, where: { key: 'businessHours' }, required: false }
+			]
+		}
 
+		if (location) query = this.includeQueryLocation(location, query, false)
+
+		return DB.company.findOne(query);
+	}
+	
 	/**
 	 * Return companies
 	 * 
@@ -130,13 +164,23 @@ class CompanyControl {
 	 */
 	getCompanies(where, location, pagination) {
 		let query = {
-			attributes: { include: [this.isOpenAttribute('metas.value')] },
+			attributes: {
+				include: [
+					[Sequelize.fn('COMPANY_IS_OPEN', Sequelize.col('metas.value')), 'isOpen'],
+					[Sequelize.fn('COMPANY_NEXT_OPEN_DATE', Sequelize.col('metas.value'), Sequelize.fn('NOW')), 'nextOpen'],
+					[Sequelize.fn('COMPANY_NEXT_CLOSE_DATE', Sequelize.col('metas.value')), 'nextClose'],
+					[Sequelize.fn('COMPANY_ALLOW_BUY_CLOSED_BY_ID', Sequelize.col('company.id')), 'allowBuyClosed'],
+				]
+			},
 			where,
-			include: [DB.companyType, { model: DB.companyMeta, where: { key: 'businessHours' }, required: false }],
+			include: [
+				DB.companyType,
+				{ model: DB.companyMeta, where: { key: 'businessHours' }, required: false }
+			],
 			group: Sequelize.col('company.id'),
 			limit: 10,
 			subQuery: false,
-			order: [[Sequelize.col('isOpen'), 'DESC']]
+			order: [[Sequelize.col('isOpen'), 'DESC'], [Sequelize.col('allowBuyClosed'), 'DESC']]
 		}
 
 		if (pagination) {
@@ -148,7 +192,7 @@ class CompanyControl {
 		if (location) {
 			query = this.includeQueryLocation(location, query);
 
-			query.order = [[Sequelize.col('isOpen'), 'DESC'], [Sequelize.col('distance'), 'ASC']]
+			query.order = [[Sequelize.col('isOpen'), 'DESC'], [Sequelize.col('distance'), 'ASC'], [Sequelize.col('allowBuyClosed'), 'DESC'], [Sequelize.col('distance'), 'ASC']]
 		}
 			
 		return DB.company.findAll(query);
@@ -266,7 +310,7 @@ class CompanyControl {
 		}
 	}
 
-	isOpenAttribute(column='') {
+	/* isOpenAttribute(column='') {
 		const now = moment();
 		const weekDay = now.format('d');
 	
@@ -286,7 +330,7 @@ class CompanyControl {
 		const isOpen = Sequelize.literal(`IF(IF(${hour1} IS NOT NULL, ${timeNow} BETWEEN ${from1} AND ${to1}, false) OR IF(${hour2} IS NOT NULL, ${timeNow} BETWEEN ${from2} AND ${to2}, false), true, false)`)
 	
 		return [isOpen, 'isOpen'];
-	}
+	} */
 
 }
 

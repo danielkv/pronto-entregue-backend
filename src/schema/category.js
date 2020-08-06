@@ -1,6 +1,7 @@
 import { gql }  from 'apollo-server';
 import { col } from 'sequelize';
 
+import CategoryController from '../controller/category';
 import { upload }  from '../controller/uploads';
 import Category  from '../model/category';
 import Company from '../model/company';
@@ -36,7 +37,7 @@ export const typeDefs =  gql`
 
 	extend type Query {
 		category(id: ID!): Category!
-		categories(filter: Filter, pagination: Pagination): [Category]!
+		categories(filter: JSON, pagination: Pagination): [Category]!
 		loadCompanyCategories(filter: JSON): [Category]!
 	}
 
@@ -112,7 +113,8 @@ export const resolvers =  {
 
 			return Category.findAll({
 				where,
-				...getSQLPagination(pagination)
+				...getSQLPagination(pagination),
+				order: [['order', 'ASC']]
 			})
 		},
 		async category(_, { id }) {
@@ -124,28 +126,19 @@ export const resolvers =  {
 		},
 	},
 	Category: {
-		async products(parent, { filter }) {
+		async products(parent) {
 			if (parent.products) return parent.products;
 			
 			const categoryId = parent.get('id');
-			const where = sanitizeFilter(filter, { search: ['name'] });
 
-			//return parent.getProducts({ where });
-			return await Product.findAll({
-				where: [where, { categoryId }],
-				order: [['name', 'ASC']]
-			})
+			return CategoryController.productsLoader.load(categoryId);
 		},
-		async countProducts(parent, { filter }) {
+		async countProducts(parent) {
 			if (parent.products) return parent.get('products').length;
 
 			const categoryId = parent.get('id');
-			const where = sanitizeFilter(filter, { search: ['name'] });
 
-			const products = await Product.findAll({
-				where: [where, { categoryId }],
-				order: [['name', 'ASC']]
-			})
+			const products = await CategoryController.productsLoader.load(categoryId);
 
 			return products.length;
 		}

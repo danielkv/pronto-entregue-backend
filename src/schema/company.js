@@ -34,7 +34,11 @@ export const typeDefs =  gql`
 		lastMonthRevenue: Float!
 		userRelation: CompanyRelation!
 		published: Boolean!
+
 		isOpen: Boolean!
+		nextOpen: DateTime
+		nextClose: DateTime
+		allowBuyClosed: Boolean!
 
 		acceptTakeout: Boolean! #deprecated
 
@@ -360,11 +364,21 @@ export const resolvers =  {
 			return businessHoursLoader.load(parent.get('id'));
 		},
 		async isOpen(parent) {
-			if (parent.get('isOpen')) return parent.get('isOpen');
+			const isOpen = parent.get('isOpen')
+			if (typeof isOpen !== 'undefined') return isOpen;
 
 			// deprecated
 			const businessHours = await businessHoursLoader.load(parent.get('id'));
 			return companyIsOpen(businessHours);
+		},
+		async nextOpen(parent) {
+			return parent.get('nextOpen');
+		},
+		async nextClose(parent) {
+			return parent.get('nextClose');
+		},
+		async allowBuyClosed(parent) {
+			return parent.get('allowBuyClosed')
 		},
 
 		countProducts(parent, { filter }) {
@@ -479,7 +493,7 @@ export const resolvers =  {
 
 			const companyId = parent.get('companyId');
 
-			return CompanyController.getCompany(companyId, location)
+			return CompanyController.companiesLoader(companyId, location)
 		},
 	}
 }
