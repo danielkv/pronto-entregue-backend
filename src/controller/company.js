@@ -192,7 +192,7 @@ class CompanyControl {
 		if (location) {
 			query = this.includeQueryLocation(location, query);
 
-			query.order = [[Sequelize.col('isOpen'), 'DESC'], [Sequelize.col('distance'), 'ASC'], [Sequelize.col('allowBuyClosed'), 'DESC'], [Sequelize.col('distance'), 'ASC']]
+			query.order = [[Sequelize.literal("isOpen OR (allowBuyClosed IS NOT NULL AND allowBuyClosed <> 'false')"), 'DESC'], [Sequelize.col('distance'), 'ASC']]
 		}
 			
 		return DB.company.findAll(query);
