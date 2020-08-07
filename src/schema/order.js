@@ -291,16 +291,11 @@ export const resolvers =  {
 
 			return true;
 		},
-		createOrder(_, { data }, { company: selectedCompany }, ctx) {
+		createOrder(_, { data }, ctx) {
 			return sequelize.transaction(async (transaction) => {
 				// check if company exits
 				const company = await Company.findByPk(data.companyId);
 				if (!company) throw new Error('Estabelecimento não encontrado');
-
-				// check if company is open
-				const businessHours = await company.getMetas({ where: { key: 'businessHours' } }).then(([meta]) => {if (meta) return JSON.parse(meta.get('value')); else return defaultBusinessHours()});
-				const isOpen = companyIsOpen(businessHours);
-				if (!(selectedCompany && selectedCompany.get('id') === company.get('id')) && !isOpen) throw new Error(`${company.get('displayName')} está fechado no momento`);
 
 				//check if coupon is valid
 				if (data.couponId) {
@@ -319,7 +314,7 @@ export const resolvers =  {
 					data.type = await CompanyController.getDeliveryType(company.get('id'));
 				
 				// create order
-				const createdOrder = await OrderController.create(data, company, { transaction });
+				const createdOrder = await OrderController.create(data, company, { transaction }, ctx);
 
 				return createdOrder;
 			});

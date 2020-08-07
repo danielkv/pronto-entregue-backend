@@ -38,7 +38,7 @@ export const typeDefs =  gql`
 		isOpen: Boolean!
 		nextOpen: DateTime
 		nextClose: DateTime
-		allowBuyClosed: Boolean!
+		allowBuyClosed: String
 
 		acceptTakeout: Boolean! #deprecated
 

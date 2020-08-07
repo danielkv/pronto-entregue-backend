@@ -1,6 +1,7 @@
 import EventEmitter from 'events';
-import { QueryTypes } from "sequelize";
+import Sequelize, { QueryTypes } from "sequelize";
 
+import DB from '../model';
 import OrderProduct from "../model/orderProduct";
 import UserMeta from '../model/userMeta';
 import connection from "../services/connection";
@@ -43,7 +44,30 @@ class OrderControl extends EventEmitter {
 	 * @param {Company} companyInstance 
 	 * @param {Object} options 
 	 */
-	async create (data, companyInstance, options) {
+	async create (data, companyInstance, options, ctx) {
+		// check if company is open
+		let closedBuy = false;
+
+		const res = await DB.companyMeta.findOne({
+			attributes: [
+				[Sequelize.fn('COMPANY_IS_OPEN', Sequelize.col('value')), 'isOpen'],
+				[Sequelize.fn('COMPANY_ALLOW_BUY_CLOSED_BY_ID', Sequelize.col('companyId')), 'allowBuyClosed'],
+			],
+			where: { key: 'businessHours', companyId: companyInstance.get('id') }
+		});
+
+		const isOpen = res.get('isOpen');
+		const allowBuyClosed = res.get('allowBuyClosed');
+
+		if (!isOpen) {
+			if (!allowBuyClosed) throw new Error(`${companyInstance.get('displayName')} está fechado no momento`);
+			else {
+				if (!data.scheduledTo && allowBuyClosed === 'onlyScheduled')
+					throw new Error(`${companyInstance.get('displayName')} está fechado no momento, tente mais tarde`);
+				closedBuy = true;
+			}
+		}
+
 		// check if order has delivery address, if not throw an error
 		if (data.type !== 'takeout') {
 			if (!data.address) throw new Error('Pedido não tem endereço de entrega');
@@ -58,7 +82,7 @@ class OrderControl extends EventEmitter {
 		await OrderProduct.updateAll(data.products, order, options.transaction);
 
 		// emit event
-		this.emit('create', { order, company: companyInstance });
+		this.emit('create', { order, company: companyInstance, closedBuy, ctx });
 	
 		return order;
 	}
@@ -171,11 +195,11 @@ class OrderControl extends EventEmitter {
 					title: 'Seu pedido mudou de status',
 					body: `O Pedido #${orderId} está sendo preparado. ${selectedFinalText}`
 				};
-			case 'scheduled':
+			/* case 'scheduled':
 				return {
 					title: 'Seu pedido já foi recebido',
 					body: `O Pedido #${orderId} já foi agendado pelo estabelecimento. Pode ficar tranquilo que vamos te avisar próximo do horário que você agendou.`
-				};
+				}; */
 			case 'waitingPickUp':
 				return {
 					title: 'Seu pedido está pronto',

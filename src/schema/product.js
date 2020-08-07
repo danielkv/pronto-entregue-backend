@@ -214,6 +214,9 @@ export const resolvers =  {
 					{
 						model: Sale,
 						required: true,
+						attributes: {
+							include: [[literal('IF(sales.startsAt <= NOW() AND sales.expiresAt >= NOW() AND sales.active, true, false)'), 'progress']]
+						},
 						where: {
 							removed: false,
 							active: true,
