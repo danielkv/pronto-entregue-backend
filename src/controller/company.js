@@ -1,15 +1,17 @@
 import DataLoader from "dataloader";
 import moment from "moment";
-import Sequelize, { fn } from "sequelize";
+import Sequelize from "sequelize";
 
 import * as CompanyDefault from '../default/company';
+import deserializeConfig from "../helpers/deserializeConfig";
+import serealizeConfig from "../helpers/serealizeConfig";
 import { remap } from "../loaders/remap";
 import DB from "../model";
 import Company from "../model/company";
 import CompanyMeta from "../model/companyMeta";
 import User from "../model/user";
 import UserMeta from "../model/userMeta";
-import { getSQLPagination, deserializeConfig, serealizeConfig } from "../utilities";
+import { getSQLPagination } from "../utilities";
 import { pointFromCoordinates } from "../utilities/address";
 import { DELIVERY_TYPE_META } from "../utilities/company";
 

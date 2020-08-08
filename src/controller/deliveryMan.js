@@ -1,5 +1,4 @@
 import EventEmitter from 'events';
-import { Op } from 'sequelize';
 
 import User from '../model/user';
 import UserMeta from '../model/userMeta';
@@ -123,7 +122,10 @@ class DeliveryManFactory extends EventEmitter {
 
 		// get meta
 		const meta = await UserMeta.findOne({
-			where: { userId: userInstance.get('id'), key: DELIVERY_MAN_ENABLED_META }
+			where: {
+				userId: userInstance.get('id'),
+				key: DELIVERY_MAN_ENABLED_META
+			}
 		})
 
 		// if meta exists return meta's value
