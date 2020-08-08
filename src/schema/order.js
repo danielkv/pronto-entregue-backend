@@ -79,8 +79,8 @@ export const typeDefs =  gql`
 	extend type Query {
 		order (id: ID!): Order!
 
-		countOrders(filter:JSON): Int! @hasRole(permission: "master")
-		orders (filter: JSON, pagination: Pagination): [Order]! @hasRole(permission: "master")
+		countOrders(filter:JSON): Int! @hasRole(permission: "adm")
+		orders (filter: JSON, pagination: Pagination): [Order]! @hasRole(permission: "adm")
 	}
 
 	extend type Mutation {

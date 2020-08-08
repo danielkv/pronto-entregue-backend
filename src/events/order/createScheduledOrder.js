@@ -92,7 +92,7 @@ export default async function createScheduledOrder ({ order, company }) {
 
 	const userNotificationMessage = {
 		title: `Você tem um pedido agendado de ${company.get('displayName')}`,
-		body: `O pedido #${orderId} foi agendado para ${moment(scheduledTo).calendar()}. Fique no aguardo das notificações pra saber quando ele estiver a caminho 🤩`
+		body: `O pedido #${orderId} foi agendado para ${moment(scheduledTo).calendar(moment(timeBefore))}. Fique no aguardo das notificações pra saber quando ele estiver a caminho 🤩`
 	}
 
 	const userMessage = {
@@ -115,7 +115,7 @@ export default async function createScheduledOrder ({ order, company }) {
 
 	const companyNotificationMessage = {
 		title: 'Você tem um pedido agendado para alguns instantes',
-		body: `O pedido #${orderId} foi agendado ${moment(createdAt).fromNow()}. Enviamos essa notifição apenas pra você lembrar do pedido 😊`
+		body: `O pedido #${orderId} foi agendado ${moment(createdAt).calendar(moment(timeBefore))}. Enviamos essa notifição apenas pra você lembrar do pedido 😊`
 	}
 		
 	const companyMessage = {
