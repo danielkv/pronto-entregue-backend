@@ -1,4 +1,3 @@
-import DataLoader from 'dataloader';
 import EventEmitter from 'events';
 
 import * as UserDefault from '../default/user'
@@ -9,24 +8,6 @@ import { getSQLPagination } from '../utilities';
 import reduceTokensMetas from '../utilities/reduceTokensMetas';
 
 class UserControl extends EventEmitter {
-	constructor () {
-		super();
-
-		this.metaLoader = new DataLoader(async values => {
-			const userIds = values.map(k => k.userId);
-			const keys = values.map(k => k.key);
-			const metas = await DB.companyMeta.findAll({
-				where: { key: keys, userId: userIds }
-			});
-
-			return values.map(v => {
-				const config = metas.find(c => c.userId == v.userId && c.key == v.key);
-				if (config) return config;
-
-				return null;
-			});
-		}, { cache: false })
-	}
 
 	/**
 	 * Return tokens
@@ -76,54 +57,6 @@ class UserControl extends EventEmitter {
 		});
 
 		return reduceTokensMetas(metas);
-	}
-
-	/**
-	 * Set and return values from config table
-	 * @param {*} companyId 
-	 * @param {*} key 
-	 * @param {*} value 
-	 * @param {*} type 
-	 */
-	async setConfig(companyId, key, value, type) {
-		const meta = await DB.companyMeta.findOne({ where: { companyId, key } })
-		if (!meta) {
-			const valueSave = serealizeConfig(value, type);
-			const created = await DB.companyMeta.create({ key, companyId, value: valueSave, type });
-			return deserializeConfig(created.value, type);
-		} else {
-			const typeSave = type ? type : meta.type;
-			const valueSave = serealizeConfig(value, typeSave);
-			const updated = await meta.update({ key, value: valueSave, type: typeSave });
-			return updated.value;
-		}
-	}
-
-	/**
-	 * Returns values from config table
-	 * @param {String} key 
-	 */
-	async getConfig(companyId, key) {
-		const config = await this.metaLoader.load({ key, companyId })
-		if (config) {
-			let typeDeserialize = config.type;
-			if (!config.type) {
-				switch (key) {
-					case 'deliveryManEnabled':
-						typeDeserialize = 'boolean'
-						break;
-					default:
-						typeDeserialize = 'string'
-				}
-			}
-			return deserializeConfig(config.value, typeDeserialize);
-		}
-
-		//check for default value
-		const defaultValue = UserDefault[key];
-		if (defaultValue) return defaultValue();
-		
-		return;
 	}
 
 }

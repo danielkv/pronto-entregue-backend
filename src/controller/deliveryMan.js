@@ -1,7 +1,11 @@
 import EventEmitter from 'events';
 
+import DeliveryManEntity from '../entities/DeliveryManEntity';
+import UserMetaEntity from '../entities/UserMetaEntity';
+import DB from '../model';
 import User from '../model/user';
 import UserMeta from '../model/userMeta';
+import { getSQLPagination } from '../utilities';
 import { DELIVERY_MAN_ENABLED_META, MAX_CONCURRENT_DELIVERIES, DELIVERY_MAN_ROLE } from '../utilities/deliveryMan';
 import { DEVICE_TOKEN_META } from '../utilities/notifications';
 
@@ -14,12 +18,19 @@ class DeliveryManFactory extends EventEmitter {
 		return userInstance.get('role') === DELIVERY_MAN_ROLE;
 	}
 
+	listDeliveryMen(pagination) {
+		return DB.user.findAll({
+			where: { role: 'deliveryMan' },
+			...getSQLPagination(pagination)
+		});
+	}
+
 	/**
 	 * returns open deliveries that delivery man is assigned
-	 * @param {User} userInstance 
+	 * @param {ID} userId
 	 */
-	getOpenDeliveries(userInstance) {
-		return userInstance.getDeliveries({ where: { status: ['wainting', 'waitingDelivery', 'delivering'] } });
+	getOpenDeliveries(userId) {
+		return DeliveryManEntity.getOpenDeliveries(userId)
 	}
 
 	/**
@@ -116,23 +127,10 @@ class DeliveryManFactory extends EventEmitter {
 	 * Checks if user is enabled as DeliveryMan
 	 * @param {*} userInstance 
 	 */
-	async isEnabled(userInstance) {
+	async isEnabled(userId) {
 		// checks if user is Delviery man
-		if (!this.userIsDeliveryMan(userInstance)) return false;
-
-		// get meta
-		const meta = await UserMeta.findOne({
-			where: {
-				userId: userInstance.get('id'),
-				key: DELIVERY_MAN_ENABLED_META
-			}
-		})
-
-		// if meta exists return meta's value
-		if (meta) return meta.get('value') === 'true';
 		
-		// if meta does not exist return false
-		return false;
+		return UserMetaEntity.getMeta(userId, DELIVERY_MAN_ENABLED_META);
 	}
 	
 }

@@ -4,6 +4,7 @@ import ConfigController from '../controller/config';
 import DeliveryController from '../controller/delivery';
 import DeliveryManController from '../controller/deliveryMan';
 import { orderDeliveryLoader, userLoader } from '../loaders';
+import DB from '../model';
 import Delivery from '../model/delivery';
 import User from '../model/user';
 import pubSub from '../services/pubsub';
@@ -44,6 +45,7 @@ export const typeDefs = gql`
 		user: User
 		canAcceptDelivery: Boolean!
 		isEnabled: Boolean!
+		openDeliveries: [Delivery]!
 	}
 
 	extend type Order {
@@ -59,6 +61,8 @@ export const typeDefs = gql`
 		deliveries(filter: JSON, pagination: Pagination): [Delivery]! @hasRole(permission: "deliveryMan")
 		delivery(id: ID!): Delivery! @hasRole(permission: "deliveryMan")
 
+		countDeliveryMen: Int!
+		deliveryMen(pagination: Pagination): [DeliveryMan]!
 		deliveryMan(userId: ID!): DeliveryMan!
 
 		deliveryGlobalActive: Boolean!
@@ -74,6 +78,8 @@ export const typeDefs = gql`
 		setDeliveryMan(deliveryId: ID!, userId: ID!): Delivery!
 
 		callDeliveryMan(deliveryId: ID!): Delivery!
+
+		updateDeliveryManStatus(userId: ID!, newStatus: Boolean!): DeliveryMan!
 	}
 
 	extend type Subscription {
@@ -103,9 +109,25 @@ export const resolvers = {
 		},
 		deliveryMan(_, { userId }) {
 			return userLoader.load(userId);
-		}
+		},
+		deliveryMen(_, { pagination }) {
+			return DeliveryManController.listDeliveryMen(pagination);
+		},
+		async countDeliveryMen() {
+			const deliveryMen = await DeliveryManController.listDeliveryMen();
+
+			return deliveryMen.length;
+		},
 	},
 	Mutation: {
+		async updateDeliveryManStatus(_, { userId, newStatus }) {
+			const user = await DB.user.findByPk(userId);
+			if (newStatus) {
+				return await DeliveryManController.enable(user);
+			} else {
+				return await DeliveryManController.disable(user);
+			}
+		},
 		async enableDeliveryMan(_, { userId }) {
 			// check if user exists
 			const user = await User.findByPk(userId);
@@ -176,11 +198,20 @@ export const resolvers = {
 		user(parent) {
 			return parent;
 		},
+		
 		canAcceptDelivery (parent) {
 			return DeliveryManController.canAcceptDelivery(parent);
 		},
+		async openDeliveries (parent) {
+			const userId = parent.get('id');
+			const del = await DeliveryManController.getOpenDeliveries(userId);
+			return del
+		},
 		isEnabled(parent) {
-			return DeliveryManController.isEnabled(parent);
+			const userId = parent.get('id');
+			if (!userId) return false;
+
+			return DeliveryManController.isEnabled(userId);
 		}
 	},
 	Order: {
