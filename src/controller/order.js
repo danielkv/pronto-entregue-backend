@@ -45,8 +45,36 @@ class OrderControl extends EventEmitter {
 	 * @param {Object} options 
 	 */
 	async create (data, companyInstance, options, ctx) {
+		//validate order data
+		const validation = await this.validate(data, companyInstance, ctx);
+		
+		// create order
+		const order = await companyInstance.createOrder(data, options);
+	
+		// create order products
+		await OrderProduct.updateAll(data.products, order, options.transaction);
+
+		// emit event
+		this.emit('create', { order, company: companyInstance, ...validation });
+	
+		return order;
+	}
+
+	async validate (data, companyInstance, ctx) {
 		// check if company is open
 		let closedBuy = false;
+
+		const products = await DB.product.findAll({ where: { id: data.products.map(prod=>prod.productRelatedId), active: true } })
+		
+		// check if all products are active
+		if (products.length !== data.products.length) throw new Error('Há produtos que não estão mais ativos no seu pedido, por favor verifique sua cesta e tente novamente.')
+
+		// check if there is any scheduable products and cart scheduledTo is set
+		products.forEach(product=>{
+			const scheduleEnabled = product.get('scheduleEnabled');
+			if (scheduleEnabled && scheduleEnabled === true && !data.scheduledTo)
+				throw new Error('Há produtos sob encomenda nesse pedido. Verifique se está utilizando a versão mais atualizada do app.');
+		})
 
 		const res = await DB.companyMeta.findOne({
 			attributes: [
@@ -75,16 +103,11 @@ class OrderControl extends EventEmitter {
 			data = { ...data, ...address };
 		}
 
-		// create order
-		const order = await companyInstance.createOrder(data, options);
-	
-		// create order products
-		await OrderProduct.updateAll(data.products, order, options.transaction);
+		return {
+			closedBuy,
+			ctx
+		}
 
-		// emit event
-		this.emit('create', { order, company: companyInstance, closedBuy, ctx });
-	
-		return order;
 	}
 
 	/**
