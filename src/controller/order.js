@@ -47,6 +47,13 @@ class OrderControl extends EventEmitter {
 	async create (data, companyInstance, options, ctx) {
 		//validate order data
 		const validation = await this.validate(data, companyInstance, ctx);
+
+		// check if order has delivery address, if not throw an error
+		if (data.type !== 'takeout') {
+			if (!data.address) throw new Error('Pedido não tem endereço de entrega');
+			const address = joinAddress(data.address);
+			data = { ...data, ...address };
+		}
 		
 		// create order
 		const order = await companyInstance.createOrder(data, options);
@@ -64,10 +71,11 @@ class OrderControl extends EventEmitter {
 		// check if company is open
 		let closedBuy = false;
 
-		const products = await DB.product.findAll({ where: { id: data.products.map(prod=>prod.productRelatedId), active: true } })
+		const products = await DB.product.findAll({ where: { id: data.products.map(prod=>prod.productRelatedId) } })
 		
 		// check if all products are active
-		if (products.length !== data.products.length) throw new Error('Há produtos que não estão mais ativos no seu pedido, por favor verifique sua cesta e tente novamente.')
+		if (products.some(product => product.active === false))
+			throw new Error('Há produtos que não estão mais ativos no seu pedido, por favor verifique sua cesta e tente novamente.')
 
 		// check if there is any scheduable products and cart scheduledTo is set
 		products.forEach(product=>{
@@ -94,13 +102,6 @@ class OrderControl extends EventEmitter {
 					throw new Error(`${companyInstance.get('displayName')} está fechado no momento, tente mais tarde`);
 				closedBuy = true;
 			}
-		}
-
-		// check if order has delivery address, if not throw an error
-		if (data.type !== 'takeout') {
-			if (!data.address) throw new Error('Pedido não tem endereço de entrega');
-			const address = joinAddress(data.address);
-			data = { ...data, ...address };
 		}
 
 		return {

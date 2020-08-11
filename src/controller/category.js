@@ -6,7 +6,7 @@ class CategoryController  {
 	constructor() {
 		this.productsLoader = new DataLoader(async (keys)=>{
 			const allProducts = DB.product.findAll({
-				where: { categoryId: keys },
+				where: { categoryId: keys, active: true },
 				order: [['categoryId', 'ASC']]
 			});
 

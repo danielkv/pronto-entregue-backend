@@ -59,6 +59,7 @@ export const typeDefs = gql`
 	extend type Query {
 		countDeliveries(filter: JSON): Int! @hasRole(permission: "deliveryMan")
 		deliveries(filter: JSON, pagination: Pagination): [Delivery]! @hasRole(permission: "deliveryMan")
+		
 		delivery(id: ID!): Delivery! @hasRole(permission: "deliveryMan")
 
 		countDeliveryMen: Int!
