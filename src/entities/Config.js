@@ -1,5 +1,6 @@
 import deserializeConfig from "../helpers/deserializeConfig"
 import serealizeConfig from "../helpers/serealizeConfig";
+import configLoader from "../loaders/configLoader";
 import DB from "../model";
 
 export default class ConfigEntity {
@@ -8,7 +9,7 @@ export default class ConfigEntity {
 	 * @param {String} key 
 	 */
 	async get(key) {
-		const row = await this.loader.load(key);
+		const row = await configLoader.load(key);
 		if (!row) return null;
 		
 		return deserializeConfig(row.get('value'), row.get('type'))
