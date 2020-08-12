@@ -8,6 +8,7 @@ import { upload } from '../controller/uploads';
 import ConfigEntity from '../entities/Config';
 import JobQueue from '../factory/queue';
 import { deliveryTimeLoader, businessHoursLoader, rateLoader, addressLoader } from '../loaders';
+import companyTypeLoader from '../loaders/companyTypeLoader';
 import DB from '../model';
 import Address from '../model/address';
 import Company  from '../model/company';
@@ -403,7 +404,8 @@ export const resolvers =  {
 
 		
 		type(parent) {
-			return parent.getCompanyType();
+			const companyTypeId = parent.get('companyTypeId');
+			return companyTypeLoader.load(companyTypeId);
 		},
 
 		paymentMethods(parent, { filter }) {

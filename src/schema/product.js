@@ -4,6 +4,7 @@ import { Op, fn, literal, col } from 'sequelize';
 import { categoryKey, loadProductKey } from '../cache/keys';
 import ProductController from '../controller/product';
 import { productSaleLoader, optionsGroupsLoader } from '../loaders';
+import productCategoryLoader from '../loaders/productCategoryLoader';
 import Category from '../model/category';
 import Company from '../model/company';
 import Option  from '../model/option';
@@ -288,10 +289,7 @@ export const resolvers =  {
 			
 			const categoryId = parent.get('categoryId');
 			//return parent.getCategory();
-			return Category.cache(categoryKey(categoryId))
-				.findOne({
-					where: { id: categoryId }
-				})
+			return productCategoryLoader.load(categoryId);
 		},
 		countFavoritedBy(parent) {
 			return parent.countFavoritedBy();
