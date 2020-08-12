@@ -16,6 +16,10 @@ export function deliveryHoursEnabled() {
 	return false;
 }
 
+export function deliveryTime() {
+	return '0';
+}
+
 export function deliveryHours() {
 	return [
 		{
