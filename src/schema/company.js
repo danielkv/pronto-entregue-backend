@@ -402,7 +402,6 @@ export const resolvers =  {
 			})
 		},
 
-		
 		type(parent) {
 			const companyTypeId = parent.get('companyTypeId');
 			return companyTypeLoader.load(companyTypeId);

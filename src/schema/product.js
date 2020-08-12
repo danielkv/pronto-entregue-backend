@@ -1,7 +1,7 @@
 import { gql }  from 'apollo-server';
 import { Op, fn, literal, col } from 'sequelize';
 
-import { categoryKey, loadProductKey } from '../cache/keys';
+import { loadProductKey } from '../cache/keys';
 import ProductController from '../controller/product';
 import { productSaleLoader, optionsGroupsLoader } from '../loaders';
 import productCategoryLoader from '../loaders/productCategoryLoader';
@@ -128,7 +128,7 @@ export const resolvers =  {
 		createProduct(_, { data }, ctx) {
 			return conn.transaction(async (transaction) => {
 				// update product
-				const product = await ProductController.update(product, data, { transaction }, ctx);
+				const product = await ProductController.create(data, { transaction }, ctx);
 					
 				return product;
 			})
