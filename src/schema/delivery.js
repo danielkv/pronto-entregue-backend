@@ -82,6 +82,7 @@ export const typeDefs = gql`
 		disableDeliveryMan(userId: ID!): DeliveryMan!
 
 		setDeliveryMan(deliveryId: ID!, userId: ID!): Delivery!
+		removeDeliveryMan(deliveryId: ID!): Delivery!
 
 		callDeliveryMan(deliveryId: ID!): Delivery!
 
@@ -179,6 +180,16 @@ export const resolvers = {
 
 			// set user to delivery
 			const updatedDelivery = await DeliveryController.setDeliveryMan(delivery, user);
+
+			return updatedDelivery;
+		},
+		async removeDeliveryMan(_, { deliveryId }) {
+			// check if delivery exists
+			const delivery = await Delivery.findByPk(deliveryId);
+			if (!delivery) throw new Error('Nenhuma entrega encontrada');
+
+			// set user to delivery
+			const updatedDelivery = await DeliveryController.removeDeliveryMan(delivery);
 
 			return updatedDelivery;
 		},

@@ -68,6 +68,16 @@ class DeliveryControl extends EventEmitter {
 
 		return deliveryInstance;
 	}
+	
+	async removeDeliveryMan(deliveryInstance) {
+		// set deliveryMan user to delivery
+		await deliveryInstance.setDeliveryMan(null);
+
+		// emit event
+		this.emit('removeDeliveryMan', { delivery: deliveryInstance })
+
+		return deliveryInstance;
+	}
 
 	async createFromOrder(orderInstance, options) {
 		const orderId = orderInstance.get('id')
