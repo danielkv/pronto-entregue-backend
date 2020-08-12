@@ -2,10 +2,12 @@ import DataLoader from "dataloader";
 import _ from "lodash";
 import Sequelize from "sequelize";
 
+import ConfigEntity from "../entities/Config";
 import DB from "../model";
 import { pointFromCoordinates, calculateDistance } from "../utilities/address";
 import { DELIVERY_PRICE_PER_KM, DELIVERY_PE_MIN_PRICE } from "../utilities/config";
-import ConfigController from "./config";
+
+const configEntity = new ConfigEntity();
 
 class DeliveryAreaControl {
 
@@ -119,10 +121,10 @@ class DeliveryAreaControl {
 	 */
 	async calculatePeDeliveryPrice(distance) {
 		// get price per KM config
-		const pricePerKM = await ConfigController.get(DELIVERY_PRICE_PER_KM);
+		const pricePerKM = await configEntity.get(DELIVERY_PRICE_PER_KM);
 
 		// get delivery minimum price
-		const minPrice = await ConfigController.get(DELIVERY_PE_MIN_PRICE);
+		const minPrice = await configEntity.get(DELIVERY_PE_MIN_PRICE);
 
 		// convert to price per meter
 		const pricePerMeter = pricePerKM / 1000;

@@ -1,9 +1,10 @@
 import { gql }  from 'apollo-server';
 
-import ConfigController from '../controller/config';
 import DeliveryController from '../controller/delivery';
 import DeliveryManController from '../controller/deliveryMan';
+import ConfigEntity from '../entities/Config';
 import { orderDeliveryLoader, userLoader } from '../loaders';
+import deliveryOrderLoader from '../loaders/deliveryOrderLoader';
 import DB from '../model';
 import Delivery from '../model/delivery';
 import User from '../model/user';
@@ -13,14 +14,14 @@ import { splitAddress } from '../utilities/address';
 import { DELIVERY_GLOBAL_ACTIVE } from '../utilities/config';
 import { DELIVERY_UPDATED, DELIVERY_CREATED } from '../utilities/delivery';
 
+const configEntity = new ConfigEntity();
+
 export const typeDefs = gql`
 	type Delivery {
 		id: ID!
 		description: String!
 		value: Float!
 		status: String!
-		user: User
-		order: Order
 		deliveryMan: DeliveryMan
 		from: Address!
 		to: Address!
@@ -28,6 +29,9 @@ export const typeDefs = gql`
 		receiverContact: String!
 		senderContact: String!
 		createdAt: DateTime!
+
+		user: User
+		order: Order
 	}
 
 	input DeliveryInput {
@@ -57,6 +61,7 @@ export const typeDefs = gql`
 	}
 
 	extend type Query {
+		sumDeliveries(filter: JSON): Int! @hasRole(permission: "deliveryMan")
 		countDeliveries(filter: JSON): Int! @hasRole(permission: "deliveryMan")
 		deliveries(filter: JSON, pagination: Pagination): [Delivery]! @hasRole(permission: "deliveryMan")
 		
@@ -96,12 +101,19 @@ export const resolvers = {
 	},
 	Query: {
 		deliveryGlobalActive() {
-			return ConfigController.get(DELIVERY_GLOBAL_ACTIVE);
+			return configEntity.get(DELIVERY_GLOBAL_ACTIVE);
 		},
 		countDeliveries(_, { filter }) {
 			const where = sanitizeFilter(filter, { excludeFilters: ['active'] });
 
 			return DeliveryController.getDeliveries(where).then(res=>res.length);
+		},
+		sumDeliveries(_, { filter }) {
+			const where = sanitizeFilter(filter, { excludeFilters: ['active'] });
+
+			return DeliveryController.getDeliveries(where).then(res=>res.reduce((total, delivery)=>{
+				return total + Number(delivery.get('value'));
+			}, 0));
 		},
 		deliveries(_, { filter, pagination }) {
 			const where = sanitizeFilter(filter, { excludeFilters: ['active'] });
@@ -189,6 +201,12 @@ export const resolvers = {
 		},
 		from(parent) {
 			return splitAddress(parent, 'deliveryFrom', 'From')
+		},
+		order(parent) {
+			const orderId = parent.get('orderId');
+			if (!orderId) return;
+			
+			return deliveryOrderLoader.load(orderId);
 		}
 	},
 	DeliveryMan: {

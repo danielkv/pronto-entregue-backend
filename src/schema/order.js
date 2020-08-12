@@ -15,7 +15,6 @@ import sequelize  from '../services/connection';
 import pubSub, { instanceToData } from '../services/pubsub'
 import { sanitizeFilter, getSQLPagination } from '../utilities';
 import { pointFromCoordinates } from '../utilities/address';
-import { companyIsOpen, defaultBusinessHours } from '../utilities/company';
 import { ORDER_UPDATED } from '../utilities/notifications';
 
 export const typeDefs =  gql`

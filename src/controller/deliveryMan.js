@@ -1,13 +1,17 @@
 import EventEmitter from 'events';
 
+import ConfigEntity from '../entities/Config';
 import DeliveryManEntity from '../entities/DeliveryManEntity';
 import UserMetaEntity from '../entities/UserMetaEntity';
 import DB from '../model';
 import User from '../model/user';
 import UserMeta from '../model/userMeta';
 import { getSQLPagination } from '../utilities';
-import { DELIVERY_MAN_ENABLED_META, MAX_CONCURRENT_DELIVERIES, DELIVERY_MAN_ROLE } from '../utilities/deliveryMan';
+import { MAX_CONCURRENT_DELIVERIES } from '../utilities/config';
+import { DELIVERY_MAN_ENABLED_META, MAX_CONCURRENT_DELIVERIES_DEFAULT, DELIVERY_MAN_ROLE } from '../utilities/deliveryMan';
 import { DEVICE_TOKEN_META } from '../utilities/notifications';
+
+const configEntity = new ConfigEntity();
 
 class DeliveryManFactory extends EventEmitter {
 	/**
@@ -41,8 +45,10 @@ class DeliveryManFactory extends EventEmitter {
 		const enabled = await this.isEnabled(userInstance);
 		if (!enabled) return false;
 
+		const maxConcurrent = await configEntity.get(MAX_CONCURRENT_DELIVERIES);
+
 		const deliveries = await this.getOpenDeliveries(userInstance);
-		return deliveries.length < MAX_CONCURRENT_DELIVERIES;
+		return deliveries.length < (maxConcurrent || MAX_CONCURRENT_DELIVERIES_DEFAULT);
 	}
 
 	/**

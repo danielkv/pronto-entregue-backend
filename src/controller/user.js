@@ -1,8 +1,5 @@
 import EventEmitter from 'events';
 
-import * as UserDefault from '../default/user'
-import deserializeConfig from '../helpers/deserializeConfig';
-import serealizeConfig from '../helpers/serealizeConfig';
 import DB from '../model';
 import { getSQLPagination } from '../utilities';
 import reduceTokensMetas from '../utilities/reduceTokensMetas';

@@ -2,10 +2,10 @@ import { gql }  from 'apollo-server';
 import { Op, fn, col, where, literal, QueryTypes } from 'sequelize';
 
 import CompanyController from '../controller/company';
-import ConfigController from '../controller/config';
 import DeliveryAreaController from '../controller/deliveryArea';
 import OrderController from '../controller/order';
 import { upload } from '../controller/uploads';
+import ConfigEntity from '../entities/Config';
 import JobQueue from '../factory/queue';
 import { deliveryTimeLoader, businessHoursLoader, rateLoader, addressLoader } from '../loaders';
 import DB from '../model';
@@ -21,6 +21,8 @@ import { getSQLPagination, sanitizeFilter }  from '../utilities';
 import { calculateDistance, CompanyAreaSelect } from '../utilities/address'
 import { companyIsOpen, DELIVERY_TYPE_META } from '../utilities/company';
 import { DELIVERY_GLOBAL_ACTIVE } from '../utilities/config';
+
+const configEntity = new ConfigEntity();
 
 export const typeDefs =  gql`
 	type Company {
@@ -240,7 +242,7 @@ export const resolvers =  {
 			if (!location) throw new Error('Não é possível retornar uma área de entrega sem definir uma localização');
 
 			// get delivery type global configuration
-			const deliveryGlobalActive = await ConfigController.get(DELIVERY_GLOBAL_ACTIVE);
+			const deliveryGlobalActive = await configEntity.get(DELIVERY_GLOBAL_ACTIVE);
 
 			if (!deliveryGlobalActive && parent.deliveryAreas && parent.deliveryAreas.length)
 				return parent.deliveryAreas[0];
@@ -277,7 +279,7 @@ export const resolvers =  {
 			const location = variableValues.location || args.location;
 			if (!location) return false;
 
-			const deliveryGlobalActive = await ConfigController.get(DELIVERY_GLOBAL_ACTIVE);
+			const deliveryGlobalActive = await configEntity.get(DELIVERY_GLOBAL_ACTIVE);
 
 			if (deliveryGlobalActive) {
 				const orderType = await CompanyController.getConfig(parent.get('id'), DELIVERY_TYPE_META);

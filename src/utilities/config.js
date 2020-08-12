@@ -4,6 +4,7 @@ export const DELIVERY_PE_MIN_PRICE = 'delivery_pe_min_price'
 export const DELIVERY_NOTIFICATION_LIMIT = 'delivery_notification_limit'
 export const DELIVERY_NOTIFICATION_INTERVAL = 'delivery_notification_interval'
 export const DELIVERY_GLOBAL_ACTIVE = 'delivery_global_active'
+export const MAX_CONCURRENT_DELIVERIES = 'max_concurrent_deliveries'
 
 // ORDERS
 export const ORDER_NOTIFICATION_LIMIT = 'order_notification_limit'

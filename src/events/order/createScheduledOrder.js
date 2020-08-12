@@ -1,13 +1,15 @@
 import moment from 'moment';
 
 import CompanyController from '../../controller/company';
-import ConfigController from '../../controller/config';
 import { ORDER_CREATED } from '../../controller/order';
 import UserController from '../../controller/user';
+import ConfigEntity from '../../entities/Config';
 import JobQueue from '../../factory/queue';
 import pubSub, { instanceToData } from '../../services/pubsub';
 import { TIME_BEFORE_SCHEDULED_ORDER_NOTIFICATION } from '../../utilities/config';
-import {  DEVICE_TOKEN_META, DESKTOP_TOKEN_META } from '../../utilities/notifications';
+import { DEVICE_TOKEN_META, DESKTOP_TOKEN_META } from '../../utilities/notifications';
+
+const configEntity = new ConfigEntity();
 
 /**
  * Queue notifications for scheduled orders
@@ -84,7 +86,7 @@ export default async function createScheduledOrder ({ order, company }) {
 	const companyJobId = `scheduledOrder.company.${orderId}`;
 
 	// calculate jo delay
-	const timeBefore = await ConfigController.get(TIME_BEFORE_SCHEDULED_ORDER_NOTIFICATION);
+	const timeBefore = await configEntity.get(TIME_BEFORE_SCHEDULED_ORDER_NOTIFICATION);
 	const jobDelay = moment(scheduledTo).subtract(timeBefore, 'minutes').diff(moment(), 'milliseconds');
 
 	// do not queue notifications in this case

@@ -1,12 +1,14 @@
-import ConfigController from '../controller/config';
 import DeliveryController from '../controller/delivery';
 import OrderController from '../controller/order';
+import ConfigEntity from '../entities/Config';
 import JobQueue from '../factory/queue';
 import Order from '../model/order';
 import pubSub, { instanceToData } from '../services/pubsub';
 import { DELIVERY_NOTIFICATION_LIMIT, DELIVERY_NOTIFICATION_INTERVAL } from '../utilities/config';
 import { DELIVERY_UPDATED, DELIVERY_CREATED } from '../utilities/delivery';
 import { ORDER_UPDATED } from '../utilities/notifications';
+
+const configEntity = new ConfigEntity();
 
 export default new class DeliveryEventFactory {
 	start () {
@@ -66,8 +68,8 @@ export default new class DeliveryEventFactory {
 
 			// case new status is waitingDelivery, notify delivery men
 			if (newStatus === 'waitingDelivery') {
-				const limit = await ConfigController.get(DELIVERY_NOTIFICATION_LIMIT);
-				const interval = await ConfigController.get(DELIVERY_NOTIFICATION_INTERVAL);
+				const limit = await configEntity.get(DELIVERY_NOTIFICATION_LIMIT);
+				const interval = await configEntity.get(DELIVERY_NOTIFICATION_INTERVAL);
 				DeliveryController.notifyDeliveryMen(delivery, interval, limit)
 			}
 		});

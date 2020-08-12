@@ -1,6 +1,6 @@
-import ConfigController from "../../controller/config";
 import { ORDER_CREATED } from "../../controller/order";
 import JobQueue from "../../factory/queue";
+import configLoader from "../../loaders/configLoader";
 import pubSub, { instanceToData } from "../../services/pubsub";
 import { ORDER_NOTIFICATION_LIMIT, ORDER_NOTIFICATION_INTERVAL } from "../../utilities/config";
 
@@ -12,7 +12,7 @@ export default async function createDefaultOrder({ order, company }) {
 	pubSub.publish(ORDER_CREATED, { orderCreated: instanceToData(order), companyId });
 
 	// setup data and config
-	const [limit, interval] = await ConfigController.loader.loadMany([ORDER_NOTIFICATION_LIMIT, ORDER_NOTIFICATION_INTERVAL])
+	const [limit, interval] = await configLoader.loadMany([ORDER_NOTIFICATION_LIMIT, ORDER_NOTIFICATION_INTERVAL])
 	const data = { companyId, orderId }
 		
 	// queue order notifications
