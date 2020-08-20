@@ -9,7 +9,6 @@ import User from './user';
 
 class Coupon extends Sequelize.Model {
 	async isValid(order) {
-		console.log('VALIDATION')
 		let rulesWhere = {};
 		let include = [];
 
@@ -80,10 +79,11 @@ class Coupon extends Sequelize.Model {
 		}
 
 		// check maxPerUser
-		if (order.userId && this.get('maxPerUser') > 0) {
-			const countOrders = await this.countOrders({ where: { id: order.userId } });
+		const maxPerUser = this.get('maxPerUser');
+		if (order.userId && maxPerUser > 0) {
+			const countOrders = await this.countOrders({ where: { userId: order.userId } });
 			
-			if (countOrders >= this.get('maxPerUser')) throw new Error('Esse cupom atingiu o limite de pedidos por usuário');
+			if (countOrders >= maxPerUser) throw new Error('Esse cupom atingiu o limite de pedidos por usuário');
 		}
 
 		// check minValue

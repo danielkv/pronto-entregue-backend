@@ -62,8 +62,6 @@ export function instanceToData (instance) {
 		modelName: instance.constructor.name,
 		data: instance.get({ plain: true })
 	}
-
-	//console.log(JSON.stringify(data));
 	
 	return data
 }
@@ -140,7 +138,5 @@ function generateIncludeRecurse (model, depth = 1) {
 		})
 }
 
-//console.log(reviver('order', '{"modelName":"order","data":{"price":27,"discount":0,"id":150,"paymentFee":"0.00","deliveryPrice":"5.00","deliveryTime":0,"type":"peDelivery","status":"waitingDelivery","message":"","nameAddress":"","streetAddress":"Rua João Quartieiro","numberAddress":29,"complementAddress":"","districtAddress":"Centro","zipcodeAddress":88960000,"cityAddress":"Sombrio","stateAddress":"SC","referenceAddress":null,"locationAddress":{"type":"Point","coordinates":[-29.1079952,-49.6347488]},"createdAt":"2020-06-19T16:09:45.000Z","updatedAt":"2020-06-24T14:02:18.000Z","creditHistoryId":null,"userId":3,"companyId":9,"paymentMethodId":9,"couponId":null}}'))
-//console.log( dataToInstance(models['order'], '{"modelName":"order","data":{"price":27,"discount":0,"id":150,"paymentFee":"0.00","deliveryPrice":"5.00","deliveryTime":0,"type":"peDelivery","status":"waitingDelivery","message":"","nameAddress":"","streetAddress":"Rua João Quartieiro","numberAddress":29,"complementAddress":"","districtAddress":"Centro","zipcodeAddress":88960000,"cityAddress":"Sombrio","stateAddress":"SC","referenceAddress":null,"locationAddress":{"type":"Point","coordinates":[-29.1079952,-49.6347488]},"createdAt":"2020-06-19T16:09:45.000Z","updatedAt":"2020-06-24T14:02:18.000Z","creditHistoryId":null,"userId":3,"companyId":9,"paymentMethodId":9,"couponId":null}}'))
 
 export default pubSub;

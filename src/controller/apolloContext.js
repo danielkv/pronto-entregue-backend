@@ -2,7 +2,7 @@ import { authenticate, selectCompany } from './authentication';
 
 export const createContext = async ({ req, connection }) => {
 	if (connection) {
-		//console.log(connection.context)
+		// subscriptions
 	} else {
 		const { authorization, companyid: companyId, selectedaddress, adminconnection } = req.headers;
 

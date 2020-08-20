@@ -93,10 +93,7 @@ class CompaniesReportControl {
 		const companyDiscount = orders.reduce((value, order)=>order.discount + value, -credits);
 		const totalDiscount = companyDiscount + credits;
 		
-		const taxable = orders.reduce((value, order)=>{console.log(order.taxable); return parseFloat(order.taxable) + value}, 0);
-		//const taxable = revenue - (coupons - taxableCoupon);
-	
-		//console.log(revenue - taxable);
+		const taxable = orders.reduce((value, order)=>(parseFloat(order.taxable) + value), 0);
 		
 		return {
 			...company.get(),

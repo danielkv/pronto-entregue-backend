@@ -57,7 +57,6 @@ class ModelsService {
 	}
 
 	setupAssociations() {
-		//console.log(models);
 		// Company Relations
 		DB.company.hasMany(DB.companyMeta);
 		DB.company.belongsToMany(DB.user, { through: DB.companyRelation });
