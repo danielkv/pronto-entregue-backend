@@ -62,6 +62,7 @@ export const resolvers = {
 				where: { userId },
 				order: [['createdAt', 'DESC']]
 			});
+			if (!lastOrder) return;
 
 			// get order location
 			const orderLocation = lastOrder.get('locationAddress');
