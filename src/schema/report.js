@@ -1,11 +1,9 @@
 import { gql }  from 'apollo-server';
-import moment from 'moment';
+import Sequelize from 'sequelize';
 
 import CompaniesReportController from '../controller/companiesReport';
+import DB from '../model';
 import Company from '../model/company';
-import CompanyMeta from '../model/companyMeta';
-import Coupon from '../model/coupon';
-import CreditHistory from '../model/creditHistory';
 import Order from '../model/order';
 import { sanitizeFilter } from '../utilities';
 
@@ -15,8 +13,12 @@ export const typeDefs =  gql`
 		companies: [CompanyReport]!
 		
 		credits: Float!
+		payment: Float!
+		refund: Float!
 		coupons: Float!
 		taxableCoupon: Float!
+		deliveryPaymentValue: Float!
+		countPeDelivery: Int!
 
 		companyDiscount: Float!
 		totalDiscount: Float!
@@ -28,9 +30,14 @@ export const typeDefs =  gql`
 
 	type CompanyReport {
 		id: ID!
+		image: String!
 		displayName: String!
-		plan: CompanyPlan!
-
+		plan: CompanyPlan
+		refund: Float!
+		deliveryPaymentValue: Float!
+		countPeDelivery: Int!
+		payment: Float!
+		
 		countOrders: Int!
 		orders: [OrderReport]!
 
@@ -38,7 +45,7 @@ export const typeDefs =  gql`
 		coupons: Float!
 		taxableCoupon: Float!
 
-		companyDiscount: Float!
+		#companyDiscount: Float!
 		totalDiscount: Float!
 		revenue: Float!
 		tax: Float!
@@ -50,14 +57,22 @@ export const typeDefs =  gql`
 		createdAt: DateTime!
 		subtotal: Float!
 		price: Float!
+		refund: Float!
+		type: String!
+		payment: Float!
+
+		deliveryPrice: Float!
+		deliveryPaymentValue: Float!
+
 		discount: Float!
 
-		datetime: String!
-
 		creditHistory: CreditHistory
+
 		coupon: Coupon
 		couponValue: Float!
 		taxableCoupon: Float!
+
+		paymentMethod: PaymentMethod!
 		
 		tax: Float!
 		taxable: Float!
@@ -73,7 +88,7 @@ export const resolvers =  {
 	Query: {
 		async companiesReport(_, { companiesIds=null, filter }) {
 			const ordersWhere = filter ? sanitizeFilter(filter, { excludeFilters: ['active'] }) : null;
-			const companyWhere = companiesIds ? { id: companiesIds } : null;
+			const companyWhere = companiesIds && companiesIds.length ? { id: companiesIds } : null;
 
 			const companies = await Company.findAll({
 				where: companyWhere,
@@ -83,16 +98,18 @@ export const resolvers =  {
 						required: true,
 						where: ordersWhere,
 						subQuery: true,
-						include: [CreditHistory, Coupon]
+						include: [DB.creditHistory, DB.coupon, DB.paymentMethod]
 					},
 					{
-						model: CompanyMeta,
+						model: DB.companyMeta,
 						required: false,
 						where: { key: 'plan' }
 					}
-				]
-			})
+				],
 
+				order: [[Sequelize.col('orders.createdAt'), 'DESC']],
+			})
+			
 			return CompaniesReportController.calculate(companies);
 		}
 	},
@@ -106,11 +123,6 @@ export const resolvers =  {
 	CompanyReport: {
 		countOrders(parent) {
 			return parent.orders.length
-		}
-	},
-	OrderReport: {
-		datetime(parent){
-			return moment(parent.createdAt).format()
 		}
 	}
 }
