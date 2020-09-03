@@ -6,7 +6,7 @@ import CreditsController from '../controller/credits';
 import DeliveryAreaController from '../controller/deliveryArea';
 import OrderController from '../controller/order';
 import { ORDER_CREATED, ORDER_QTY_STATUS_UPDATED, ORDER_STATUS_UPDATED } from '../controller/order';
-import { orderCompanyLoader, orderPaymentMethodLoader, userLoader } from '../loaders';
+import { orderPaymentMethodLoader, userLoader } from '../loaders';
 import Company from '../model/company';
 import Coupon from '../model/coupon';
 import Order from '../model/order';
@@ -173,7 +173,8 @@ export const resolvers =  {
 		company(parent) {
 			const companyId = parent.companyId
 
-			return orderCompanyLoader.load(companyId);
+			return CompanyController.loader.load({ id: companyId });
+			//return orderCompanyLoader.load(companyId);
 		},
 		subtotal (parent) {
 			return parent.price + parent.discount;

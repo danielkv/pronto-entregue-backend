@@ -22,17 +22,17 @@ class CompanyControl {
 			const ids = keys.map(k => k.id)
 
 			let query = {
-			/* 	attributes: {
+				attributes: {
 					include: [
 						[Sequelize.fn('COMPANY_NEXT_OPEN_DATE', Sequelize.col('metas.value'), Sequelize.fn('NOW')), 'nextOpen'],
 						[Sequelize.fn('COMPANY_NEXT_CLOSE_DATE', Sequelize.col('metas.value')), 'nextClose'],
 						[Sequelize.fn('COMPANY_ALLOW_BUY_CLOSED_BY_ID', Sequelize.col('company.id')), 'allowBuyClosed']
 					]
-				}, */
+				},
 				where: { id: ids },
-				/* include: [
+				include: [
 					{ model: DB.companyMeta, where: { key: 'businessHours' }, required: false }
-				] */
+				]
 			}
 			
 
