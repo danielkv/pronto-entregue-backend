@@ -1,9 +1,10 @@
 
 import { gql }  from 'apollo-server';
+import { Sequelize } from 'sequelize';
 
 import DB from '../model';
 import GMaps from '../services/googleMapsClient';
-import { parseAddresses } from '../utilities/address';
+import { parseAddresses, pointFromCoordinates } from '../utilities/address';
 
 export const typeDefs = gql`
 
@@ -44,6 +45,8 @@ export const typeDefs = gql`
 
 	extend type Query {
 		address(id: ID!): Address!
+
+		getLastOrderAddress(userId: ID!): Address
 	}
 
 `;
@@ -52,6 +55,31 @@ export const resolvers = {
 	Query: {
 		address(_, { id }) {
 			return DB.address.findByPk(id);
+		},
+		async getLastOrderAddress(_, { userId }) {
+			// get last
+			const lastOrder = await DB.order.findOne({
+				where: { userId },
+				order: [['createdAt', 'DESC']]
+			});
+			if (!lastOrder) return;
+
+			// get order location
+			const orderLocation = lastOrder.get('locationAddress');
+
+			// get closet address from user
+
+			const point = pointFromCoordinates(orderLocation.coordinates);
+			const address = await DB.address.findOne({
+				include: [{
+					model: DB.user,
+					where: { id: userId }
+				}],
+				attributes: { include: [[Sequelize.fn('ST_Distance_Sphere', point, Sequelize.col('address.location')), 'distance']] },
+				order: [[Sequelize.col('distance'), 'ASC']]
+			})
+
+			return address;
 		}
 	},
 	Mutation: {

@@ -103,7 +103,9 @@ class ModelsService {
 		DB.user.hasMany(DB.userMeta);
 		DB.user.hasMany(DB.order);
 		DB.user.belongsToMany(DB.company, { through: DB.companyRelation });
+
 		DB.user.belongsToMany(DB.address, { through: DB.userAddress });
+		DB.address.belongsToMany(DB.user, { through: DB.userAddress });
 
 		//UserMeta
 		DB.userMeta.belongsTo(DB.user);
