@@ -44,7 +44,7 @@ export class RedirectService {
         const screen = this.screens[screenName];
         if (!screenName) throw new Error('Não há nenhuma tela com esse nome');
 
-        screen.params = { ...screen.params, ...params };
+        if (params) screen.params = { ...screen.params, ...params };
 
         return screen;
     }
