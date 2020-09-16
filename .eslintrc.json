@@ -24,7 +24,7 @@
         "no-use-before-define": "off",
         "comma-dangle": "off",
         "linebreak-style": "off",
-        "indent": ["error", "tab", { "SwitchCase": 1 }],
+        //"indent": ["error", "tab", { "SwitchCase": 1 }],
         "no-tabs": 0,
         "arrow-body-style": 0,
         "semi": 0,
