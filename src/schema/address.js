@@ -56,16 +56,20 @@ export const resolvers = {
         async getLastOrderAddress(_, { userId }) {
             // get last
             const lastOrder = await DB.order.findOne({
-                where: { userId },
+                where: {
+                    userId,
+                    type: { [Sequelize.Op.not]: 'takeout' },
+                    locationAddress: { [Sequelize.Op.not]: null },
+                },
                 order: [['createdAt', 'DESC']],
             });
             if (!lastOrder) return;
 
             // get order location
             const orderLocation = lastOrder.get('locationAddress');
+            if (!orderLocation || !orderLocation.coordinates) return;
 
-            // get closet address from user
-
+            // get closest address from user
             const point = pointFromCoordinates(orderLocation.coordinates);
             const address = await DB.address.findOne({
                 include: [
