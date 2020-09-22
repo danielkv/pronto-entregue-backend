@@ -1,4 +1,4 @@
-import { gql }  from 'apollo-server';
+import { gql } from 'apollo-server';
 import { Op, fn } from 'sequelize';
 
 import { upload } from '../controller/uploads';
@@ -11,290 +11,357 @@ import connection from '../services/connection';
 import { sanitizeFilter, getSQLPagination } from '../utilities';
 import { couponProductWhere } from '../utilities/coupon';
 
-export const typeDefs =  gql`
-	
-	type Coupon {
-		id: ID!
-		name: String!
-		image: String
-		description: String
-		masterOnly: Boolean!
+export const typeDefs = gql`
+    type Coupon {
+        id: ID!
+        name: String!
+        image: String
+        description: String
+        masterOnly: Boolean!
 
-		featured: Boolean!
-		taxable: Float!
-		active: Boolean!
-		valueType: ValueType!
-		value: Float!
-		freeDelivery: Boolean!
+        featured: Boolean!
+        taxable: Float!
+        active: Boolean!
+        valueType: ValueType!
+        value: Float!
+        freeDelivery: Boolean!
 
-		startsAt: DateTime!
-		expiresAt: DateTime!
-		createdAt: DateTime!
-		updatedAt: DateTime!
-		
-		#rules
-		minValue: Int
-		maxValue: Int
-		maxPerUser: Int!
-		maxPurchases: Int!
-		onlyFirstPurchases: Boolean!
+        startsAt: DateTime!
+        expiresAt: DateTime!
+        createdAt: DateTime!
+        updatedAt: DateTime!
 
-		products: [Product]!
-		companies: [Company]!
-		users: [User]!
-	}
+        #rules
+        minValue: Int
+        maxValue: Int
+        maxPerUser: Int!
+        maxPurchases: Int!
+        onlyFirstPurchases: Boolean!
 
-	input CouponInput {
-		name: String
-		file: Upload
-		description: String
+        products: [Product]!
+        countCompanies: Int!
+        companies: [Company]!
+        users: [User]!
+    }
 
-		featured: Boolean
-		taxable: Float!
-		active: Boolean
-		type: Type
-		valueType: ValueType
-		value: Float
-		freeDelivery: Boolean!
+    input CouponInput {
+        name: String
+        file: Upload
+        description: String
 
-		startsAt: DateTime
-		expiresAt: DateTime
+        featured: Boolean
+        taxable: Float!
+        active: Boolean
+        type: Type
+        valueType: ValueType
+        value: Float
+        freeDelivery: Boolean!
 
-		#rules
-		minValue: Int
-		maxValue: Int
-		maxPerUser: Int
-		maxPurchases: Int
-		onlyFirstPurchases: Boolean
+        startsAt: DateTime
+        expiresAt: DateTime
 
-		companies: [ID]
-		products: [ID]
-		users: [ID]
-	}
+        #rules
+        minValue: Int
+        maxValue: Int
+        maxPerUser: Int
+        maxPurchases: Int
+        onlyFirstPurchases: Boolean
 
-	extend type Order {
-		coupon: Coupon
-	}
+        companies: [ID]
+        products: [ID]
+        users: [ID]
+    }
 
-	extend input OrderInput {
-		couponId: ID
-	}
+    extend type Order {
+        coupon: Coupon
+    }
 
-	extend type User {
-		coupons(order: OrderInput): [Coupon]!
-	}
+    extend input OrderInput {
+        couponId: ID
+    }
 
-	extend type Product {
-		countCoupons(notIn: [ID]): Int!
-		coupons(notIn: [ID]): [Coupon]!
-	}
+    extend type User {
+        coupons(order: OrderInput): [Coupon]!
+    }
 
-	extend type Query {
-		countCoupons(filter: Filter): Int!
-		coupons(filter: Filter, pagination: Pagination): [Coupon]!
-		coupon(id: ID!): Coupon!
-	}
+    extend type Product {
+        countCoupons(notIn: [ID]): Int!
+        coupons(notIn: [ID]): [Coupon]!
+    }
 
-	extend type Mutation {
-		createCoupon(data: CouponInput!): Coupon!
-		updateCoupon(id: ID!, data: CouponInput!): Coupon!
+    extend type Query {
+        countCoupons(filter: JSON): Int!
+        coupons(filter: JSON, pagination: Pagination): [Coupon]!
+        coupon(id: ID!): Coupon!
+    }
 
-		checkCoupon(couponName: String!, order: OrderInput!): Coupon!
-	}
+    extend type Mutation {
+        createCoupon(data: CouponInput!): Coupon!
+        updateCoupon(id: ID!, data: CouponInput!): Coupon!
+
+        checkCoupon(couponName: String!, order: OrderInput!): Coupon!
+    }
 `;
 
 export const resolvers = {
-	Mutation: {
-		createCoupon(_, { data }, { user, company }) {
-			return connection.transaction(async transaction => {
-				// if needs to upload a file
-				if (data.file) data.image = await upload('coupons', await data.file);
+    Mutation: {
+        createCoupon(_, { data }, { user, company }) {
+            return connection.transaction(async (transaction) => {
+                // if needs to upload a file
+                if (data.file)
+                    data.image = await upload('coupons', await data.file);
 
-				// check if user is master, if true only user master can edit
-				if (user.can('master')) data.masterOnly = true;
-				else {
-					// if user is not master, the coupon will be charged from company
-					data.taxable = 100;
+                // check if user is master, if true only user master can edit
+                if (user.can('master')) data.masterOnly = true;
+                else {
+                    // if user is not master, the coupon will be charged from company
+                    data.taxable = 100;
 
-					// if user is not master, the company has to be selected
-					if (!data.companies.length) data.companies = [company.get('id')]
-				}
+                    // if user is not master, the company has to be selected
+                    if (!data.companies.length)
+                        data.companies = [company.get('id')];
+                }
 
-				const createdCoupon = await Coupon.create(data, { transaction });
+                const createdCoupon = await Coupon.create(data, {
+                    transaction,
+                });
 
-				if (data.companies) await createdCoupon.setCompanies(data.companies, { transaction });
-				if (data.products) await createdCoupon.setProducts(data.products, { transaction });
-				if (data.users) await createdCoupon.setUsers(data.users, { transaction });
+                if (data.companies)
+                    await createdCoupon.setCompanies(data.companies, {
+                        transaction,
+                    });
+                if (data.products)
+                    await createdCoupon.setProducts(data.products, {
+                        transaction,
+                    });
+                if (data.users)
+                    await createdCoupon.setUsers(data.users, { transaction });
 
-				return createdCoupon;
-			});
-		},
-		updateCoupon(_, { id, data }, { user, company }) {
-			return connection.transaction(async transaction => {
-				// check if coupon exists
-				const couponFound = await Coupon.findByPk(id);
-				if (!couponFound) throw new Error('Cupom não encontrado');
+                return createdCoupon;
+            });
+        },
+        updateCoupon(_, { id, data }, { user, company }) {
+            return connection.transaction(async (transaction) => {
+                // check if coupon exists
+                const couponFound = await Coupon.findByPk(id);
+                if (!couponFound) throw new Error('Cupom não encontrado');
 
-				// check if user can update coupon
-				if (couponFound.get('masterOnly') === true && !user.can('master')) throw new Error('Você não tem permissões para alterar esse cupom');
+                // check if user can update coupon
+                if (
+                    couponFound.get('masterOnly') === true &&
+                    !user.can('master')
+                )
+                    throw new Error(
+                        'Você não tem permissões para alterar esse cupom',
+                    );
 
-				// if needs to upload a file
-				if (data.file) data.image = await upload('cupons', await data.file);
+                // if needs to upload a file
+                if (data.file)
+                    data.image = await upload('cupons', await data.file);
 
-				// check if user is master, if true only user master can edit
-				if (user.can('master')) data.masterOnly = true;
-				else {
-					// if user is not master, the coupon will be charged from company
-					data.taxable = 100;
+                // check if user is master, if true only user master can edit
+                if (user.can('master')) data.masterOnly = true;
+                else {
+                    // if user is not master, the coupon will be charged from company
+                    data.taxable = 100;
 
-					// if user is not master, the company has to be selected
-					if (!data.companies.length) data.companies = [company.get('id')]
-				}
+                    // if user is not master, the company has to be selected
+                    if (!data.companies.length)
+                        data.companies = [company.get('id')];
+                }
 
-				const updatedCoupon = await couponFound.update(data, { fields: ['name', 'image', 'description', 'active', 'type', 'valueType', 'value', 'startsAt', 'expiresAt', 'masterOnly', 'maxPerUser', 'maxPurchases', 'onlyFirstPurchases', 'taxable', 'featured', 'minValue', 'maxValue', 'freeDelivery'], transaction });
+                const updatedCoupon = await couponFound.update(data, {
+                    fields: [
+                        'name',
+                        'image',
+                        'description',
+                        'active',
+                        'type',
+                        'valueType',
+                        'value',
+                        'startsAt',
+                        'expiresAt',
+                        'masterOnly',
+                        'maxPerUser',
+                        'maxPurchases',
+                        'onlyFirstPurchases',
+                        'taxable',
+                        'featured',
+                        'minValue',
+                        'maxValue',
+                        'freeDelivery',
+                    ],
+                    transaction,
+                });
 
-				if (data.companies) await updatedCoupon.setCompanies(data.companies, { transaction });
-				if (data.products) await updatedCoupon.setProducts(data.products, { transaction });
-				if (data.users) await updatedCoupon.setUsers(data.users, { transaction });
+                if (data.companies)
+                    await updatedCoupon.setCompanies(data.companies, {
+                        transaction,
+                    });
+                if (data.products)
+                    await updatedCoupon.setProducts(data.products, {
+                        transaction,
+                    });
+                if (data.users)
+                    await updatedCoupon.setUsers(data.users, { transaction });
 
-				return updatedCoupon;
-			});
-		},
-		async checkCoupon(_, { couponName, order }) {
-			const coupon = await Coupon.findOne({
-				order: [['startsAt', 'DESC']],
-				//include: [Company, Product, User],
+                return updatedCoupon;
+            });
+        },
+        async checkCoupon(_, { couponName, order }) {
+            const coupon = await Coupon.findOne({
+                order: [['startsAt', 'DESC']],
+                //include: [Company, Product, User],
 
-				where: {
-					name: { [Op.like]: couponName.trim() },
-					active: true,
-					startsAt: { [Op.lte]: fn('NOW') },
-					expiresAt: { [Op.gte]: fn('NOW') }
-				}
-			});
-			if (!coupon) throw new Error('Esse cupom não é válido');
+                where: {
+                    name: { [Op.like]: couponName.trim() },
+                    active: true,
+                    startsAt: { [Op.lte]: fn('NOW') },
+                    expiresAt: { [Op.gte]: fn('NOW') },
+                },
+            });
+            if (!coupon) throw new Error('Esse cupom não é válido');
 
-			await coupon.isValid(order);
+            await coupon.isValid(order);
 
-			return coupon;
-		}
-	},
-	Query: {
-		async coupon(_, { id }) {
-			// check if coupon exists
-			const couponFound = await Coupon.findByPk(id);
-			if (!couponFound) throw new Error('Campanha não encontrado');
+            return coupon;
+        },
+    },
+    Query: {
+        async coupon(_, { id }) {
+            // check if coupon exists
+            const couponFound = await Coupon.findByPk(id);
+            if (!couponFound) throw new Error('Campanha não encontrado');
 
-			return couponFound;
-		},
-		countCoupons(_, { filter }) {
-			const where = sanitizeFilter(filter, { excludeFilters: ['companyId'], search: ['name', 'description', '$company.name$', '$user.firstName$', '$product.name$'] });
+            return couponFound;
+        },
+        countCoupons(_, { filter }) {
+            const where = sanitizeFilter(filter, {
+                excludeFilters: ['companyId'],
+                search: [
+                    'name',
+                    'description',
+                    '$companies.displayName$',
+                    '$users.firstName$',
+                    '$products.name$',
+                ],
+            });
 
-			return Coupon.findAll({
-				where,
-				include: [Company, User, Product]
-			}).then((res)=>res.length)
-		},
-		coupons(_, { filter, pagination }, { user }) {
-			let where = {};
-			if (filter.companyId) {
-				where['$companies.id$'] = {
-					[Op.or]: [
-						filter.companyId,
-						{ [Op.is]: null }
-					]
-				};
-			}
-			if (!user.can('master')) filter.masterOnly = false;
-			
-			where = [where, sanitizeFilter(filter, { excludeFilters: ['companyId'], search: ['name', 'description', '$company.name$', '$user.firstName$', '$product.name$'] })];
+            return Coupon.findAll({
+                where,
+                include: [Company, User, Product],
+                subQuery: false,
+            }).then((res) => res.length);
+        },
+        coupons(_, { filter, pagination }, { user }) {
+            let where = {};
+            if (filter.companyId) {
+                where['$companies.id$'] = {
+                    [Op.or]: [filter.companyId, { [Op.is]: null }],
+                };
+            }
+            if (!user.can('master')) filter.masterOnly = false;
 
-			return Coupon.findAll({
-				where,
-				order: [['expiresAt', 'DESC'], ['createdAt', 'Desc']],
-				include: [Company, User, Product],
-				subQuery: false,
-				...getSQLPagination(pagination),
-			})
-		}
-	},
-	User: {
-		coupons(parent, { companiesIds, productsIds }) {
-			let where = {
-				active: true,
-				startsAt: { [Op.lte]: fn('NOW') },
-				expiresAt: { [Op.gte]: fn('NOW') }
-			}
-			let include = [];
+            where = [
+                where,
+                sanitizeFilter(filter, {
+                    excludeFilters: ['companyId'],
+                    search: [
+                        'name',
+                        'description',
+                        '$companies.displayName$',
+                        '$users.firstName$',
+                        '$products.name$',
+                    ],
+                }),
+            ];
 
-			if (companiesIds) {
-				include = [...include, Company];
+            return Coupon.findAll({
+                where,
+                order: [
+                    ['expiresAt', 'DESC'],
+                    ['createdAt', 'Desc'],
+                ],
+                include: [Company, User, Product],
+                subQuery: false,
+                ...getSQLPagination(pagination),
+            });
+        },
+    },
+    User: {
+        coupons(parent, { companiesIds, productsIds }) {
+            let where = {
+                active: true,
+                startsAt: { [Op.lte]: fn('NOW') },
+                expiresAt: { [Op.gte]: fn('NOW') },
+            };
+            let include = [];
 
-				where['$companies.id$'] = {
-					[Op.or]: [
-						companiesIds,
-						{ [Op.is]: null }
-					]
-				};
-			}
-			if (productsIds) {
-				include = [...include, Product];
-				where['$products.id$'] = {
-					[Op.or]: [
-						productsIds,
-						{ [Op.is]: null }
-					]
-				};
-			}
+            if (companiesIds) {
+                include = [...include, Company];
 
-			return parent.getCoupons({
-				group: 'name',
-				order: [['startsAt', 'DESC']],
-				include,
+                where['$companies.id$'] = {
+                    [Op.or]: [companiesIds, { [Op.is]: null }],
+                };
+            }
+            if (productsIds) {
+                include = [...include, Product];
+                where['$products.id$'] = {
+                    [Op.or]: [productsIds, { [Op.is]: null }],
+                };
+            }
 
-				where
-			});
-		}
-	},
-	Coupon: {
-		products(parent) {
-			return parent.getProducts();
-		},
-		companies(parent) {
-			return parent.getCompanies();
-		},
-		users(parent) {
-			return parent.getUsers();
-		},
-	},
-	Product: {
-		countCoupons(parent, { notIn = {} }) {
-			// count all realted campaigns
-			return Coupon.count({
-				where: {
-					...couponProductWhere(parent),
-					id: { [Op.notIn]: notIn }
-				},
-				include: [Product, Company]
-			})
-		},
-		coupons(parent, { notIn = {} }) {
-			// get all realted campaigns
-			return Coupon.findAll({
-				where: {
-					...couponProductWhere(parent),
-					id: { [Op.notIn]: notIn }
-				},
-				include: [Product, Company]
-			})
-		},
-	},
-	Order: {
-		coupon(parent) {
-			const couponId = parent.couponId;
-			if (!couponId) return;
+            return parent.getCoupons({
+                group: 'name',
+                order: [['startsAt', 'DESC']],
+                include,
 
-			return orderCouponLoader.load(couponId);
-		}
-	}
-}
+                where,
+            });
+        },
+    },
+    Coupon: {
+        products(parent) {
+            return parent.getProducts();
+        },
+        countCompanies(parent) {
+            return parent.countCompanies();
+        },
+        companies(parent) {
+            return parent.getCompanies();
+        },
+        users(parent) {
+            return parent.getUsers();
+        },
+    },
+    Product: {
+        countCoupons(parent, { notIn = {} }) {
+            // count all realted campaigns
+            return Coupon.count({
+                where: {
+                    ...couponProductWhere(parent),
+                    id: { [Op.notIn]: notIn },
+                },
+                include: [Product, Company],
+            });
+        },
+        coupons(parent, { notIn = {} }) {
+            // get all realted campaigns
+            return Coupon.findAll({
+                where: {
+                    ...couponProductWhere(parent),
+                    id: { [Op.notIn]: notIn },
+                },
+                include: [Product, Company],
+            });
+        },
+    },
+    Order: {
+        coupon(parent) {
+            const couponId = parent.couponId;
+            if (!couponId) return;
+
+            return orderCouponLoader.load(couponId);
+        },
+    },
+};
