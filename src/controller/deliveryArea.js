@@ -4,12 +4,12 @@ import Sequelize from 'sequelize';
 
 import ConfigEntity from '../entities/Config';
 import DB from '../model';
+import GMaps from '../services/googleMapsClient';
 import { pointFromCoordinates, calculateDistance } from '../utilities/address';
 import {
     DELIVERY_PRICE_PER_KM,
     DELIVERY_PE_MIN_PRICE,
 } from '../utilities/config';
-import GMaps from '../services/googleMapsClient';
 
 const configEntity = new ConfigEntity();
 
@@ -108,11 +108,11 @@ class DeliveryAreaControl {
      * Get area that will be used as price selectorto make the delivery
      * only for company deliveries
      *
-     * @param {Company} companyInstamce
+     * @param {Company} companyInstance
      * @param {*} userLocation
      */
-    getCompanyAreas(companyInstamce, userLocation) {
-        const companyId = companyInstamce.get('id');
+    getCompanyAreas(companyInstance, userLocation) {
+        const companyId = companyInstance.get('id');
         return this.deliveryLoader.load({ companyId, location: userLocation });
     }
 
@@ -120,11 +120,11 @@ class DeliveryAreaControl {
      * Get area that will be used as price selectorto make the delivery
      * only for pe deliveries
      *
-     * @param {Company} companyInstamce
+     * @param {Company} companyInstance
      * @param {Object} userLocation
      */
-    async getPeArea(companyInstamce, userLocation) {
-        const companyId = companyInstamce.get('id');
+    async getPeArea(companyInstance, userLocation) {
+        const companyId = companyInstance.get('id');
 
         const viewAreas = await this.viewLoader.load({
             companyId,
@@ -133,36 +133,19 @@ class DeliveryAreaControl {
         if (!viewAreas.length) return null;
 
         // get company address
-        const companyAddress = await companyInstamce.getAddress();
+        const companyAddress = await companyInstance.getAddress();
 
         // get location coordinates
         const companyLocation = companyAddress.get('location').coordinates;
 
-        // get distance between user location and company
-        //const distance = calculateDistance({ latitude: companyLocation[0], longitude: companyLocation[1] }, { latitude: userLocation.coordinates[0], longitude: userLocation.coordinates[1] })
-        let distance;
-
-        try {
-            const distanceResponse = await GMaps.directions({
-                params: {
-                    key: process.env.GMAPS_KEY,
-                    origin: [companyLocation[0], companyLocation[1]],
-                    destination: [
-                        userLocation.coordinates[0],
-                        userLocation.coordinates[1],
-                    ],
-                },
-            });
-            distance = distanceResponse.data.routes[0].legs[0].distance.value;
-        } catch (_) {
-            distance = calculateDistance(
-                { latitude: companyLocation[0], longitude: companyLocation[1] },
-                {
-                    latitude: userLocation.coordinates[0],
-                    longitude: userLocation.coordinates[1],
-                },
-            );
-        }
+        // get straight distance between user location and company
+        const distance = calculateDistance(
+            { latitude: companyLocation[0], longitude: companyLocation[1] },
+            {
+                latitude: userLocation.coordinates[0],
+                longitude: userLocation.coordinates[1],
+            },
+        );
 
         // calculate price
         const price = await this.calculatePeDeliveryPrice(distance);
@@ -174,6 +157,39 @@ class DeliveryAreaControl {
             distance,
             price,
         };
+    }
+
+    async calculateRealPrice(origin, destination) {
+        console.log('calculo de rota');
+
+        let distance;
+
+        try {
+            distance = await this.calculateDrivingDistance(origin, destination);
+        } catch (err) {
+            distance = calculateDistance(
+                { latitude: origin[0], longitude: origin[1] },
+                { latitude: destination[0], longitude: destination[1] },
+            );
+        }
+
+        return await this.calculatePeDeliveryPrice(distance);
+    }
+
+    async calculateDrivingDistance(origin, destination) {
+        const distanceResponse = await GMaps.directions({
+            params: {
+                key: process.env.GMAPS_KEY,
+                origin: origin,
+                destination: destination,
+            },
+        });
+
+        const distance = distanceResponse.data.routes[0].legs[0].distance.value;
+
+        console.log('directions API');
+
+        return distance;
     }
 
     /**

@@ -33,8 +33,8 @@ export default async function createDefaultOrder({ order, company }) {
         intervalModel.get('type'),
     );
 
-    const data = { companyId, orderId };
-
+	const data = { companyId, orderId };
+	
     // queue order notifications
     JobQueue.notifications.add(`createOrder.first.${orderId}`, data);
     JobQueue.notifications.add(`createOrder.${orderId}`, data, {

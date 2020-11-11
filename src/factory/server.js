@@ -1,4 +1,5 @@
 import { ApolloServer }  from 'apollo-server-express';
+import bodyParser from 'body-parser';
 import cors  from 'cors';
 import express  from 'express';
 import http from 'http';
@@ -23,6 +24,9 @@ class ServerFactory {
 
 	createExpressServer(routes) {
 		const app = express();
+
+		// setup body parser
+		app.use(bodyParser.json())
 
 		//open cors
 		app.use(cors());

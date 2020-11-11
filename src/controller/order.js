@@ -182,14 +182,14 @@ class OrderControl extends EventEmitter {
 		if (oldStatus === newStatus) return orderInstance;
 
 		// check availability
-		const availableStatus = ['waiting', 'scheduled', 'preparing', 'waitingDelivery', 'waitingPickUp', 'delivering', 'delivered', 'canceled'];
+		const availableStatus = ['paymentPending', 'waiting', 'scheduled', 'preparing', 'waitingDelivery', 'waitingPickUp', 'delivering', 'delivered', 'canceled'];
 		const newStatusIndex = availableStatus.findIndex((stat) => stat === newStatus);
 		const orlStatusindex = availableStatus.findIndex((stat) => stat === oldStatus);
 
 		// check if newStatus is available
 		if (newStatusIndex < 0) throw new Error('Esse status não é disponível para esse pedido');
 		// check if can return status
-		if (!ctx.user.can('master') && newStatusIndex < orlStatusindex ) throw new Error('Não é possível retornar pedido ao status anterior');
+		if ((ctx && !ctx.user.can('master')) && newStatusIndex < orlStatusindex ) throw new Error('Não é possível retornar pedido ao status anterior');
 		// -> check if user can cancel order
 		if (newStatus === 'canceled' && (orderInstance.get('userId') !== ctx.user.get('id') && !ctx.user.can('orders_edit'))) throw new Error('Você não tem permissões para cancelar esse pedido');
 	

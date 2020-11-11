@@ -18,10 +18,18 @@ export default new (class OrderEventsFactory {
         /**
          * Queue job to notify  after change order status
          */
-        OrderController.on('changeStatus', async ({ order, newStatus }) => {
+        OrderController.on('changeStatus', async ({ order, newStatus, oldStatus }) => {
             const orderId = order.get('id');
             const userId = order.get('userId');
-            const companyId = order.get('companyId');
+			const companyId = order.get('companyId');
+			
+			if (oldStatus === 'paymentPending') {
+				const company = await order.getCompany();
+				
+				notifyNewOrder({ order, company });
+
+				return; // do not continue
+			}
 
             // remove recurrent notification
             JobQueue.removeRepeatebleJob(
@@ -80,12 +88,12 @@ export default new (class OrderEventsFactory {
         /* OrderController.on('update', createScheduledOrder);
 		OrderController.on('changeStatus', createScheduledOrder); */
 
-        /**
-         * Notify company (pubsub subscriptions) when order is created
-         */
-        OrderController.on('create', (args) => {
-            const order = args.order;
+		function notifyNewOrder(args) {
+			const order = args.order;
 
+			const excludeStatus = ['paymentPending', 'delivered', 'canceled'];
+			if (excludeStatus.includes(order.status)) return;
+			
             // scheduledTo
             if (order.get('scheduledTo')) return createScheduledOrder(args);
 
@@ -94,7 +102,12 @@ export default new (class OrderEventsFactory {
 
             // default order
             createDefaultOrder(args);
-        });
+        }
+
+        /**
+         * Notify company (pubsub subscriptions) when order is created
+         */
+        OrderController.on('create', notifyNewOrder);
 
         console.log(' - Setup Order events');
     }
