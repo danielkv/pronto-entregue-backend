@@ -85,8 +85,6 @@ export const resolvers = {
 				phone: userMetas.find(metas => metas.key === 'phone').value,
 			}
 			
-			
-
 			// create new payment
 			const { status, data } = await picpay.payment.send(sendData, buyer);
 
